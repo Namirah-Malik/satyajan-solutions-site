@@ -15,7 +15,7 @@ function inr(n: number) {
 
 export default function CartPage() {
   const router = useRouter();
-  const { cartItems, updateQuantity, removeFromCart, getSubtotal, getTotalSavings } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, getSubtotal, getTotalSavings, clearCart } = useCart();
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
@@ -127,9 +127,8 @@ export default function CartPage() {
       .join('\n');
 
     // Open WhatsApp
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
-
-    // Generate order reference ID
+window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+clearCart(); 
     const orderId = `SAT-${Date.now()}`;
 
     // Estimated delivery: 7 days from now
@@ -304,6 +303,19 @@ export default function CartPage() {
                   onSelect={setEmiSelected}
                 />
               </div>
+              {/* ── Payment & Delivery Badge ── */}
+<div className="mb-5 flex flex-col gap-2">
+  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+    <Icon icon="mdi:cash" width={20} height={20} className="text-green-600 flex-shrink-0" />
+    <div>
+      <p className="text-sm font-semibold text-green-800">Cash on Delivery Available</p>
+      <p className="text-xs text-green-600">Pay when your order arrives at your doorstep</p>
+    </div>
+  </div>
+</div>
+
+{/* ── Email field for Google survey ── */}
+<div className="mb-5"></div>
 
               {/* ── Email field for Google survey ── */}
               <div className="mb-5">

@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation'
 import Logo from './BrandLogo/Logo'
 import Search from './Search'
 import { useCart } from '@/context/CartContext'
+import WishlistIcon from '@/components/WishlistIcon';
 
 // ── Mobile bottom nav items ───────────────────────────────────────────────────
 const BOTTOM_NAV = [
@@ -66,18 +67,23 @@ const Header: React.FC = () => {
                 <Search sticky={scrolled} isHomepage={!scrolled} />
               </div>
 
-              {/* Cart */}
-              <Link
-                href='/cart'
-                className='relative flex items-center justify-center p-2 rounded-full transition-colors text-dark hover:text-primary'
-              >
-                <Icon icon={'solar:cart-large-4-bold'} width={24} height={24} />
-                {mounted && cartItemCount > 0 && (
-                  <span className='absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center'>
-                    {cartItemCount > 9 ? '9+' : cartItemCount}
-                  </span>
-                )}
-              </Link>
+              {/* Wishlist */}
+<WishlistIcon />
+
+{/* Cart */}
+<Link
+  href='/cart'
+  className='relative flex items-center justify-center p-2 rounded-full transition-colors text-dark hover:text-primary'
+>
+  <Icon icon={'solar:cart-large-4-bold'} width={24} height={24} />
+  {mounted && cartItemCount > 0 && (
+    <span className='absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center'>
+      {cartItemCount > 9 ? '9+' : cartItemCount}
+    </span>
+  )}
+</Link>
+
+    
 
               {/* Phone — desktop only */}
               <div className='hidden md:block'>

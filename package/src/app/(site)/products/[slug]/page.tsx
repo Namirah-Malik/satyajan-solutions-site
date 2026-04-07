@@ -34,8 +34,8 @@ async function fetchProduct(slug: string): Promise<any | null> {
     const db = await getPrisma();
     if (db) {
       const product = await db.product.findFirst({
-        where: { OR: [{ id: slug }, { slug: slug }] },
-      });
+  where: { id: slug },
+});
       if (product) return product;
     }
   } catch (e) {

@@ -76,11 +76,13 @@ const CACHE_HEADERS = {
 };
 
 export async function GET() {
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL); // ADD THIS
+
   // 1. Try database
   try {
     const db = await getPrisma();
     if (db) {
-      const raw = await db.product.findMany({ orderBy: { createdAt: "desc" } });
+      const raw = await db.product.findMany();
       const products = raw.map(cleanProduct);
       const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean))];
       return NextResponse.json({ products, categories }, { headers: CACHE_HEADERS });

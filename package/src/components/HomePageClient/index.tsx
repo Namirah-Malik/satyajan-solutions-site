@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Icon } from '@iconify/react'
-import { ArrowRight, CheckCircle, Star, Send, MessageCircle, Calculator } from 'lucide-react'
+import { ArrowRight, CheckCircle, Star, Send, MessageCircle } from 'lucide-react'
+
 import * as LucideIcons from 'lucide-react'
 import { companyInfo, products, benefits, testimonials, faqs } from '@/mock/data'
-import SolarSavingsCalculator from '@/components/SolarSavingsCalculator'
 
 // ── Category map: mock/data category → products page filter value ─────────────
 const categoryFilterMap: Record<string, string> = {
@@ -143,7 +143,6 @@ function MarqueeTicker() {
 
 export default function HomePageClient() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' })
-  const [showSavingsCalculator, setShowSavingsCalculator] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [contactErrors, setContactErrors] = useState({ name: '', email: '', phone: '', message: '' })
   const [contactTouched, setContactTouched] = useState({ name: false, email: false, phone: false, message: false })
@@ -284,12 +283,13 @@ export default function HomePageClient() {
                 >
                   Book Free Consultation <ArrowRight className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => setShowSavingsCalculator(true)}
-                  className="w-full sm:w-auto bg-white/60 backdrop-blur border border-gray-200 text-gray-700 hover:bg-white text-sm md:text-base px-5 md:px-8 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:shadow-xl active:scale-95 transition-all font-semibold"
-                >
-                  <Calculator className="w-4 h-4" /> Calculate Savings
-                </button>
+                <Link
+  href="/solar-calculator"
+  className="w-full sm:w-auto bg-white/60 backdrop-blur border border-gray-200 text-gray-700 hover:bg-white text-sm md:text-base px-5 md:px-8 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:shadow-xl active:scale-95 transition-all font-semibold"
+>
+  <Icon icon="ph:calculator-fill" width={16} /> Calculate Savings
+</Link>
+                
               </div>
               <div className="sr grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 pt-2">
                 <StatCard value="1000+" label="Happy Customers" />
@@ -589,7 +589,6 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      <SolarSavingsCalculator isOpen={showSavingsCalculator} onClose={() => setShowSavingsCalculator(false)} />
     </main>
   )
 }

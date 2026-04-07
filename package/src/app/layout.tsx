@@ -1,6 +1,11 @@
+
+
 import type { Metadata } from 'next'
 import { Bricolage_Grotesque } from 'next/font/google'
+// @ts-expect-error
 import './globals.css'
+import { WishlistProvider } from '@/context/WishlistContext';
+
 import Header from '@/components/Layout/Header'
 import Footer from '@/components/Layout/Footer'
 import NextTopLoader from 'nextjs-toploader';
@@ -52,6 +57,7 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning>
       <body className={`${font.className} bg-white antialiased`} suppressHydrationWarning>
 
+<WishlistProvider>
 
         <CartProvider>
           <NextTopLoader color="#07be8a" />
@@ -61,6 +67,8 @@ export default function RootLayout({
           <CallMeBackTrigger />
           <Chatbox />
         </CartProvider>
+        </WishlistProvider>
+
       </body>
     </html>
   )
