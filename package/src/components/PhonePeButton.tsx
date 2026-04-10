@@ -1,12 +1,11 @@
 'use client';
 // src/components/PhonePeButton.tsx
-// Drop this button anywhere — cart page, product detail, etc.
 
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 
 interface PhonePeButtonProps {
-  amount: number;               // in ₹ (e.g. 7483)
+  amount: number;
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
@@ -14,6 +13,8 @@ interface PhonePeButtonProps {
   items?: { name: string; price: number; quantity: number }[];
   className?: string;
   label?: string;
+  /** Return false to block payment (e.g. validation failed) */
+  onBeforePay?: () => boolean;
 }
 
 export default function PhonePeButton({
@@ -25,12 +26,20 @@ export default function PhonePeButton({
   items,
   className = '',
   label = 'Pay with PhonePe',
+  onBeforePay,
 }: PhonePeButtonProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error,   setError]   = useState('');
 
   const handlePay = async () => {
     if (loading) return;
+
+    // Run pre-payment validation if provided
+    if (onBeforePay) {
+      const canProceed = onBeforePay();
+      if (!canProceed) return; // validation failed — form shows its own errors
+    }
+
     setLoading(true);
     setError('');
 
@@ -38,14 +47,7 @@ export default function PhonePeButton({
       const res = await fetch('/api/payment/initiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          customerName,
-          customerPhone,
-          customerEmail,
-          orderId,
-          items,
-        }),
+        body: JSON.stringify({ amount, customerName, customerPhone, customerEmail, orderId, items }),
       });
 
       const data = await res.json();
@@ -54,7 +56,6 @@ export default function PhonePeButton({
         throw new Error(data.error || 'Payment initiation failed');
       }
 
-      // Redirect to PhonePe checkout page
       window.location.href = data.redirectUrl;
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -86,7 +87,6 @@ export default function PhonePeButton({
           </>
         ) : (
           <>
-            {/* PhonePe logo mark */}
             <svg width="22" height="22" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="20" cy="20" r="20" fill="white"/>
               <path d="M26.5 13.5H21L13 27h5.5l2-3.5h4.5c3.3 0 6-2.7 6-6s-2.7-4-4.5-4zm-.5 7h-3.5l2-3.5h1.5c1.1 0 2 .9 2 2s-.9 1.5-2 1.5z" fill="#5f259f"/>
@@ -95,14 +95,16 @@ export default function PhonePeButton({
           </>
         )}
       </button>
+
       {error && (
         <p className="mt-2 text-sm text-red-500 text-center flex items-center justify-center gap-1">
           <Icon icon="ph:warning-circle" width={14} />
           {error}
         </p>
       )}
+
       <p className="mt-2 text-center text-[10px] text-gray-400">
-        Secured by PhonePe · UPI · Cards · NetBanking
+        Secured by PhonePe · UPI · Cards
       </p>
     </div>
   );

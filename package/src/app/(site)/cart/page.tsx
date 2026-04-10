@@ -10,8 +10,8 @@ import CartEMISummary, { TENURES, calcEMI } from '@/components/EMI/CartEMISummar
 import PhonePeButton from '@/components/PhonePeButton';
 
 const WHATSAPP_NUMBER     = '918019179159';
-const COD_DISCOUNT_PCT    = 5;   // 5% for COD / WhatsApp
-const ONLINE_DISCOUNT_PCT = 10;  // 10% for PhonePe online
+const COD_DISCOUNT_PCT    = 5;
+const ONLINE_DISCOUNT_PCT = 10;
 
 function inr(n: number) {
   return new Intl.NumberFormat('en-IN', {
@@ -19,35 +19,44 @@ function inr(n: number) {
   }).format(n);
 }
 
+interface FieldErrors {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+}
+
 export default function CartPage() {
   const router = useRouter();
   const { cartItems, updateQuantity, removeFromCart, getSubtotal, getTotalSavings, clearCart } = useCart();
 
-  const [couponCode,    setCouponCode]    = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
-  const [couponDiscount,setCouponDiscount]= useState(0);
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerName,  setCustomerName]  = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [emailError,    setEmailError]    = useState('');
-  const [emiSelected,   setEmiSelected]   = useState(1);
-  const [paymentTab,    setPaymentTab]    = useState<'online' | 'cod'>('online');
+  const [couponCode,      setCouponCode]      = useState('');
+  const [appliedCoupon,   setAppliedCoupon]   = useState<string | null>(null);
+  const [couponDiscount,  setCouponDiscount]  = useState(0);
+  const [customerName,    setCustomerName]    = useState('');
+  const [customerPhone,   setCustomerPhone]   = useState('');
+  const [customerEmail,   setCustomerEmail]   = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+  const [emiSelected,     setEmiSelected]     = useState(1);
+  const [paymentTab,      setPaymentTab]      = useState<'online' | 'cod'>('online');
+  const [errors,          setErrors]          = useState<FieldErrors>({ name: '', phone: '', email: '', address: '' });
+  const [touched,         setTouched]         = useState({ name: false, phone: false, email: false, address: false });
 
   // ── Totals ────────────────────────────────────────────────────────────────
-  const subtotal         = getSubtotal();
-  const totalSavings     = getTotalSavings();
-  const mrpTotal         = cartItems.reduce((t, i) => t + (i.originalPrice || i.price) * i.quantity, 0);
-  const productDiscount  = mrpTotal - subtotal;
-  const couponAmt        = couponDiscount;
-  const baseTotal        = subtotal - couponAmt;
+  const subtotal          = getSubtotal();
+  const totalSavings      = getTotalSavings();
+  const mrpTotal          = cartItems.reduce((t, i) => t + (i.originalPrice || i.price) * i.quantity, 0);
+  const productDiscount   = mrpTotal - subtotal;
+  const couponAmt         = couponDiscount;
+  const baseTotal         = subtotal - couponAmt;
   const onlineDiscountAmt = Math.round((baseTotal * ONLINE_DISCOUNT_PCT) / 100);
   const codDiscountAmt    = Math.round((baseTotal * COD_DISCOUNT_PCT)    / 100);
-  const totalOnline      = baseTotal - onlineDiscountAmt;
-  const totalCod         = baseTotal - codDiscountAmt;
-  const totalAmount      = paymentTab === 'online' ? totalOnline : totalCod;
+  const totalOnline       = baseTotal - onlineDiscountAmt;
+  const totalCod          = baseTotal - codDiscountAmt;
+  const totalAmount       = paymentTab === 'online' ? totalOnline : totalCod;
 
   const selectedTenure = TENURES[emiSelected];
-  const { emi, interest, total: emiTotal } = calcEMI(totalCod, selectedTenure.rate, selectedTenure.months);
+  const { emi, interest } = calcEMI(totalCod, selectedTenure.rate, selectedTenure.months);
 
   // ── Coupon ────────────────────────────────────────────────────────────────
   const handleApplyCoupon = () => {
@@ -62,24 +71,57 @@ export default function CartPage() {
     if (appliedCoupon) handleRemoveCoupon();
   };
 
-  // ── Validation ────────────────────────────────────────────────────────────
-  const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-  const validateForm  = (): boolean => {
-    if (!customerEmail.trim()) {
-      setEmailError('Email required for order updates');
-      document.getElementById('customer-email')?.focus();
-      return false;
+  // ── Per-field validators ──────────────────────────────────────────────────
+  const validateField = (field: keyof FieldErrors, value: string): string => {
+    switch (field) {
+      case 'name':
+        if (!value.trim() || value.trim().length < 2) return 'Full name is required';
+        return '';
+      case 'phone': {
+        const d = value.replace(/\D/g, '');
+        if (!d || d.length !== 10 || !/^[6-9]/.test(d)) return 'Enter a valid 10-digit mobile number';
+        return '';
+      }
+      case 'email':
+        if (!value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          return 'Enter a valid email address';
+        return '';
+      case 'address':
+        if (!value.trim() || value.trim().length < 10)
+          return 'Enter your full delivery address (min 10 characters)';
+        return '';
+      default:
+        return '';
     }
-    if (!validateEmail(customerEmail)) {
-      setEmailError('Enter a valid email address');
-      document.getElementById('customer-email')?.focus();
-      return false;
-    }
-    setEmailError('');
-    return true;
   };
 
-  // ── COD / WhatsApp checkout → payment/status page ────────────────────────
+  const handleBlur = (field: keyof FieldErrors, value: string) => {
+    setTouched(p => ({ ...p, [field]: true }));
+    setErrors(p => ({ ...p, [field]: validateField(field, value) }));
+  };
+
+  // ── Full form validation (called before any payment) ─────────────────────
+  const validateForm = (): boolean => {
+    const newErrors: FieldErrors = {
+      name:    validateField('name',    customerName),
+      phone:   validateField('phone',   customerPhone),
+      email:   validateField('email',   customerEmail),
+      address: validateField('address', customerAddress),
+    };
+    setErrors(newErrors);
+    setTouched({ name: true, phone: true, email: true, address: true });
+
+    const hasErrors = Object.values(newErrors).some(Boolean);
+    if (hasErrors) {
+      // Scroll to the first error field
+      setTimeout(() => {
+        document.getElementById('customer-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+    }
+    return !hasErrors;
+  };
+
+  // ── COD / WhatsApp checkout ───────────────────────────────────────────────
   const handleCodCheckout = () => {
     if (!validateForm()) return;
 
@@ -90,12 +132,7 @@ export default function CartPage() {
       .join('\n\n');
 
     const emiSection = selectedTenure.months > 1
-      ? [
-          '💳 *EMI Option:*',
-          `   ${selectedTenure.months} months @ ${selectedTenure.rate === 0 ? '0% No Cost EMI' : `${selectedTenure.rate}% p.a.`}`,
-          `   Interest: ${interest === 0 ? '₹0' : inr(interest)}`,
-          `   *EMI: ${inr(emi)}/month*`,
-        ].join('\n')
+      ? `💳 *EMI:* ${selectedTenure.months} months @ ${selectedTenure.rate === 0 ? '0% No Cost' : `${selectedTenure.rate}% p.a.`} | *${inr(emi)}/month*`
       : '';
 
     const message = [
@@ -112,21 +149,17 @@ export default function CartPage() {
       emiSection ? '━━━━━━━━━━━━━━━━━━━━━━━' : '',
       emiSection,
       '━━━━━━━━━━━━━━━━━━━━━━━',
-      customerName  ? `👤 ${customerName}` : '',
-      customerPhone ? `📞 +91${customerPhone}` : '',
+      `👤 ${customerName}`,
+      `📞 +91${customerPhone}`,
       `📧 ${customerEmail}`,
+      `📍 ${customerAddress}`,
       '\n🙏 Please confirm availability & delivery. Thank you!',
     ].filter(Boolean).join('\n');
 
-    // Open WhatsApp
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 
-    // Generate order ID and redirect to payment/status with method=cod
     const orderId = `SAT-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-    router.push(
-      `/payment/status?orderId=${orderId}&method=cod&amount=${totalCod}`
-    );
-    // Cart is cleared inside the status page once it detects COD
+    router.push(`/payment/status?orderId=${orderId}&method=cod&amount=${totalCod}`);
   };
 
   // ── Empty cart ────────────────────────────────────────────────────────────
@@ -220,9 +253,21 @@ export default function CartPage() {
                     <button onClick={handleApplyCoupon} className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-dark transition-colors">Apply</button>
                   </div>
                 )}
+                {/* WhatsApp for extra discount */}
+                <button
+                  onClick={() => window.open(
+                    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I'd like an extra discount. My cart total is ${inr(subtotal)}.`)}`,
+                    '_blank'
+                  )}
+                  className="mt-2.5 w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/40 text-[#128C7E] rounded-xl text-xs font-bold transition-all"
+                >
+                  <Icon icon="mdi:whatsapp" width={15} className="text-[#25D366]" />
+                  Chat for Extra Discount on WhatsApp
+                </button>
+                <p className="text-[10px] text-gray-400 mt-1 text-center">Talk to us directly — we&apos;ll give you the best price!</p>
               </div>
 
-              {/* ── Payment Method Tabs ── */}
+              {/* Payment Method Tabs */}
               <div>
                 <p className="text-sm font-bold text-gray-800 mb-2">Payment Method</p>
                 <div className="grid grid-cols-2 gap-1.5 p-1 bg-gray-100 rounded-2xl">
@@ -247,12 +292,10 @@ export default function CartPage() {
                     }`}>{COD_DISCOUNT_PCT}% OFF</span>
                   </button>
                 </div>
-
-                {/* Discount banner */}
                 <div className={`mt-2.5 rounded-xl p-3 flex items-center gap-2 ${
                   paymentTab === 'online' ? 'bg-purple-50 border border-purple-100' : 'bg-green-50 border border-green-100'
                 }`}>
-                  <Icon icon="ph:tag-simple-fill" width={16}
+                  <Icon icon="ph:tag-simple-fill" width={15}
                     className={paymentTab === 'online' ? 'text-purple-600 flex-shrink-0' : 'text-green-600 flex-shrink-0'} />
                   <div>
                     <p className={`text-xs font-bold ${paymentTab === 'online' ? 'text-purple-700' : 'text-green-700'}`}>
@@ -310,7 +353,7 @@ export default function CartPage() {
                 )}
               </div>
 
-              {/* EMI — COD tab only */}
+              {/* EMI — COD only */}
               {paymentTab === 'cod' && (
                 <div className="border-t border-gray-100 pt-4">
                   <CartEMISummary cartTotal={totalCod} selected={emiSelected} onSelect={setEmiSelected} />
@@ -323,56 +366,126 @@ export default function CartPage() {
                 </div>
               )}
 
-              {/* Customer Details */}
-              <div className="border-t border-gray-100 pt-4 space-y-3">
-                <h3 className="text-sm font-bold text-gray-800">Your Details</h3>
+              {/* ── Customer Details — ALL MANDATORY ── */}
+              <div className="border-t border-gray-100 pt-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-gray-900">Delivery Details</h3>
+                  <span className="text-[11px] text-red-500 font-semibold bg-red-50 px-2 py-0.5 rounded-full">
+                    All fields required
+                  </span>
+                </div>
 
+                {/* Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Full Name <span className="text-gray-400 font-normal">(optional)</span>
+                  <label htmlFor="customer-name" className="block text-xs font-semibold text-gray-700 mb-1">
+                    Full Name <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <Icon icon="ph:user-fill" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width={13} />
-                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)}
+                    <input id="customer-name" type="text" value={customerName}
+                      onChange={(e) => { setCustomerName(e.target.value); if (touched.name) setErrors(p => ({ ...p, name: validateField('name', e.target.value) })); }}
+                      onBlur={(e) => handleBlur('name', e.target.value)}
                       placeholder="Your full name"
-                      className="w-full pl-8 pr-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors ${
+                        errors.name ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                      }`} />
                   </div>
+                  {errors.name && (
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.name}
+                    </p>
+                  )}
                 </div>
 
+                {/* Phone */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">
-                    Phone <span className="text-gray-400 font-normal">(optional)</span>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Mobile Number <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/30">
-                    <span className="pl-3 pr-2 text-gray-500 text-xs font-medium">+91</span>
+                  <div className={`flex items-center border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/30 transition-colors ${
+                    errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                  }`}>
+                    <span className="pl-3 pr-2 text-gray-500 text-xs font-semibold whitespace-nowrap">+91</span>
                     <div className="w-px h-4 bg-gray-200" />
                     <input type="tel" value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      placeholder="10-digit mobile" maxLength={10} inputMode="numeric"
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, '').slice(0, 10);
+                        setCustomerPhone(v);
+                        if (touched.phone) setErrors(p => ({ ...p, phone: validateField('phone', v) }));
+                      }}
+                      onBlur={(e) => handleBlur('phone', e.target.value)}
+                      placeholder="10-digit mobile number" maxLength={10} inputMode="numeric"
                       className="flex-1 px-3 py-2.5 bg-transparent focus:outline-none text-sm" />
                   </div>
+                  {errors.phone && (
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.phone}
+                    </p>
+                  )}
                 </div>
 
+                {/* Email */}
                 <div>
-                  <label htmlFor="customer-email" className="block text-xs font-semibold text-gray-600 mb-1">
-                    Email <span className="text-red-500">*</span>
-                    <span className="text-gray-400 font-normal ml-1">(for order confirmation)</span>
+                  <label htmlFor="customer-email" className="block text-xs font-semibold text-gray-700 mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                    <span className="text-gray-400 font-normal ml-1">(order confirmation)</span>
                   </label>
                   <div className="relative">
                     <Icon icon="ph:envelope-fill" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width={13} />
                     <input id="customer-email" type="email" value={customerEmail}
-                      onChange={(e) => { setCustomerEmail(e.target.value); if (emailError) setEmailError(''); }}
+                      onChange={(e) => { setCustomerEmail(e.target.value); if (touched.email) setErrors(p => ({ ...p, email: validateField('email', e.target.value) })); }}
+                      onBlur={(e) => handleBlur('email', e.target.value)}
                       placeholder="you@example.com"
                       className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors ${
-                        emailError ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
                       }`} />
                   </div>
-                  {emailError && (
+                  {errors.email && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <Icon icon="ph:warning-circle-fill" width={11} /> {emailError}
+                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.email}
                     </p>
                   )}
                 </div>
+
+                {/* Delivery Address */}
+                <div>
+                  <label htmlFor="customer-address" className="block text-xs font-semibold text-gray-700 mb-1">
+                    Delivery Address <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Icon icon="ph:map-pin-fill" className="absolute left-3 top-3 text-gray-400" width={13} />
+                    <textarea id="customer-address" value={customerAddress} rows={3}
+                      onChange={(e) => { setCustomerAddress(e.target.value); if (touched.address) setErrors(p => ({ ...p, address: validateField('address', e.target.value) })); }}
+                      onBlur={(e) => handleBlur('address', e.target.value)}
+                      placeholder="House/Flat No., Street, Area, City, Pincode"
+                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none ${
+                        errors.address ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                      }`} />
+                  </div>
+                  {errors.address && (
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.address}
+                    </p>
+                  )}
+                </div>
+
+                {/* Completion indicator */}
+                {(() => {
+                  const filled = [customerName, customerPhone, customerEmail, customerAddress].filter(v => v.trim().length > 2).length;
+                  return filled < 4 ? (
+                    <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
+                      <Icon icon="ph:warning-fill" width={14} className="text-amber-500 flex-shrink-0" />
+                      <p className="text-xs text-amber-700 font-medium">
+                        Fill all {4 - filled} remaining field{4 - filled !== 1 ? 's' : ''} to proceed to payment
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 p-2.5 bg-green-50 border border-green-200 rounded-xl">
+                      <Icon icon="ph:check-circle-fill" width={14} className="text-green-500 flex-shrink-0" />
+                      <p className="text-xs text-green-700 font-semibold">Details complete — ready to pay!</p>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* ── Payment Buttons ── */}
@@ -386,11 +499,12 @@ export default function CartPage() {
                       customerEmail={customerEmail || undefined}
                       items={cartItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
                       label={`Pay ${inr(totalOnline)} · Save ${inr(onlineDiscountAmt)}`}
+                      onBeforePay={validateForm}
                     />
                     <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
-                      <Icon icon="ph:seal-check-fill" width={16} className="text-yellow-600 flex-shrink-0" />
+                      <Icon icon="ph:seal-check-fill" width={15} className="text-yellow-600 flex-shrink-0" />
                       <p className="text-xs text-yellow-700 font-medium">
-                        <strong>{ONLINE_DISCOUNT_PCT}% instant discount</strong> applied — UPI, Cards & more
+                        <strong>{ONLINE_DISCOUNT_PCT}% instant discount</strong> applied — UPI & Cards
                       </p>
                     </div>
                   </>
@@ -402,7 +516,7 @@ export default function CartPage() {
                       Order via WhatsApp / COD
                     </button>
                     <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl">
-                      <Icon icon="mdi:cash" width={16} className="text-green-600 flex-shrink-0" />
+                      <Icon icon="mdi:cash" width={15} className="text-green-600 flex-shrink-0" />
                       <div>
                         <p className="text-xs text-green-700 font-bold">{COD_DISCOUNT_PCT}% COD Discount — Pay {inr(totalCod)}</p>
                         <p className="text-[11px] text-green-500">Cash on delivery at your doorstep</p>
@@ -410,7 +524,7 @@ export default function CartPage() {
                     </div>
                     {selectedTenure.months > 1 && (
                       <p className="text-center text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2">
-                        EMI option: <strong className="text-gray-800">{inr(emi)}/month</strong> × {selectedTenure.months} months
+                        EMI: <strong>{inr(emi)}/month</strong> × {selectedTenure.months} months
                         {selectedTenure.rate === 0 && <span className="text-green-600 font-semibold"> (No Cost)</span>}
                       </p>
                     )}
