@@ -220,7 +220,6 @@ export default function CartPage() {
                     <button onClick={handleApplyCoupon} className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-dark transition-colors">Apply</button>
                   </div>
                 )}
-                <p className="text-xs text-gray-400 mt-1.5">Try: SAVE10 or FIRST100</p>
               </div>
 
               {/* ── Payment Method Tabs ── */}
