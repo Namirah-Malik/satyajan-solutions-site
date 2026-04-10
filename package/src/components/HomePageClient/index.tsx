@@ -70,6 +70,25 @@ function useCounter(target: number, suffix: string, duration = 1600) {
   return { ref, count }
 }
 
+// ── SVG Icons ─────────────────────────────────────────────────────────────────
+const GoogleIcon = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+)
+
+const IndiaMART_Icon = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+    <rect width="32" height="32" rx="6" fill="#F97316"/>
+    <text x="50%" y="52%" dominantBaseline="middle" textAnchor="middle"
+      fill="white" fontSize="13" fontWeight="900" fontFamily="Arial, sans-serif"
+      letterSpacing="-0.5">IM</text>
+  </svg>
+)
+
 const WavyDivider = ({ flip = false }: { flip?: boolean }) => (
   <svg className={`w-full h-6 sm:h-8 md:h-12 ${flip ? 'rotate-180' : ''}`} viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
     <path d="M0,0 C480,100 960,0 1440,100 L1440,100 L0,100 Z" fill="url(#wavyGrad)" opacity="0.12" />
@@ -141,6 +160,85 @@ function MarqueeTicker() {
   )
 }
 
+// ── Single Testimonial Card ───────────────────────────────────────────────────
+function TestimonialCard({ t }: { t: any }) {
+  return (
+    <a
+      href={t.sourceUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex-shrink-0 w-72 sm:w-80 bg-white rounded-2xl shadow-md border border-gray-100 p-4 sm:p-5 flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+    >
+      {/* Top: stars + source badge */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex gap-0.5">
+          {[...Array(t.rating)].map((_: any, i: number) => (
+            <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+          ))}
+        </div>
+        <span
+          className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+            t.source === 'Google'
+              ? 'bg-white border-gray-200 text-gray-600'
+              : 'bg-orange-50 border-orange-200 text-orange-600'
+          }`}
+        >
+          {t.source === 'Google' ? <GoogleIcon size={10} /> : <IndiaMART_Icon size={10} />}
+          {t.source}
+        </span>
+      </div>
+
+      {/* Review text */}
+      <p className="text-xs sm:text-sm text-gray-700 mb-3 italic font-medium leading-relaxed flex-1 line-clamp-3">
+        &quot;{t.text}&quot;
+      </p>
+
+      {/* Bottom: avatar + name + location */}
+      <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+        <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+          {t.name[0]}
+        </div>
+        <div className="min-w-0">
+          <div className="font-semibold text-gray-900 text-xs sm:text-sm truncate">{t.name}</div>
+          <div className="flex items-center gap-1 flex-wrap">
+            {t.location && <span className="text-[10px] text-gray-400">{t.location}</span>}
+            {t.date && <span className="text-[10px] text-gray-300">· {t.date}</span>}
+          </div>
+          {t.badge && <span className="text-[9px] text-emerald-600 font-medium">{t.badge}</span>}
+        </div>
+      </div>
+    </a>
+  )
+}
+
+// ── Infinite Scrolling Testimonials Row ───────────────────────────────────────
+function TestimonialRow({ items, direction = 'left', speed = 40 }: {
+  items: any[]
+  direction?: 'left' | 'right'
+  speed?: number
+}) {
+  // Triple items to make seamless loop
+  const doubled = [...items, ...items, ...items]
+  const animClass = direction === 'left' ? 'animate-scroll-left' : 'animate-scroll-right'
+
+  return (
+    <div className="overflow-hidden relative w-full">
+      {/* Fade edges */}
+      <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-r from-yellow-50/80 to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-l from-yellow-50/80 to-transparent z-10 pointer-events-none" />
+
+      <div
+        className={`flex gap-4 w-max py-2 ${animClass}`}
+        style={{ '--scroll-speed': `${speed}s` } as React.CSSProperties}
+      >
+        {doubled.map((t: any, i: number) => (
+          <TestimonialCard key={`${t.id}-${i}`} t={t} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function HomePageClient() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' })
   const [openFaq, setOpenFaq] = useState<number | null>(0)
@@ -149,6 +247,10 @@ export default function HomePageClient() {
   const [contactSuccess, setContactSuccess] = useState(false)
 
   useScrollReveal()
+
+  // Split testimonials into two rows
+  const row1 = testimonials.slice(0, 6)
+  const row2 = testimonials.slice(6)
 
   const validateContactField = (field: string, value: string) => {
     if (field === 'name') {
@@ -237,7 +339,6 @@ export default function HomePageClient() {
             </li>
           ))}
         </ul>
-        {/* ✅ Fixed: each button now links to its specific category */}
         <Link
           href={`/products?category=${encodeURIComponent(categoryFilterMap[product.category] || product.category)}`}
           className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-white py-2 rounded-xl flex items-center justify-center gap-1.5 font-semibold hover:shadow-lg transition-all text-xs sm:text-sm mt-auto"
@@ -284,12 +385,11 @@ export default function HomePageClient() {
                   Book Free Consultation <ArrowRight className="w-4 h-4" />
                 </button>
                 <Link
-  href="/solar-calculator"
-  className="w-full sm:w-auto bg-white/60 backdrop-blur border border-gray-200 text-gray-700 hover:bg-white text-sm md:text-base px-5 md:px-8 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:shadow-xl active:scale-95 transition-all font-semibold"
->
-  <Icon icon="ph:calculator-fill" width={16} /> Calculate Savings
-</Link>
-                
+                  href="/solar-calculator"
+                  className="w-full sm:w-auto bg-white/60 backdrop-blur border border-gray-200 text-gray-700 hover:bg-white text-sm md:text-base px-5 md:px-8 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:shadow-xl active:scale-95 transition-all font-semibold"
+                >
+                  <Icon icon="ph:calculator-fill" width={16} /> Calculate Savings
+                </Link>
               </div>
               <div className="sr grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 pt-2">
                 <StatCard value="1000+" label="Happy Customers" />
@@ -346,7 +446,7 @@ export default function HomePageClient() {
               Our Products &amp; Services
             </h2>
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 max-w-3xl font-medium">
-              Comprehensive range of power solutions backed by Microtek's quality and our expert local support.
+              Comprehensive range of power solutions backed by Microtek&apos;s quality and our expert local support.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
@@ -386,29 +486,49 @@ export default function HomePageClient() {
       </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────────────────────── */}
-      <section id="testimonials" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6 bg-gradient-to-b from-yellow-50/60 to-white">
+      <section id="testimonials" className="py-10 sm:py-14 md:py-20 bg-gradient-to-b from-yellow-50/60 to-white overflow-hidden">
         <WavyDivider flip />
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="sr text-center mb-6 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">What Our Clients Say</h2>
-            <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">Real experiences from satisfied customers across India.</p>
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">
+              What Our Clients Say
+            </h2>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
+              Real reviews from verified customers on Google &amp; IndiaMART.
+            </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
-            {testimonials.map((t: any) => (
-              <GlassCard key={t.id} className="sr p-3 sm:p-4 md:p-6 hover:scale-[1.02] transition-transform duration-300">
-                <div className="flex gap-1 mb-2 sm:mb-3">
-                  {[...Array(t.rating)].map((_: any, i: number) => (
-                    <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-xs sm:text-sm text-gray-700 mb-3 sm:mb-4 italic font-medium">&quot;{t.text}&quot;</p>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm">{t.name[0]}</div>
-                  <div className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base">{t.name}</div>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
+        </div>
+
+        {/* ── Row 1: scroll left ── */}
+        <div className="mb-4">
+          <TestimonialRow items={row1} direction="left" speed={35} />
+        </div>
+
+        {/* ── Row 2: scroll right ── */}
+        <div className="mb-8">
+          <TestimonialRow items={row2} direction="right" speed={30} />
+        </div>
+
+        {/* Review source links */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 px-4">
+          <a
+            href="https://share.google/xEUrHKGcodkwsSfRF"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-800 transition-colors border border-gray-200 rounded-full px-4 py-2 bg-white shadow-sm hover:shadow-md"
+          >
+            <GoogleIcon size={14} />
+            View all Google Reviews
+          </a>
+          <a
+            href="https://www.indiamart.com/satyajanenergysolutions/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs text-gray-500 hover:text-orange-600 transition-colors border border-gray-200 rounded-full px-4 py-2 bg-white shadow-sm hover:shadow-md"
+          >
+            <IndiaMART_Icon size={14} />
+            View all IndiaMART Reviews
+          </a>
         </div>
       </section>
 

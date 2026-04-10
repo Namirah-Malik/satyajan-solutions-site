@@ -114,3 +114,27 @@ section { @apply py-24 }
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in { animation: fade-in 0.4s ease both; }
+@theme {
+  --animate-scroll-left: scrollLeft var(--scroll-speed, 35s) linear infinite;
+  --animate-scroll-right: scrollRight var(--scroll-speed, 30s) linear infinite;
+}
+
+@keyframes scrollLeft {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+@keyframes scrollRight {
+  0%   { transform: translateX(-33.333%); }
+  100% { transform: translateX(0); }
+}
+/* ── Pause scroll rows on card hover ──────────────────────────────────────── */
+.animate-scroll-left,
+.animate-scroll-right {
+  animation-play-state: running;
+}
+
+.animate-scroll-left:hover,
+.animate-scroll-right:hover {
+  animation-play-state: paused;
+}
