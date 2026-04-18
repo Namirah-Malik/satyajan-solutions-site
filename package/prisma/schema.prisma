@@ -14,15 +14,16 @@ datasource db {
 }
 
 model Product {
-     id              String   @id @default(auto()) @map("_id") @db.ObjectId
-     name            String
-     SKU             String
-     description     String
-     price           Float
-     images          String[]
-     salient_features String[]
-     features        String[]
-     specifications  Json[]
-     data            Json[]
-     category        String?
-   }
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  SKU              String
+  description      String
+  price            Float
+  images           String[]   // Already supports multiple!
+  video            String?    // NEW: YouTube URL or Microtek video URL
+  salient_features String[]
+  features         String[]
+  specifications   Json[]
+  data             Json[]
+  category         String?
+}

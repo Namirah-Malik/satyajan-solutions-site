@@ -128,7 +128,6 @@ section { @apply py-24 }
   0%   { transform: translateX(-33.333%); }
   100% { transform: translateX(0); }
 }
-/* ── Pause scroll rows on card hover ──────────────────────────────────────── */
 .animate-scroll-left,
 .animate-scroll-right {
   animation-play-state: running;
@@ -138,3 +137,40 @@ section { @apply py-24 }
 .animate-scroll-right:hover {
   animation-play-state: paused;
 }
+/* ── Hero Image Premium Animation ─────────────────────── */
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(40px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-float {
+  0%, 100% { transform: translate3d(0, 0px, 0); }
+  50%       { transform: translate3d(0, -10px, 0); }
+}
+
+.hero-image-float {
+  animation:
+    hero-enter 0.8s ease-out forwards,
+    hero-float 4s ease-in-out 0.8s infinite;
+  will-change: transform;
+}
+
+/* ── Testimonial scroll rows ───────────────────────────── */
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333%); }
+}
+@keyframes scroll-right {
+  from { transform: translateX(-33.333%); }
+  to   { transform: translateX(0); }
+}
+.animate-scroll-left  { animation: scroll-left  var(--scroll-speed, 35s) linear infinite; }
+.animate-scroll-right { animation: scroll-right var(--scroll-speed, 30s) linear infinite; }
+.animate-scroll-left:hover,
+.animate-scroll-right:hover { animation-play-state: paused; }

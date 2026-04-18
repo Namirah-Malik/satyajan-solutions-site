@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -6,44 +7,38 @@ import Link from 'next/link';
 import HeroSub from '@/components/shared/HeroSub';
 
 // ── Business Logic ────────────────────────────────────────────────────────────
-// Based on Satyajan Energy solar engineering formula:
-// PSH (Hyderabad) = 4.8 hrs/day
-// System Efficiency / PR = 0.78 (accounts for inverter loss, cable loss, dust, temp)
-// Panel wattage = 550W | Area per panel = 24 sqft
-// Daily Gen (units) = kW × PSH × PR
-// Annual Gen = kW × PSH × 365 × PR
-// Degradation = 0.7% per year for 25-year projection
-// No government subsidy applied
+// Daily Generation = kW × 5 units/day (Satyajan standard)
+// System Cost      = kW × ₹50,000 (flat across all sizes)
+// Annual Gen       = kW × 5 × 365
+// Degradation      = 0.7% per year for 25-year projection
+// India CO₂ factor = 0.82 kg/unit
 
-const PSH = 4.8;           // Peak Sun Hours — Hyderabad average
-const PR = 0.78;           // Performance Ratio
-const PANEL_W = 550;       // Panel wattage (Watts)
-const PANEL_AREA = 24;     // sqft per panel
-const DEGRADATION = 0.993; // 0.7% annual degradation
+const DAILY_UNITS_PER_KW = 5;      // units per kW per day
+const COST_PER_KW        = 50000;  // ₹ per kW — flat
+const DEGRADATION        = 0.993;  // 0.7% annual degradation
+const PANEL_W            = 550;    // Watts per panel
+const PANEL_AREA         = 24;     // sqft per panel
 
-// Satyajan pricing tiers
 function systemCostByKw(kw: number): number {
-  if (kw <= 3)  return kw * 65000;
-  if (kw <= 20) return kw * 50000;
-  return kw * 40000;
+  return kw * COST_PER_KW;
 }
 
 function calcSolarSavings(kw: number, tariff: number) {
   const systemCost = systemCostByKw(kw);
 
   // Generation
-  const dailyGen    = kw * PSH * PR;                          // units/day
-  const monthlyGen  = Math.round(dailyGen * 30);
-  const annualGen   = Math.round(kw * PSH * 365 * PR);        // kWh/year
+  const dailyGen   = parseFloat((kw * DAILY_UNITS_PER_KW).toFixed(1));   // units/day
+  const monthlyGen = Math.round(dailyGen * 30);                           // units/month
+  const annualGen  = Math.round(kw * DAILY_UNITS_PER_KW * 365);          // units/year
 
   // Savings
   const monthlySavings = Math.round(monthlyGen * tariff);
-  const annualSavings  = Math.round(annualGen * tariff);
+  const annualSavings  = Math.round(annualGen  * tariff);
 
-  // Payback (no subsidy)
+  // Payback
   const paybackYears = parseFloat((systemCost / annualSavings).toFixed(1));
 
-  // 25-year savings with 0.7% annual degradation
+  // 25-year savings with degradation
   let totalSavings25 = 0;
   let gen = annualGen;
   for (let i = 0; i < 25; i++) {
@@ -55,13 +50,13 @@ function calcSolarSavings(kw: number, tariff: number) {
   const numPanels  = Math.ceil((kw * 1000) / PANEL_W);
   const areaNeeded = numPanels * PANEL_AREA;
 
-  // Environmental (India grid factor: 0.82 kg CO₂/unit)
+  // Environmental
   const co2Annual  = Math.round(annualGen * 0.82);
   const treesEquiv = Math.round(co2Annual / 21.7);
 
   return {
     systemCost,
-    dailyGen:     parseFloat(dailyGen.toFixed(1)),
+    dailyGen,
     monthlyGen,
     annualGen,
     monthlySavings,
@@ -82,7 +77,7 @@ function inr(n: number) {
 }
 
 const TARIFF_OPTIONS = [7, 8, 9, 10, 11];
-const KW_PRESETS = [1, 2, 3, 5, 7, 10];
+const KW_PRESETS     = [1, 2, 3, 5, 7, 10];
 type Step = 'input' | 'results' | 'booking' | 'done';
 
 const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
@@ -92,15 +87,15 @@ const GlassCard = ({ children, className = '' }: { children: React.ReactNode; cl
 );
 
 export default function SolarCalculatorPage() {
-  const [step, setStep]         = useState<Step>('input');
-  const [kw, setKw]             = useState(3);
-  const [customKw, setCustomKw] = useState('');
-  const [tariff, setTariff]     = useState(8);
-  const [form, setForm]         = useState({ name: '', phone: '', email: '', message: '' });
+  const [step, setStep]           = useState<Step>('input');
+  const [kw, setKw]               = useState(3);
+  const [customKw, setCustomKw]   = useState('');
+  const [tariff, setTariff]       = useState(8);
+  const [form, setForm]           = useState({ name: '', phone: '', email: '', message: '' });
   const [formError, setFormError] = useState('');
 
   const effectiveKw = customKw ? parseFloat(customKw) || kw : kw;
-  const calc = calcSolarSavings(effectiveKw, tariff);
+  const calc        = calcSolarSavings(effectiveKw, tariff);
 
   const handleCalculate = () => {
     if (effectiveKw < 0.5 || effectiveKw > 50) return;
@@ -147,14 +142,14 @@ export default function SolarCalculatorPage() {
         badge="Solar Calculator"
       />
 
-      {/* ── Input ── */}
+      {/* ── Input ─────────────────────────────────────────────────── */}
       <section className="px-4 max-w-7xl mx-auto pt-12 pb-8">
         <div className="text-start mb-10">
           <h2 className="text-4xl font-extrabold text-gray-900 mb-4 drop-shadow-lg tracking-tight">
             Calculate Your Savings
           </h2>
           <p className="text-lg text-gray-600 max-w-4xl font-medium">
-            Based on Hyderabad solar irradiance (4.8 hrs/day) · Performance Ratio 78% · Satyajan pricing
+            5 units/kW/day · ₹50,000/kW · Satyajan pricing
           </p>
         </div>
 
@@ -204,13 +199,13 @@ export default function SolarCalculatorPage() {
                 ))}
               </div>
 
-              {/* Live preview — 4 metrics, NO subsidy */}
+              {/* Live preview */}
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { label: 'Daily Generation', value: `${calc.dailyGen} units`, color: 'text-blue-600' },
-                  { label: 'System Cost',       value: inr(calc.systemCost),    color: 'text-gray-800' },
-                  { label: 'Monthly Savings',   value: inr(calc.monthlySavings),color: 'text-primary font-extrabold' },
-                  { label: 'Payback Period',    value: `${calc.paybackYears} yrs`, color: 'text-orange-500 font-extrabold' },
+                  { label: 'Daily Generation', value: `${calc.dailyGen} units`,    color: 'text-blue-600' },
+                  { label: 'System Cost',       value: inr(calc.systemCost),        color: 'text-gray-800' },
+                  { label: 'Monthly Savings',   value: inr(calc.monthlySavings),    color: 'text-primary font-extrabold' },
+                  { label: 'Payback Period',    value: `${calc.paybackYears} yrs`,  color: 'text-orange-500 font-extrabold' },
                 ].map(m => (
                   <div key={m.label} className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm">
                     <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">{m.label}</p>
@@ -229,7 +224,7 @@ export default function SolarCalculatorPage() {
         </GlassCard>
       </section>
 
-      {/* ── Results ── */}
+      {/* ── Results ─────────────────────────────────────────────────── */}
       {(step === 'results' || step === 'booking' || step === 'done') && (
         <section id="results-section" className="px-4 max-w-7xl mx-auto pb-8 space-y-6">
           <div className="text-start mb-6">
@@ -237,7 +232,7 @@ export default function SolarCalculatorPage() {
               Your Solar Savings
             </h2>
             <p className="text-gray-600 font-medium">
-              {effectiveKw} kW system · {calc.numPanels} panels · ₹{tariff}/unit · Hyderabad
+              {effectiveKw} kW system · {calc.numPanels} panels · ₹{tariff}/unit
             </p>
           </div>
 
@@ -264,26 +259,28 @@ export default function SolarCalculatorPage() {
             <p className="text-gray-600 font-medium leading-relaxed">
               With a <span className="text-gray-900 font-bold">{effectiveKw} kW solar system</span> ({calc.numPanels} × 550W panels),
               you will generate approximately <span className="text-gray-900 font-bold">{calc.dailyGen} units per day</span> and{' '}
-              <span className="text-gray-900 font-bold">{calc.monthlyGen} units per month</span> in Hyderabad
-              (based on 4.8 hrs peak sun and 78% system efficiency). At your electricity rate of{' '}
+              <span className="text-gray-900 font-bold">{calc.monthlyGen} units per month</span>. At your electricity rate of{' '}
               <span className="text-gray-900 font-bold">₹{tariff}/unit</span>, you&apos;ll save{' '}
               <span className="text-primary font-bold">{inr(calc.monthlySavings)}/month</span> — that&apos;s{' '}
-              <span className="text-primary font-bold">{inr(calc.annualSavings)}/year</span>. The system pays for
+              <span className="text-primary font-bold">{inr(calc.annualSavings)}/year</span>. The system costs{' '}
+              <span className="text-gray-900 font-bold">{inr(calc.systemCost)}</span> and pays for
               itself in <span className="text-orange-500 font-bold">{calc.paybackYears} years</span>, after which
               you enjoy free electricity for 20+ more years!
             </p>
           </GlassCard>
 
-          {/* Financial breakdown — NO subsidy */}
+          {/* Financial breakdown */}
           <GlassCard className="p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6 tracking-tight">Financial Breakdown</h3>
             <div className="space-y-4">
               {[
-                { label: 'System Cost',          value: inr(calc.systemCost),       valueColor: 'text-gray-800 font-bold' },
-                { label: 'Monthly Savings',       value: inr(calc.monthlySavings),   valueColor: 'text-primary font-bold' },
-                { label: 'Annual Savings',        value: inr(calc.annualSavings),    valueColor: 'text-primary font-bold' },
+                { label: 'System Cost',          value: inr(calc.systemCost),         valueColor: 'text-gray-800 font-bold' },
+                { label: 'Daily Generation',      value: `${calc.dailyGen} units/day`, valueColor: 'text-blue-600 font-bold' },
+                { label: 'Monthly Generation',    value: `${calc.monthlyGen} units`,   valueColor: 'text-blue-600 font-bold' },
+                { label: 'Monthly Savings',       value: inr(calc.monthlySavings),     valueColor: 'text-primary font-bold' },
+                { label: 'Annual Savings',        value: inr(calc.annualSavings),      valueColor: 'text-primary font-bold' },
                 { label: 'Payback Period',        value: `${calc.paybackYears} years`, valueColor: 'text-orange-500 font-bold', border: true },
-                { label: '25-Year Total Savings', value: inr(calc.totalSavings25),   valueColor: 'text-emerald-600 text-lg font-black', border: true },
+                { label: '25-Year Total Savings', value: inr(calc.totalSavings25),     valueColor: 'text-emerald-600 text-lg font-black', border: true },
               ].map((r, i) => (
                 <div key={i} className={`flex justify-between items-center text-sm ${r.border ? 'pt-4 border-t border-gray-200' : ''}`}>
                   <span className="text-gray-600">{r.label}</span>
@@ -304,10 +301,10 @@ export default function SolarCalculatorPage() {
           {/* Hardware + Environmental */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: 'ph:solar-panel-fill', color: 'text-yellow-500', label: 'No. of Panels',    value: `${calc.numPanels} panels`,         sub: '550W Mono PERC each' },
-              { icon: 'ph:house-fill',       color: 'text-sky-500',    label: 'Roof Area Needed', value: `~${calc.areaNeeded} sqft`,          sub: 'Shade-free terrace' },
-              { icon: 'ph:leaf-fill',        color: 'text-emerald-500',label: 'CO₂ Saved / Year', value: `${calc.co2Annual.toLocaleString('en-IN')} kg`, sub: `≈ ${calc.treesEquiv} trees/year` },
-              { icon: 'ph:lightning-fill',   color: 'text-blue-500',   label: 'Annual Generation',value: `${calc.annualGen.toLocaleString('en-IN')} units`, sub: 'kWh per year' },
+              { icon: 'ph:solar-panel-fill', color: 'text-yellow-500', label: 'No. of Panels',     value: `${calc.numPanels} panels`,                       sub: '550W Mono PERC each' },
+              { icon: 'ph:house-fill',        color: 'text-sky-500',    label: 'Roof Area Needed',  value: `~${calc.areaNeeded} sqft`,                       sub: 'Shade-free terrace' },
+              { icon: 'ph:leaf-fill',         color: 'text-emerald-500',label: 'CO₂ Saved / Year',  value: `${calc.co2Annual.toLocaleString('en-IN')} kg`,    sub: `≈ ${calc.treesEquiv} trees/year` },
+              { icon: 'ph:lightning-fill',    color: 'text-blue-500',   label: 'Annual Generation', value: `${calc.annualGen.toLocaleString('en-IN')} units`, sub: 'kWh per year' },
             ].map(m => (
               <GlassCard key={m.label} className="p-5">
                 <Icon icon={m.icon} width={24} className={`${m.color} mb-2`} />
@@ -335,7 +332,7 @@ export default function SolarCalculatorPage() {
         </section>
       )}
 
-      {/* ── Booking ── */}
+      {/* ── Booking ─────────────────────────────────────────────────── */}
       {(step === 'booking' || step === 'done') && (
         <section id="booking-section" className="px-4 max-w-7xl mx-auto pb-16">
           {step === 'booking' && (
@@ -417,22 +414,22 @@ export default function SolarCalculatorPage() {
               {
                 icon: 'ph:sun-fill', color: 'text-yellow-500', bg: 'bg-yellow-50 border-yellow-100',
                 title: 'How We Calculate',
-                desc: 'Daily generation = kW × 4.8 hrs (Hyderabad PSH) × 0.78 (PR). PR accounts for inverter loss (~4%), cable loss (~2.5%), dust (~3%), and temperature coefficient.',
+                desc: 'Daily generation = kW × 5 units/day. Monthly = Daily × 30. Annual = kW × 5 × 365. Based on Satyajan field data across Hyderabad installations.',
               },
               {
                 icon: 'ph:clock-countdown-fill', color: 'text-orange-500', bg: 'bg-orange-50 border-orange-100',
                 title: 'Payback Period',
-                desc: 'System Cost ÷ Annual Savings. Pricing: ≤3kW at ₹65,000/kW, 4–20kW at ₹50,000/kW, 21–50kW at ₹40,000/kW. Typical payback: 4–7 years.',
+                desc: 'System Cost ÷ Annual Savings. Flat pricing of ₹50,000/kW. A 3 kW system costs ₹1,50,000 and typically pays back in 4–6 years.',
               },
               {
                 icon: 'ph:trend-up-fill', color: 'text-primary', bg: 'bg-green-50 border-green-100',
                 title: 'Long-term Benefits',
-                desc: '25-year projection accounts for 0.7% annual panel degradation. Solar panels carry a 25-year performance warranty — after payback, electricity is nearly free.',
+                desc: '25-year projection with 0.7% annual panel degradation. Solar panels carry a 25-year performance warranty — after payback, electricity is nearly free.',
               },
               {
                 icon: 'ph:leaf-fill', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100',
                 title: 'Environmental Impact',
-                desc: 'India grid emission factor: 0.82 kg CO₂ per unit. A 5 kW system avoids ~7,300 kg CO₂/year — equivalent to planting 336 trees annually.',
+                desc: 'India grid emission factor: 0.82 kg CO₂ per unit. A 5 kW system avoids ~9,125 units/year — saving ~7,483 kg CO₂, equal to planting 345 trees annually.',
               },
             ].map(c => (
               <GlassCard key={c.title} className={`p-5 border ${c.bg}`}>

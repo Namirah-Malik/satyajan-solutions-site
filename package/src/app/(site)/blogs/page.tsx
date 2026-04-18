@@ -1,20 +1,20 @@
 import Blog from "@/components/Blog";
 import React from "react";
 
-//import { homeMetadata } from '@/lib/page-metadata'
-//export const metadata = homeMetadata
 import { blogsMetadata } from '@/lib/page-metadata';
-export const metadata = blogsMetadata
+export const metadata = blogsMetadata;
 
+interface PageProps {
+  searchParams: { category?: string };
+}
 
-
-const page = () => {
-    return (
-        <>
-            {/* Old HeroSub removed to match the Second Website design exactly */}
-            <Blog />
-        </>
-    );
+const page = ({ searchParams }: PageProps) => {
+  const category = searchParams?.category ?? 'all';
+  return (
+    <>
+      <Blog initialCategory={category} />
+    </>
+  );
 };
 
 export default page;

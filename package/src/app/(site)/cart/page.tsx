@@ -255,10 +255,46 @@ export default function CartPage() {
                 )}
                 {/* WhatsApp for extra discount */}
                 <button
-                  onClick={() => window.open(
-                    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I'd like an extra discount. My cart total is ${inr(subtotal)}.`)}`,
-                    '_blank'
-                  )}
+onClick={() => {
+  const itemLines = cartItems
+    .map((item, i) =>
+      `${i + 1}. *${item.name}*\n   SKU: ${item.SKU}\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`
+    )
+    .join('\n\n');
+
+  const emiSection = selectedTenure.months > 1
+    ? `💳 *EMI:* ${selectedTenure.months} months @ ${
+        selectedTenure.rate === 0 ? '0% No Cost' : `${selectedTenure.rate}% p.a.`
+      } | *${inr(emi)}/month*`
+    : '';
+
+  const message = [
+    '🛒 *New Order — Satyajan Energy Solutions*',
+    '━━━━━━━━━━━━━━━━━━━━━━━',
+    itemLines,
+    '━━━━━━━━━━━━━━━━━━━━━━━',
+    `   MRP Total: ${inr(mrpTotal)}`,
+    productDiscount > 0 ? `   Product Discount: -${inr(productDiscount)}` : '',
+    couponAmt > 0 ? `   Coupon (${appliedCoupon}): -${inr(couponAmt)}` : '',
+    `   Delivery: FREE`,
+    `   *Cart Total: ${inr(subtotal)}*`,
+    '━━━━━━━━━━━━━━━━━━━━━━━',
+    emiSection,
+    '━━━━━━━━━━━━━━━━━━━━━━━',
+    customerName ? `👤 ${customerName}` : '',
+    customerPhone ? `📞 +91${customerPhone}` : '',
+    customerEmail ? `📧 ${customerEmail}` : '',
+    customerAddress ? `📍 ${customerAddress}` : '',
+    '\n🙏 Hi! I’d like an extra discount on this order. Please assist.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  window.open(
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
+    '_blank'
+  );
+}}
                   className="mt-2.5 w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/40 text-[#128C7E] rounded-xl text-xs font-bold transition-all"
                 >
                   <Icon icon="mdi:whatsapp" width={15} className="text-[#25D366]" />

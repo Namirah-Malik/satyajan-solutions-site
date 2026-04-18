@@ -42,12 +42,29 @@ function cleanProduct(raw: any) {
     .map((img: any) => {
       const src = extractDirectUrl(img);
       if (!src) return null;
-      // Local images served directly, external ones proxied
       if (src.startsWith('/') && !src.startsWith('/http')) return { src };
       if (!src.startsWith('http')) return null;
       return { src: `/api/image-proxy?url=${encodeURIComponent(src)}` };
     })
     .filter(Boolean) as { src: string }[];
+
+  // ── Null-safe video URL processing ───────────────────────────────────────────
+  let video: string | null = null;
+  const rawVideo = raw.video;
+  if (rawVideo && typeof rawVideo === 'string' && rawVideo.trim()) {
+    let v = rawVideo.trim();
+    // Convert YouTube watch URL → embed URL
+    if (v.includes('youtube.com/watch?v=')) {
+      try {
+        const videoId = new URL(v).searchParams.get('v');
+        if (videoId) v = `https://www.youtube.com/embed/${videoId}`;
+      } catch {}
+    } else if (v.includes('youtu.be/')) {
+      const videoId = v.split('youtu.be/')[1]?.split('?')[0];
+      if (videoId) v = `https://www.youtube.com/embed/${videoId}`;
+    }
+    video = v;
+  }
 
   const name = (raw.name || '')
     .replace(/\s*wishlist\s*shareicon\s*/gi, '')
@@ -67,16 +84,15 @@ function cleanProduct(raw: any) {
   const slug = raw.slug || raw.id || '';
   const price = Number(raw.price || raw.rate || 0);
 
-  return { ...raw, name, images, features, salient_features, slug, price };
+  return { ...raw, name, images, video, features, salient_features, slug, price };
 }
 
-// ── Cache headers for performance ─────────────────────────────────────────────
 const CACHE_HEADERS = {
   'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
 };
 
 export async function GET() {
-    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL); // ADD THIS
+  console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 
   // 1. Try database
   try {
@@ -108,7 +124,7 @@ export async function GET() {
     console.error("Live API fetch error:", e);
   }
 
-  // 3. ✅ Fixed: mock fallback — products variable is now defined
+  // 3. Mock fallback
   const products = mockProducts.map(cleanProduct);
   return NextResponse.json(
     { products, categories: mockCategories },

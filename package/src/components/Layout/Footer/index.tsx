@@ -127,19 +127,32 @@ const Footer = () => {
               {/* Social icons */}
               <div className="flex items-center gap-3 pt-2 flex-wrap">
 
+                {/* Amazon */}
+                <Link
+                  href="https://www.amazon.in/l/27943762031?me=A3VPQJV1FYL5BP&ref_=ssf_share"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Amazon Seller"
+                >
+                  <Icon icon="fa7-brands:amazon" width={22} height={22} className="text-white/60 hover:text-primary transition-colors" />
+                </Link>
+
+                {/* Instagram */}
                 <Link href="https://www.instagram.com/satyajan.solutions/" target="_blank">
                   <Icon icon="fa7-brands:instagram" width={22} height={22} className="text-white/60 hover:text-primary transition-colors" />
                 </Link>
 
+                {/* LinkedIn */}
                 <Link href="https://www.linkedin.com/company/satyajan-energy-solutions-pvt-ltd/" target="_blank">
                   <Icon icon="fa7-brands:linkedin" width={22} height={22} className="text-white/60 hover:text-primary transition-colors" />
                 </Link>
 
+                {/* Facebook */}
                 <Link href="https://www.facebook.com/profile.php?id=61577768371371&sk=followers" target="_blank">
                   <Icon icon="fa7-brands:square-facebook" width={22} height={22} className="text-white/60 hover:text-primary transition-colors" />
                 </Link>
 
-                {/* IndiaMART logo — save the logo at public/images/social/indiamart.png */}
+                {/* IndiaMART */}
                 <Link
                   href="https://www.indiamart.com/satyajanenergysolutions/profile.html"
                   target="_blank"
@@ -156,6 +169,7 @@ const Footer = () => {
                   />
                 </Link>
 
+                {/* Google */}
                 <Link href="https://share.google/UqkYvc7zrN2PjQBi8" target="_blank" rel="noopener noreferrer">
                   <Icon icon="fa7-brands:google" width={22} height={22} className="text-white/60 hover:text-primary transition-colors" />
                 </Link>
