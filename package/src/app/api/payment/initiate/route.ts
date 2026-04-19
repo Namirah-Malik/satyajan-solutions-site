@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       .amount(Math.round(amount * 100)) // paise
       .redirectUrl(redirectUrl)
       .build();
-
+ 
     const response = await client.pay(request);
 
     return NextResponse.json({
