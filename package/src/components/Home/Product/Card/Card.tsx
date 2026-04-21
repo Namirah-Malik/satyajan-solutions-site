@@ -5,6 +5,8 @@ import { Icon } from '@iconify/react'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { useState } from 'react'
+import WishlistButton from '@/components/WishlistButton';
+
 
 function proxyImageUrl(src: string | null): string | null {
   if (!src) return null;
@@ -82,7 +84,22 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
                 {category}
               </span>
             )}
-          </div>
+            {/* ✅ Wishlist button — always inside image area, top-right */}
+  <div className="absolute top-2 right-2 z-10">
+    <WishlistButton
+      item={{
+        id: String(slug || ''),
+        name: name || '',
+        price: price,
+        image: mainImage || '/images/fallback.jpg',
+        category: category || '',
+        SKU: SKU,
+      }}
+      size="sm"
+    />
+  </div>
+</div>
+          
         </Link>
 
         {/* ── CONTENT ───────────────────────────────────────────────── */}

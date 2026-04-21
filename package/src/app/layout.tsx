@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Bricolage_Grotesque } from 'next/font/google'
+// @ts-expect-error
 import './globals.css'
+import { WishlistProvider } from '@/context/WishlistContext';
+
 import Header from '@/components/Layout/Header'
 import Footer from '@/components/Layout/Footer'
 import NextTopLoader from 'nextjs-toploader';
@@ -50,17 +53,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
+      <head>
+        {/* ── Google Analytics 4 ── */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-ZBB0L9QBHX"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-ZBB0L9QBHX');
+            `,
+          }}
+        />
+      </head>
       <body className={`${font.className} bg-white antialiased`} suppressHydrationWarning>
 
+        <WishlistProvider>
+          <CartProvider>
+            <NextTopLoader color="#07be8a" />
+            <Header />
+            {children}
+            <Footer />
+            <CallMeBackTrigger />
+            <Chatbox />
+          </CartProvider>
+        </WishlistProvider>
 
-        <CartProvider>
-          <NextTopLoader color="#07be8a" />
-          <Header />
-          {children}
-          <Footer />
-          <CallMeBackTrigger />
-          <Chatbox />
-        </CartProvider>
       </body>
     </html>
   )

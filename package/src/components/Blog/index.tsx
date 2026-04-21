@@ -5,15 +5,20 @@ import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { blogCategories, existingBlogs as blogPosts } from './blogdata';
 
-// ── Design system ─────────────────────────────────────────────────────────────
 const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
   <div className={`bg-white/40 backdrop-blur-lg rounded-3xl shadow-xl border border-white/30 transition-all duration-300 hover:shadow-2xl ${className}`}>
     {children}
   </div>
 );
 
-const Blog = () => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  interface BlogProps {
+  initialCategory?: string;
+}
+
+const Blog = ({ initialCategory = 'all' }: BlogProps) => {
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredBlogs = useMemo(() => {
@@ -34,17 +39,14 @@ const Blog = () => {
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  const featuredPost = filteredBlogs[0];
-  const restPosts = filteredBlogs.slice(1);
-
   return (
     <main className="min-h-screen">
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[50vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[40vh] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src={featuredPost?.featuredImage || 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1200&q=80&auto=format&fit=crop'}
+            src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1200&q=80&auto=format&fit=crop"
             alt="Blog hero"
             className="w-full h-full object-cover"
           />
@@ -119,22 +121,22 @@ const Blog = () => {
 
           {/* Results count */}
           <div className="mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900 drop-shadow-lg tracking-tight">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
               {selectedCategory === 'all' ? 'All Articles' : blogCategories.find(c => c.id === selectedCategory)?.name}
             </h2>
-            <p className="text-sm sm:text-lg text-gray-500 font-medium mt-1">
+            <p className="text-sm sm:text-base text-gray-500 font-medium mt-1">
               {filteredBlogs.length} article{filteredBlogs.length !== 1 ? 's' : ''} available
             </p>
           </div>
 
-          {/* ── No results ──────────────────────────────────────────── */}
+          {/* ── No results ── */}
           {filteredBlogs.length === 0 && (
             <GlassCard className="p-12 sm:p-16 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Icon icon="ph:magnifying-glass-fill" className="text-gray-400 text-3xl" />
               </div>
               <h3 className="text-xl font-extrabold text-gray-900 mb-2 tracking-tight">No articles found</h3>
-              <p className="text-sm text-gray-500 font-medium">Try adjusting your search or filter to find what you're looking for.</p>
+              <p className="text-sm text-gray-500 font-medium">Try adjusting your search or filter.</p>
               <button
                 onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
                 className="mt-5 inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-dark transition-colors"
@@ -145,62 +147,15 @@ const Blog = () => {
             </GlassCard>
           )}
 
-          {/* ── Featured post (first result) ────────────────────────── */}
-          {featuredPost && (
-            <Link href={`/blogs/${featuredPost.slug}`} className="block mb-6 sm:mb-8 group">
-              <GlassCard className="overflow-hidden p-0 hover:scale-[1.01]">
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                  {/* Image */}
-                  <div className="relative h-52 sm:h-72 lg:h-full min-h-[220px] overflow-hidden rounded-t-3xl lg:rounded-l-3xl lg:rounded-tr-none">
-                    <img
-                      src={featuredPost.featuredImage}
-                      alt={featuredPost.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                    <span className="absolute top-4 left-4 text-xs font-bold text-white bg-primary/90 backdrop-blur-sm px-3 py-1 rounded-full capitalize">
-                      Featured
-                    </span>
-                  </div>
-                  {/* Content */}
-                  <div className="p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
-                    <span className="text-xs font-bold text-primary   tracking-widest bg-primary/10 px-3 py-1 rounded-full mb-4 w-fit capitalize">
-                      {blogCategories.find(c => c.id === featuredPost.category)?.name || featuredPost.category}
-                    </span>
-                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 mb-3 tracking-tight leading-tight group-hover:text-primary transition-colors line-clamp-3">
-                      {featuredPost.title}
-                    </h3>
-                    <p className="text-sm sm:text-base text-gray-600 font-medium leading-relaxed mb-5 line-clamp-3">
-                      {featuredPost.excerpt}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-gray-400 font-medium mb-5">
-                      <span className="flex items-center gap-1.5">
-                        <Icon icon="ph:calendar-fill" className="text-primary" width={14} />
-                        {formatDate(featuredPost.publishedDate)}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Icon icon="ph:clock-fill" className="text-primary" width={14} />
-                        {featuredPost.readTime}
-                      </span>
-                    </div>
-                    <span className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full font-bold text-sm hover:bg-dark transition-colors w-fit shadow-md">
-                      Read Article
-                      <Icon icon="ph:arrow-right-bold" width={14} />
-                    </span>
-                  </div>
-                </div>
-              </GlassCard>
-            </Link>
-          )}
-
-          {/* ── Blog grid ────────────────────────────────────────────── */}
-          {restPosts.length > 0 && (
+          {/* ── Uniform blog grid — ALL posts same size ── */}
+          {filteredBlogs.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {restPosts.map((blog) => (
+              {filteredBlogs.map((blog) => (
                 <Link key={blog.id} href={`/blogs/${blog.slug}`} className="group block h-full">
                   <GlassCard className="overflow-hidden p-0 flex flex-col h-full hover:scale-[1.02]">
-                    {/* Image */}
-                    <div className="relative h-44 sm:h-52 overflow-hidden rounded-t-3xl flex-shrink-0">
+
+                    {/* Image — fixed height on all cards */}
+                    <div className="relative h-48 overflow-hidden rounded-t-3xl flex-shrink-0">
                       <img
                         src={blog.featuredImage}
                         alt={blog.title}
@@ -234,24 +189,26 @@ const Blog = () => {
                         {blog.excerpt}
                       </p>
 
-                      <span className="inline-flex items-center gap-1.5 text-primary font-bold text-xs sm:text-sm hover:gap-2.5 transition-all mt-auto">
-                        Read More
+                      <span className="inline-flex items-center gap-1.5 text-primary font-bold text-xs sm:text-sm group-hover:gap-2.5 transition-all mt-auto">
+                        Read Article
                         <Icon icon="ph:arrow-right-bold" width={14} />
                       </span>
                     </div>
+
                   </GlassCard>
                 </Link>
               ))}
             </div>
           )}
+
         </div>
       </section>
 
-      {/* ── CTA ──────────────────────────────────────────────────────── */}
+      {/* ── CTA ── */}
       <section className="py-12 sm:py-16 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <GlassCard className="p-6 sm:p-10 bg-white/60 text-center">
-            <h2 className="text-xl sm:text-3xl font-extrabold text-primary mb-3 drop-shadow-lg tracking-tight">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-primary mb-3 tracking-tight">
               Need Expert Advice?
             </h2>
             <p className="text-sm sm:text-base text-dark font-medium mb-6 max-w-xl mx-auto leading-relaxed">

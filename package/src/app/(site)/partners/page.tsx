@@ -118,7 +118,7 @@ const STATS = [
     icon: 'ph:calendar-fill',
     ringColor: 'border-blue-400',
     bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-500',
-    value: '25 Yrs',
+    value: '30 Yrs',
     label: 'Solar Warranty',
   },
 ]
