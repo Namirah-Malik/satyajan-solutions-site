@@ -1,298 +1,254 @@
 'use client';
 // src/app/(site)/payment/status/page.tsx
 
-import React, { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
-import { useCart } from '@/context/CartContext';
 
-// ── Strict union — never allow stray strings ──────────────────────────────────
-type PaymentState = 'loading' | 'COMPLETED' | 'PENDING' | 'FAILED';
+function inr(n: number) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency', currency: 'INR', maximumFractionDigits: 0,
+  }).format(n);
+}
 
+// ── Status check + WhatsApp notify ───────────────────────────────────────────
 function PaymentStatusContent() {
-  const searchParams  = useSearchParams();
-  const orderId       = searchParams.get('orderId');
-  const paymentMethod = searchParams.get('method') || 'online';
-  const paidAmount    = searchParams.get('amount');
-  const { clearCart } = useCart();
+  const searchParams = useSearchParams();
+  const orderId      = searchParams.get('orderId') || '';
+  const method       = searchParams.get('method')  || 'online';
+  const amountParam  = Number(searchParams.get('amount') || 0);
 
-  const [state,   setState]   = useState<PaymentState>('loading');
-  const [amount,  setAmount]  = useState<number>(paidAmount ? Number(paidAmount) : 0);
-  const [retries, setRetries] = useState(0);
-
-  const isCod = paymentMethod === 'cod';
+  const [state,    setState]    = useState<'loading' | 'success' | 'pending' | 'failed'>('loading');
+  const [amount,   setAmount]   = useState(amountParam);
+  const [notified, setNotified] = useState(false);
+  const notifyRef = useRef(false);
 
   useEffect(() => {
-    // ── No order ID → immediate failure ──────────────────────────────────────
-    if (!orderId) {
-      setState('FAILED');
+    if (!orderId) { setState('failed'); return; }
+
+    // COD orders don't need PhonePe status check
+    if (method === 'cod') {
+      setState('success');
       return;
     }
 
-    // ── COD: mark complete immediately, no API call needed ───────────────────
-    if (isCod) {
-      clearCart();
-      setState('COMPLETED');
-      return;
-    }
+    // Online payment — poll PhonePe for status
+    let attempts = 0;
+    const maxAttempts = 10;
 
-    // ── Online: poll PhonePe status API ──────────────────────────────────────
-    const check = async () => {
+    const checkStatus = async () => {
       try {
         const res  = await fetch(`/api/payment/status?orderId=${orderId}`);
         const data = await res.json();
 
-        // Treat any non-200 response as failure
-        if (!res.ok) {
-          setState('FAILED');
-          return;
-        }
-
-        const apiState: string = data.state ?? 'FAILED';
-
-        if (apiState === 'COMPLETED') {
-          setState('COMPLETED');
-          setAmount(data.amount ?? Number(paidAmount) ?? 0);
-          clearCart();
-        } else if (apiState === 'PENDING' && retries < 6) {
-          // Still pending — retry after 2.5 s
-          setTimeout(() => setRetries(r => r + 1), 2500);
+        if (data.state === 'COMPLETED') {
+          setAmount(data.amount || amountParam);
+          setState('success');
+        } else if (data.state === 'FAILED') {
+          setState('failed');
         } else {
-          // FAILED, CANCELLED, or max retries reached
-          setState('FAILED');
+          // PENDING — keep polling
+          attempts++;
+          if (attempts < maxAttempts) {
+            setTimeout(checkStatus, 3000);
+          } else {
+            setState('pending');
+          }
         }
       } catch {
-        setState('FAILED');
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(checkStatus, 3000);
+        } else {
+          setState('failed');
+        }
       }
     };
 
-    check();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId, retries]);
+    checkStatus();
+  }, [orderId, method, amountParam]);
 
-  // ── Loading / polling spinner ─────────────────────────────────────────────
-  if (!isCod && (state === 'loading' || state === 'PENDING')) {
+  // ── Send WhatsApp notification to team on success ─────────────────────────
+  useEffect(() => {
+    if (state !== 'success' || notifyRef.current) return;
+    notifyRef.current = true;
+
+    // Only notify for online payments (COD is notified directly from cart page)
+    if (method !== 'online') return;
+
+    try {
+      const raw = sessionStorage.getItem('pendingOrder');
+      if (!raw) return;
+
+      const order = JSON.parse(raw);
+
+      fetch('/api/orders/notify', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId,
+          method:          'online',
+          status:          'COMPLETED',
+          customerName:    order.customerName    || null,
+          customerPhone:   order.customerPhone   || null,
+          customerEmail:   order.customerEmail   || null,
+          customerAddress: order.customerAddress || null,
+          amount:          amount || order.amount,
+          items:           order.items || [],
+        }),
+      }).then(() => {
+        setNotified(true);
+        // Clear so it doesn't re-fire on refresh
+        sessionStorage.removeItem('pendingOrder');
+      }).catch(() => {});
+    } catch {}
+  }, [state, method, orderId, amount]);
+
+  // ── UI ────────────────────────────────────────────────────────────────────
+
+  if (state === 'loading') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4 pt-28">
-        <div className="w-20 h-20 rounded-full border-4 border-primary border-t-transparent animate-spin mb-6" />
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Verifying Payment…</h2>
-        <p className="text-gray-500 text-sm text-center max-w-xs">
-          Please wait while we confirm your payment. Do not close this page.
-        </p>
-        {orderId && <p className="text-xs text-gray-400 mt-4 font-mono">Order: {orderId}</p>}
-      </div>
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <Icon icon="ph:circle-notch-bold" className="text-primary animate-spin mx-auto" width={48} />
+          <p className="text-gray-600 font-medium">Verifying your payment…</p>
+          <p className="text-gray-400 text-sm">This usually takes a few seconds</p>
+        </div>
+      </main>
     );
   }
 
-  // ── COD / Cash on Delivery success ────────────────────────────────────────
-  if (state === 'COMPLETED' && isCod) {
+  if (state === 'failed') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex flex-col items-center justify-center px-4 pt-28 pb-16 text-center">
-
-        <div className="relative mb-6">
-          <div className="w-28 h-28 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
-            <Icon icon="ph:check-circle-fill" width={68} className="text-green-500" />
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-20">
+        <div className="max-w-lg w-full text-center">
+          <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Icon icon="ph:x-circle-fill" className="text-red-500" width={56} />
           </div>
-          <div className="absolute -top-2 -right-2 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-            <Icon icon="ph:confetti-fill" width={20} className="text-white" />
-          </div>
-        </div>
-
-        <h1 className="text-4xl font-black text-gray-900 mb-2">Order Placed! 🎉</h1>
-        <p className="text-gray-500 text-sm mb-6 max-w-sm">
-          Your order has been confirmed. Our team will call/WhatsApp you to arrange delivery.
-        </p>
-
-        {orderId && (
-          <p className="text-sm text-gray-400 mb-6">
-            Order ID: <span className="font-mono text-gray-700 font-semibold">{orderId}</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">Payment Failed</h1>
+          <p className="text-gray-500 text-base mb-8">
+            Your payment could not be processed. No money has been deducted.
           </p>
-        )}
-
-        <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100 max-w-sm w-full mb-8 text-left space-y-4">
-          <p className="text-sm font-bold text-gray-800 mb-1">What happens next?</p>
-
-          {[
-            { num: '1', bg: 'bg-green-100',  text: 'text-green-700',  title: 'WhatsApp Confirmation',
-              desc: 'Our team will WhatsApp you within 30 minutes to confirm your order details and delivery slot.' },
-            { num: '2', bg: 'bg-blue-100',   text: 'text-blue-700',   title: 'Delivery in 5–7 Days',
-              desc: 'Your product will be delivered across Hyderabad & Telangana within 5–7 business days.' },
-            { num: '3', bg: 'bg-orange-100', text: 'text-orange-700', title: 'Pay on Delivery',
-              desc: amount > 0
-                ? `Keep ₹${Number(amount).toLocaleString('en-IN')} ready to pay our delivery partner in cash.`
-                : 'Keep your payment amount ready to pay our delivery partner in cash.' },
-            { num: '4', bg: 'bg-purple-100', text: 'text-purple-700', title: 'Warranty & Installation',
-              desc: 'All products come with manufacturer warranty. Installation support available on request.' },
-          ].map((step) => (
-            <div key={step.num} className="flex items-start gap-3">
-              <div className={`w-8 h-8 ${step.bg} rounded-full flex items-center justify-center flex-shrink-0 text-sm font-black ${step.text}`}>
-                {step.num}
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900 text-sm">{step.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{step.desc}</p>
-              </div>
+          {orderId && (
+            <div className="bg-white border border-gray-200 rounded-2xl px-5 py-4 mb-8 text-left">
+              <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Reference</p>
+              <p className="text-sm font-bold text-gray-700">{orderId}</p>
             </div>
-          ))}
+          )}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/cart"
+              className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors text-sm">
+              <Icon icon="ph:arrow-counter-clockwise-bold" width={16} /> Try Again
+            </Link>
+            <a href={`https://wa.me/918019179159?text=${encodeURIComponent(`Hi, my payment failed for Order ID: ${orderId}. Please help.`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-full font-bold hover:bg-[#1fba58] transition-colors text-sm">
+              <Icon icon="mdi:whatsapp" width={16} /> Contact Support
+            </a>
+          </div>
         </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-          <button
-            onClick={() => window.open('https://wa.me/918019179159', '_blank')}
-            className="flex-1 py-3.5 px-5 bg-[#25D366] hover:bg-[#1fba58] text-white rounded-full font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
-          >
-            <Icon icon="mdi:whatsapp" width={20} />
-            Chat with Us
-          </button>
-          <Link href="/"
-            className="flex-1 py-3.5 px-5 bg-primary hover:bg-dark text-white rounded-full font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
-          >
-            <Icon icon="ph:house-fill" width={18} />
-            Go Home
-          </Link>
-        </div>
-        <Link href="/products" className="mt-4 text-sm text-primary hover:underline font-medium">
-          Continue Shopping →
-        </Link>
-      </div>
+      </main>
     );
   }
 
-  // ── Online payment success ────────────────────────────────────────────────
-  if (state === 'COMPLETED' && !isCod) {
+  if (state === 'pending') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex flex-col items-center justify-center px-4 pt-28 pb-16 text-center">
-
-        <div className="relative mb-8">
-          <div className="w-28 h-28 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
-            <Icon icon="ph:check-circle-fill" width={68} className="text-green-500" />
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-20">
+        <div className="max-w-lg w-full text-center">
+          <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Icon icon="ph:clock-fill" className="text-yellow-500" width={56} />
           </div>
-          <div className="absolute -top-2 -right-2 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-            <Icon icon="ph:confetti-fill" width={20} className="text-white" />
-          </div>
-        </div>
-
-        <h1 className="text-4xl font-black text-gray-900 mb-2">Payment Successful! 🎉</h1>
-        <p className="text-gray-500 text-base mb-6 max-w-sm">
-          Your payment was received. Thank you for shopping with Satyajan Energy Solutions!
-        </p>
-
-        {amount > 0 && (
-          <div className="bg-white rounded-2xl px-10 py-5 shadow-lg border border-green-100 mb-4">
-            <p className="text-xs text-gray-400 mb-1 uppercase tracking-wide">Amount Paid</p>
-            <p className="text-4xl font-black text-primary">₹{Number(amount).toLocaleString('en-IN')}</p>
-          </div>
-        )}
-
-        {orderId && (
-          <p className="text-sm text-gray-400 mb-8">
-            Order ID: <span className="font-mono text-gray-700 font-semibold">{orderId}</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">Payment Pending</h1>
+          <p className="text-gray-500 text-base mb-8">
+            Your payment is still being processed. If money was deducted, it will be confirmed within 24 hours.
           </p>
-        )}
-
-        <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100 max-w-sm w-full mb-8 text-left space-y-4">
-          {[
-            { icon: 'ph:whatsapp-logo-fill', bg: 'bg-green-100',  color: 'text-green-600',  title: 'WhatsApp Confirmation', desc: 'Our team will WhatsApp you within 30 minutes to confirm and arrange delivery.' },
-            { icon: 'ph:package-fill',       bg: 'bg-blue-100',   color: 'text-blue-600',   title: 'Fast Delivery',         desc: 'Delivered within 5–7 business days across Hyderabad & Telangana.' },
-            { icon: 'ph:shield-check-fill',  bg: 'bg-purple-100', color: 'text-purple-600', title: 'Warranty Assured',      desc: 'All products come with manufacturer warranty. Installation support available.' },
-          ].map((item) => (
-            <div key={item.title} className="flex items-start gap-3">
-              <div className={`w-9 h-9 ${item.bg} rounded-full flex items-center justify-center flex-shrink-0`}>
-                <Icon icon={item.icon} width={20} className={item.color} />
-              </div>
-              <div>
-                <p className="font-bold text-gray-900 text-sm">{item.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
-              </div>
+          {orderId && (
+            <div className="bg-white border border-gray-200 rounded-2xl px-5 py-4 mb-8 text-left">
+              <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Reference</p>
+              <p className="text-sm font-bold text-gray-700">{orderId}</p>
             </div>
-          ))}
+          )}
+          <a href={`https://wa.me/918019179159?text=${encodeURIComponent(`Hi, my payment is pending for Order ID: ${orderId}. Please check.`)}`}
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-full font-bold hover:bg-[#1fba58] transition-colors text-sm">
+            <Icon icon="mdi:whatsapp" width={16} /> Contact Support
+          </a>
         </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-          <button
-            onClick={() => window.open('https://wa.me/918019179159', '_blank')}
-            className="flex-1 py-3.5 px-5 bg-[#25D366] hover:bg-[#1fba58] text-white rounded-full font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
-          >
-            <Icon icon="mdi:whatsapp" width={20} />
-            Chat with Us
-          </button>
-          <Link href="/"
-            className="flex-1 py-3.5 px-5 bg-primary hover:bg-dark text-white rounded-full font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
-          >
-            <Icon icon="ph:house-fill" width={18} />
-            Go Home
-          </Link>
-        </div>
-        <Link href="/products" className="mt-4 text-sm text-primary hover:underline font-medium">
-          Continue Shopping →
-        </Link>
-      </div>
+      </main>
     );
   }
 
-  // ── Payment failed (catches all remaining states) ─────────────────────────
+  // ── SUCCESS ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex flex-col items-center justify-center px-4 pt-28 pb-16 text-center">
-      <div className="w-28 h-28 bg-red-100 rounded-full flex items-center justify-center mb-6 shadow-lg">
-        <Icon icon="ph:x-circle-fill" width={68} className="text-red-500" />
-      </div>
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-20">
+      <div className="max-w-lg w-full text-center">
 
-      <h1 className="text-4xl font-black text-gray-900 mb-3">Payment Failed</h1>
-      <p className="text-gray-500 text-base mb-2 max-w-sm">
-        Your payment could not be completed. <strong>No money has been deducted.</strong>
-      </p>
-      {orderId && <p className="text-xs text-gray-400 mb-6 font-mono">Order: {orderId}</p>}
+        {/* Success icon */}
+        <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Icon icon="ph:check-circle-fill" className="text-emerald-500" width={56} />
+        </div>
 
-      <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100 max-w-sm w-full mb-8 text-left">
-        <p className="text-sm font-bold text-gray-800 mb-3">What to do next:</p>
-        <ul className="space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">
+          {method === 'cod' ? 'Order Request Sent! 🎉' : 'Payment Successful! 🎉'}
+        </h1>
+        <p className="text-gray-500 text-base mb-2">
+          {method === 'cod'
+            ? 'Your order has been sent to our team via WhatsApp.'
+            : 'Your payment has been received successfully.'}
+        </p>
+        {amount > 0 && method === 'online' && (
+          <p className="text-emerald-600 font-bold text-lg mb-2">{inr(amount)} paid via PhonePe</p>
+        )}
+        <p className="text-gray-500 text-sm mb-8">
+          We&apos;ll confirm your order and delivery details shortly.
+        </p>
+
+        {/* Order reference */}
+        {orderId && (
+          <div className="bg-white border border-gray-200 rounded-2xl px-5 py-4 mb-6 text-left">
+            <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Order Reference</p>
+            <p className="text-sm font-bold text-gray-700">{orderId}</p>
+          </div>
+        )}
+
+        {/* What happens next */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-8 text-left space-y-3">
+          <p className="text-sm font-extrabold text-gray-900 mb-3">What happens next?</p>
           {[
-            'Check your internet connection and try again',
-            'Ensure sufficient balance in your account',
-            'Try ordering via WhatsApp / COD instead',
-            'Contact us on WhatsApp for immediate help',
-          ].map((tip, i) => (
-            <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
-              <Icon icon="ph:arrow-right-fill" width={12} className="text-primary mt-0.5 flex-shrink-0" />
-              {tip}
-            </li>
+            { icon: 'ph:whatsapp-logo-fill', color: 'text-emerald-500', text: 'Our team will contact you on WhatsApp within 30 minutes' },
+            { icon: 'ph:package-fill',       color: 'text-primary',     text: 'We confirm product availability & delivery date' },
+            { icon: 'ph:truck-fill',         color: 'text-blue-500',    text: 'Doorstep delivery arranged at your convenience' },
+          ].map((step, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <Icon icon={step.icon} className={`${step.color} flex-shrink-0 mt-0.5`} width={18} />
+              <p className="text-sm text-gray-600">{step.text}</p>
+            </div>
           ))}
-        </ul>
-      </div>
+        </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-        <Link href="/cart"
-          className="flex-1 py-3.5 px-5 bg-primary hover:bg-dark text-white rounded-full font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
-        >
-          <Icon icon="ph:arrow-left-bold" width={16} />
-          Back to Cart
-        </Link>
-        <button
-          onClick={() =>
-            window.open(
-              `https://wa.me/918019179159?text=${encodeURIComponent(
-                `Hi, my payment failed for order ${orderId || ''}. Please help.`
-              )}`,
-              '_blank'
-            )
-          }
-          className="flex-1 py-3.5 px-5 bg-[#25D366] hover:bg-[#1fba58] text-white rounded-full font-bold flex items-center justify-center gap-2 transition-colors shadow-lg"
-        >
-          <Icon icon="mdi:whatsapp" width={20} />
-          Get Help
-        </button>
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/products"
+            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors text-sm">
+            <Icon icon="ph:shopping-bag-fill" width={16} /> Continue Shopping
+          </Link>
+          <Link href="/"
+            className="inline-flex items-center justify-center gap-2 border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-gray-50 transition-colors text-sm">
+            Go to Home
+          </Link>
+        </div>
+
       </div>
-    </div>
+    </main>
   );
 }
 
 export default function PaymentStatusPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white pt-28">
-        <div className="w-16 h-16 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-        <p className="text-gray-500 text-sm">Loading…</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <Icon icon="ph:circle-notch-bold" className="text-primary animate-spin" width={40} />
       </div>
     }>
       <PaymentStatusContent />

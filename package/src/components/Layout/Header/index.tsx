@@ -99,8 +99,8 @@ const Header: React.FC = () => {
               {/* Catalogue — desktop only */}
               <div className='hidden md:block'>
                 <a
-                  href='/images/hero/Satyajan-Product-Catalogue-2025.pdf'
-                  download='Satyajan-Product-Catalogue-2025.pdf'
+                  href='/images/hero/Satyajan-Product-Catalogue-2026.pdf'
+                  download='Satyajan-Product-Catalogue-2026.pdf'
                   className='flex items-center gap-2 bg-primary hover:bg-dark text-white px-5 py-3 rounded-full font-semibold transition-colors text-sm whitespace-nowrap'
                 >
                   <Icon icon='ph:download-simple-bold' width={18} />
@@ -158,8 +158,8 @@ const Header: React.FC = () => {
 
             <div className='flex flex-col gap-1 my-16 text-white'>
               <a
-                href='/images/hero/Satyajan-Product-Catalogue-2025.pdf'
-                download='Satyajan-Product-Catalogue-2025.pdf'
+                href='/images/hero/Satyajan-Product-Catalogue-2026.pdf'
+                download='Satyajan-Product-Catalogue-2026.pdf'
                 className='flex items-center gap-2 bg-primary hover:bg-dark text-white px-6 py-3 rounded-full font-semibold transition-colors text-sm w-fit mb-6'
               >
                 <Icon icon='ph:download-simple-bold' width={18} />

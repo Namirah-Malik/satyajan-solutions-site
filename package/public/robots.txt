@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Block API routes from indexing
+Disallow: /api/
+Disallow: /_next/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /payment/
+
+# Allow product and blog content
+Allow: /products/
+Allow: /blog/
+
+Sitemap: https://satyajan.com/sitemap.xml

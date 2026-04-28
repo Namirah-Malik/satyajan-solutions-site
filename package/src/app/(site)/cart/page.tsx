@@ -4,8 +4,8 @@
 import { useCart } from '@/context/CartContext';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import CartEMISummary, { TENURES, calcEMI } from '@/components/EMI/CartEMISummary';
 import PhonePeButton from '@/components/PhonePeButton';
 
@@ -28,7 +28,26 @@ interface FieldErrors {
 
 export default function CartPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isBuyNow = searchParams.get('mode') === 'buynow';
+
   const { cartItems, updateQuantity, removeFromCart, getSubtotal, getTotalSavings, clearCart } = useCart();
+
+  // ── Buy Now isolated item ─────────────────────────────────────────────────
+  const [buyNowItem, setBuyNowItem] = useState<any>(null);
+
+  useEffect(() => {
+    if (isBuyNow) {
+      try {
+        const stored = sessionStorage.getItem('buyNowItem');
+        if (stored) setBuyNowItem(JSON.parse(stored));
+      } catch {}
+    }
+  }, [isBuyNow]);
+
+  const activeItems = isBuyNow && buyNowItem
+    ? [{ ...buyNowItem, originalPrice: buyNowItem.price }]
+    : cartItems;
 
   const [couponCode,      setCouponCode]      = useState('');
   const [appliedCoupon,   setAppliedCoupon]   = useState<string | null>(null);
@@ -43,9 +62,12 @@ export default function CartPage() {
   const [touched,         setTouched]         = useState({ name: false, phone: false, email: false, address: false });
 
   // ── Totals ────────────────────────────────────────────────────────────────
-  const subtotal          = getSubtotal();
-  const totalSavings      = getTotalSavings();
-  const mrpTotal          = cartItems.reduce((t, i) => t + (i.originalPrice || i.price) * i.quantity, 0);
+  const subtotal = isBuyNow && buyNowItem
+    ? buyNowItem.price * (buyNowItem.quantity || 1)
+    : getSubtotal();
+
+  const totalSavings      = isBuyNow ? 0 : getTotalSavings();
+  const mrpTotal          = activeItems.reduce((t, i) => t + (i.originalPrice || i.price) * i.quantity, 0);
   const productDiscount   = mrpTotal - subtotal;
   const couponAmt         = couponDiscount;
   const baseTotal         = subtotal - couponAmt;
@@ -56,7 +78,7 @@ export default function CartPage() {
   const totalAmount       = paymentTab === 'online' ? totalOnline : totalCod;
 
   const selectedTenure = TENURES[emiSelected];
-  const { emi, interest } = calcEMI(totalCod, selectedTenure.rate, selectedTenure.months);
+  const { emi } = calcEMI(totalCod, selectedTenure.rate, selectedTenure.months);
 
   // ── Coupon ────────────────────────────────────────────────────────────────
   const handleApplyCoupon = () => {
@@ -71,27 +93,14 @@ export default function CartPage() {
     if (appliedCoupon) handleRemoveCoupon();
   };
 
-  // ── Per-field validators ──────────────────────────────────────────────────
+  // ── Validators ────────────────────────────────────────────────────────────
   const validateField = (field: keyof FieldErrors, value: string): string => {
     switch (field) {
-      case 'name':
-        if (!value.trim() || value.trim().length < 2) return 'Full name is required';
-        return '';
-      case 'phone': {
-        const d = value.replace(/\D/g, '');
-        if (!d || d.length !== 10 || !/^[6-9]/.test(d)) return 'Enter a valid 10-digit mobile number';
-        return '';
-      }
-      case 'email':
-        if (!value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-          return 'Enter a valid email address';
-        return '';
-      case 'address':
-        if (!value.trim() || value.trim().length < 10)
-          return 'Enter your full delivery address (min 10 characters)';
-        return '';
-      default:
-        return '';
+      case 'name':    return (!value.trim() || value.trim().length < 2) ? 'Full name is required' : '';
+      case 'phone':   { const d = value.replace(/\D/g, ''); return (!d || d.length !== 10 || !/^[6-9]/.test(d)) ? 'Enter a valid 10-digit mobile number' : ''; }
+      case 'email':   return (!value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) ? 'Enter a valid email address' : '';
+      case 'address': return (!value.trim() || value.trim().length < 10) ? 'Enter your full delivery address (min 10 characters)' : '';
+      default: return '';
     }
   };
 
@@ -100,7 +109,7 @@ export default function CartPage() {
     setErrors(p => ({ ...p, [field]: validateField(field, value) }));
   };
 
-  // ── Full form validation (called before any payment) ─────────────────────
+  // ── Core validate — also saves order data to sessionStorage for status page ──
   const validateForm = (): boolean => {
     const newErrors: FieldErrors = {
       name:    validateField('name',    customerName),
@@ -110,22 +119,41 @@ export default function CartPage() {
     };
     setErrors(newErrors);
     setTouched({ name: true, phone: true, email: true, address: true });
-
     const hasErrors = Object.values(newErrors).some(Boolean);
     if (hasErrors) {
-      // Scroll to the first error field
       setTimeout(() => {
         document.getElementById('customer-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 50);
+      return false;
     }
-    return !hasErrors;
+
+    // ✅ Save order details so the payment/status page can send WhatsApp notification
+    try {
+      sessionStorage.setItem('pendingOrder', JSON.stringify({
+        customerName,
+        customerPhone: `+91${customerPhone}`,
+        customerEmail,
+        customerAddress,
+        amount:        totalOnline,
+        discount:      onlineDiscountAmt,
+        items: activeItems.map(i => ({
+          name:     i.name,
+          SKU:      i.SKU || '',
+          price:    i.price,
+          quantity: i.quantity,
+          image:    i.image || '',
+        })),
+      }));
+    } catch {}
+
+    return true;
   };
 
   // ── COD / WhatsApp checkout ───────────────────────────────────────────────
-  const handleCodCheckout = () => {
+  const handleCodCheckout = async () => {
     if (!validateForm()) return;
 
-    const itemLines = cartItems
+    const itemLines = activeItems
       .map((item, i) =>
         `${i + 1}. *${item.name}*\n   SKU: ${item.SKU}\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`
       )
@@ -136,7 +164,7 @@ export default function CartPage() {
       : '';
 
     const message = [
-      '🛒 *New Order — Satyajan Energy Solutions*',
+      isBuyNow ? '⚡ *Buy Now Order — Satyajan Energy Solutions*' : '🛒 *New Order — Satyajan Energy Solutions*',
       '━━━━━━━━━━━━━━━━━━━━━━━',
       itemLines,
       '━━━━━━━━━━━━━━━━━━━━━━━',
@@ -158,12 +186,38 @@ export default function CartPage() {
 
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 
+    // Send server-side WhatsApp notification to team
+    try {
+      await fetch('/api/orders/notify', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId:         `SAT-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+          method:          'cod',
+          status:          'COD_PLACED',
+          customerName,
+          customerPhone:   `+91${customerPhone}`,
+          customerEmail,
+          customerAddress,
+          amount:          totalCod,
+          items: activeItems.map(i => ({
+            name:     i.name,
+            SKU:      i.SKU || '',
+            price:    i.price,
+            quantity: i.quantity,
+          })),
+        }),
+      });
+    } catch {}
+
     const orderId = `SAT-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
     router.push(`/payment/status?orderId=${orderId}&method=cod&amount=${totalCod}`);
   };
 
-  // ── Empty cart ────────────────────────────────────────────────────────────
-  if (cartItems.length === 0) {
+  // ── Empty state ───────────────────────────────────────────────────────────
+  const isEmpty = isBuyNow ? !buyNowItem : cartItems.length === 0;
+
+  if (isEmpty) {
     return (
       <section className="!pt-44 pb-20 bg-white min-h-screen">
         <div className="container mx-auto max-w-8xl px-5 text-center py-20">
@@ -178,20 +232,48 @@ export default function CartPage() {
     );
   }
 
+  const itemCount = activeItems.reduce((s, i) => s + i.quantity, 0);
+
   return (
     <section className="!pt-44 pb-20 bg-white min-h-screen">
       <div className="container mx-auto max-w-8xl px-5 2xl:px-0">
-        <h1 className="text-3xl font-bold text-dark mb-2">Shopping Cart</h1>
-        <p className="text-gray-600 mb-8">
-          {cartItems.reduce((s, i) => s + i.quantity, 0)} item(s) in your cart
-        </p>
+
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="text-3xl font-bold text-dark">
+            {isBuyNow ? '⚡ Buy Now' : 'Shopping Cart'}
+          </h1>
+          {isBuyNow && (
+            <span className="text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">
+              Express Checkout
+            </span>
+          )}
+        </div>
+        <div className="flex items-center justify-between mb-8">
+          <p className="text-gray-600">
+            {itemCount} item{itemCount !== 1 ? 's' : ''}{isBuyNow ? ' — direct checkout' : ' in your cart'}
+          </p>
+          {isBuyNow && (
+            <Link href="/cart" className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
+              <Icon icon="solar:cart-large-4-bold" width={14} /> View full cart instead
+            </Link>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* ── Cart Items ─────────────────────────────────────────────── */}
+          {/* ── Items ── */}
           <div className="lg:col-span-2">
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              {cartItems.map((item) => (
+              {isBuyNow && (
+                <div className="mb-5 p-3 bg-primary/5 border border-primary/20 rounded-xl flex items-center gap-2">
+                  <Icon icon="solar:bolt-bold" width={16} className="text-primary flex-shrink-0" />
+                  <p className="text-xs text-primary font-semibold">
+                    Express checkout — only this item will be ordered. Your cart remains unchanged.
+                  </p>
+                </div>
+              )}
+
+              {activeItems.map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row gap-4 pb-6 mb-6 border-b border-gray-100 last:border-b-0 last:pb-0 last:mb-0">
                   <Link href={`/products/${item.id}`}
                     className="w-full sm:w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 hover:opacity-90 transition-opacity">
@@ -209,27 +291,34 @@ export default function CartPage() {
                         <span className="text-sm text-gray-400 line-through">₹{Number(item.originalPrice).toLocaleString('en-IN')}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 mt-4">
-                      <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden">
-                        <button onClick={() => handleQtyChange(item.id, item.quantity - 1)} className="px-3 py-2 hover:bg-gray-100 transition-colors">
-                          <Icon icon="mdi:minus" width={18} />
-                        </button>
-                        <span className="px-4 py-2 min-w-[48px] text-center font-semibold text-sm">{item.quantity}</span>
-                        <button onClick={() => handleQtyChange(item.id, item.quantity + 1)} className="px-3 py-2 hover:bg-gray-100 transition-colors">
-                          <Icon icon="mdi:plus" width={18} />
+                    {!isBuyNow && (
+                      <div className="flex items-center gap-4 mt-4">
+                        <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden">
+                          <button onClick={() => handleQtyChange(item.id, item.quantity - 1)} className="px-3 py-2 hover:bg-gray-100 transition-colors">
+                            <Icon icon="mdi:minus" width={18} />
+                          </button>
+                          <span className="px-4 py-2 min-w-[48px] text-center font-semibold text-sm">{item.quantity}</span>
+                          <button onClick={() => handleQtyChange(item.id, item.quantity + 1)} className="px-3 py-2 hover:bg-gray-100 transition-colors">
+                            <Icon icon="mdi:plus" width={18} />
+                          </button>
+                        </div>
+                        <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700 text-sm font-medium flex items-center gap-1 transition-colors">
+                          <Icon icon="mdi:delete-outline" width={16} /> Remove
                         </button>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700 text-sm font-medium flex items-center gap-1 transition-colors">
-                        <Icon icon="mdi:delete-outline" width={16} /> Remove
-                      </button>
-                    </div>
+                    )}
+                    {isBuyNow && (
+                      <p className="mt-3 text-xs text-gray-400 flex items-center gap-1">
+                        <Icon icon="ph:info-fill" width={12} /> Qty: 1 (Buy Now — single item checkout)
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ── Order Summary ─────────────────────────────────────────── */}
+          {/* ── Order Summary ── */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-gray-200 rounded-2xl p-6 sticky top-24 space-y-5">
               <h2 className="text-xl font-bold text-dark">Order Summary</h2>
@@ -253,48 +342,23 @@ export default function CartPage() {
                     <button onClick={handleApplyCoupon} className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-dark transition-colors">Apply</button>
                   </div>
                 )}
-                {/* WhatsApp for extra discount */}
                 <button
-onClick={() => {
-  const itemLines = cartItems
-    .map((item, i) =>
-      `${i + 1}. *${item.name}*\n   SKU: ${item.SKU}\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`
-    )
-    .join('\n\n');
-
-  const emiSection = selectedTenure.months > 1
-    ? `💳 *EMI:* ${selectedTenure.months} months @ ${
-        selectedTenure.rate === 0 ? '0% No Cost' : `${selectedTenure.rate}% p.a.`
-      } | *${inr(emi)}/month*`
-    : '';
-
-  const message = [
-    '🛒 *New Order — Satyajan Energy Solutions*',
-    '━━━━━━━━━━━━━━━━━━━━━━━',
-    itemLines,
-    '━━━━━━━━━━━━━━━━━━━━━━━',
-    `   MRP Total: ${inr(mrpTotal)}`,
-    productDiscount > 0 ? `   Product Discount: -${inr(productDiscount)}` : '',
-    couponAmt > 0 ? `   Coupon (${appliedCoupon}): -${inr(couponAmt)}` : '',
-    `   Delivery: FREE`,
-    `   *Cart Total: ${inr(subtotal)}*`,
-    '━━━━━━━━━━━━━━━━━━━━━━━',
-    emiSection,
-    '━━━━━━━━━━━━━━━━━━━━━━━',
-    customerName ? `👤 ${customerName}` : '',
-    customerPhone ? `📞 +91${customerPhone}` : '',
-    customerEmail ? `📧 ${customerEmail}` : '',
-    customerAddress ? `📍 ${customerAddress}` : '',
-    '\n🙏 Hi! I’d like an extra discount on this order. Please assist.',
-  ]
-    .filter(Boolean)
-    .join('\n');
-
-  window.open(
-    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-    '_blank'
-  );
-}}
+                  onClick={() => {
+                    const itemLines = activeItems.map((item, i) =>
+                      `${i + 1}. *${item.name}*\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`
+                    ).join('\n\n');
+                    const message = [
+                      '🛒 *Satyajan Energy Solutions*',
+                      '━━━━━━━━━━━━━━━━━━━━━━━',
+                      itemLines,
+                      '━━━━━━━━━━━━━━━━━━━━━━━',
+                      `   *Cart Total: ${inr(subtotal)}*`,
+                      customerName  ? `👤 ${customerName}` : '',
+                      customerPhone ? `📞 +91${customerPhone}` : '',
+                      '\n🙏 Hi! I\'d like an extra discount. Please assist.',
+                    ].filter(Boolean).join('\n');
+                    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+                  }}
                   className="mt-2.5 w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/40 text-[#128C7E] rounded-xl text-xs font-bold transition-all"
                 >
                   <Icon icon="mdi:whatsapp" width={15} className="text-[#25D366]" />
@@ -308,36 +372,23 @@ onClick={() => {
                 <p className="text-sm font-bold text-gray-800 mb-2">Payment Method</p>
                 <div className="grid grid-cols-2 gap-1.5 p-1 bg-gray-100 rounded-2xl">
                   <button onClick={() => setPaymentTab('online')}
-                    className={`relative py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
-                      paymentTab === 'online' ? 'bg-[#5f259f] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'
-                    }`}>
+                    className={`relative py-3 rounded-xl text-xs font-bold transition-all duration-200 ${paymentTab === 'online' ? 'bg-[#5f259f] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:credit-card-fill" width={13} className="inline mr-1" />
                     Pay Online
-                    <span className={`absolute -top-2 -right-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${
-                      paymentTab === 'online' ? 'bg-yellow-400 text-gray-900' : 'bg-green-500 text-white'
-                    }`}>{ONLINE_DISCOUNT_PCT}% OFF</span>
+                    <span className={`absolute -top-2 -right-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${paymentTab === 'online' ? 'bg-yellow-400 text-gray-900' : 'bg-green-500 text-white'}`}>{ONLINE_DISCOUNT_PCT}% OFF</span>
                   </button>
                   <button onClick={() => setPaymentTab('cod')}
-                    className={`relative py-3 rounded-xl text-xs font-bold transition-all duration-200 ${
-                      paymentTab === 'cod' ? 'bg-[#25D366] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'
-                    }`}>
+                    className={`relative py-3 rounded-xl text-xs font-bold transition-all duration-200 ${paymentTab === 'cod' ? 'bg-[#25D366] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="mdi:cash" width={13} className="inline mr-1" />
                     COD / WhatsApp
-                    <span className={`absolute -top-2 -right-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${
-                      paymentTab === 'cod' ? 'bg-yellow-400 text-gray-900' : 'bg-green-500 text-white'
-                    }`}>{COD_DISCOUNT_PCT}% OFF</span>
+                    <span className={`absolute -top-2 -right-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${paymentTab === 'cod' ? 'bg-yellow-400 text-gray-900' : 'bg-green-500 text-white'}`}>{COD_DISCOUNT_PCT}% OFF</span>
                   </button>
                 </div>
-                <div className={`mt-2.5 rounded-xl p-3 flex items-center gap-2 ${
-                  paymentTab === 'online' ? 'bg-purple-50 border border-purple-100' : 'bg-green-50 border border-green-100'
-                }`}>
-                  <Icon icon="ph:tag-simple-fill" width={15}
-                    className={paymentTab === 'online' ? 'text-purple-600 flex-shrink-0' : 'text-green-600 flex-shrink-0'} />
+                <div className={`mt-2.5 rounded-xl p-3 flex items-center gap-2 ${paymentTab === 'online' ? 'bg-purple-50 border border-purple-100' : 'bg-green-50 border border-green-100'}`}>
+                  <Icon icon="ph:tag-simple-fill" width={15} className={paymentTab === 'online' ? 'text-purple-600 flex-shrink-0' : 'text-green-600 flex-shrink-0'} />
                   <div>
                     <p className={`text-xs font-bold ${paymentTab === 'online' ? 'text-purple-700' : 'text-green-700'}`}>
-                      {paymentTab === 'online'
-                        ? `${ONLINE_DISCOUNT_PCT}% Instant Discount on Online Payment`
-                        : `${COD_DISCOUNT_PCT}% Discount on COD / WhatsApp Order`}
+                      {paymentTab === 'online' ? `${ONLINE_DISCOUNT_PCT}% Instant Discount on Online Payment` : `${COD_DISCOUNT_PCT}% Discount on COD / WhatsApp Order`}
                     </p>
                     <p className={`text-[11px] ${paymentTab === 'online' ? 'text-purple-500' : 'text-green-500'}`}>
                       You save {paymentTab === 'online' ? inr(onlineDiscountAmt) : inr(codDiscountAmt)} on this order
@@ -348,22 +399,9 @@ onClick={() => {
 
               {/* Price breakdown */}
               <div className="space-y-2 text-sm border-t border-gray-100 pt-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">MRP Total</span>
-                  <span className="font-medium">₹{mrpTotal.toLocaleString('en-IN')}</span>
-                </div>
-                {productDiscount > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Product Discount</span>
-                    <span className="text-green-600 font-medium">− ₹{productDiscount.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
-                {couponAmt > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Coupon ({appliedCoupon})</span>
-                    <span className="text-green-600 font-medium">− ₹{couponAmt.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
+                <div className="flex justify-between"><span className="text-gray-500">MRP Total</span><span className="font-medium">₹{mrpTotal.toLocaleString('en-IN')}</span></div>
+                {productDiscount > 0 && <div className="flex justify-between"><span className="text-gray-500">Product Discount</span><span className="text-green-600 font-medium">− ₹{productDiscount.toLocaleString('en-IN')}</span></div>}
+                {couponAmt > 0 && <div className="flex justify-between"><span className="text-gray-500">Coupon ({appliedCoupon})</span><span className="text-green-600 font-medium">− ₹{couponAmt.toLocaleString('en-IN')}</span></div>}
                 <div className="flex justify-between">
                   <span className={paymentTab === 'online' ? 'text-purple-600 font-semibold' : 'text-green-600 font-semibold'}>
                     {paymentTab === 'online' ? `Online Discount (${ONLINE_DISCOUNT_PCT}%)` : `COD Discount (${COD_DISCOUNT_PCT}%)`}
@@ -372,10 +410,7 @@ onClick={() => {
                     − ₹{(paymentTab === 'online' ? onlineDiscountAmt : codDiscountAmt).toLocaleString('en-IN')}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Delivery</span>
-                  <span className="text-green-600 font-medium">FREE</span>
-                </div>
+                <div className="flex justify-between"><span className="text-gray-500">Delivery</span><span className="text-green-600 font-medium">FREE</span></div>
                 <div className="border-t border-gray-200 pt-3 flex justify-between text-base font-black">
                   <span>Total Payable</span>
                   <span className="text-primary">₹{totalAmount.toLocaleString('en-IN')}</span>
@@ -389,7 +424,7 @@ onClick={() => {
                 )}
               </div>
 
-              {/* EMI — COD only */}
+              {/* EMI */}
               {paymentTab === 'cod' && (
                 <div className="border-t border-gray-100 pt-4">
                   <CartEMISummary cartTotal={totalCod} selected={emiSelected} onSelect={setEmiSelected} />
@@ -402,62 +437,40 @@ onClick={() => {
                 </div>
               )}
 
-              {/* ── Customer Details — ALL MANDATORY ── */}
+              {/* Customer Details */}
               <div className="border-t border-gray-100 pt-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-gray-900">Delivery Details</h3>
-                  <span className="text-[11px] text-red-500 font-semibold bg-red-50 px-2 py-0.5 rounded-full">
-                    All fields required
-                  </span>
+                  <span className="text-[11px] text-red-500 font-semibold bg-red-50 px-2 py-0.5 rounded-full">All fields required</span>
                 </div>
 
                 {/* Name */}
                 <div>
-                  <label htmlFor="customer-name" className="block text-xs font-semibold text-gray-700 mb-1">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
+                  <label htmlFor="customer-name" className="block text-xs font-semibold text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Icon icon="ph:user-fill" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width={13} />
                     <input id="customer-name" type="text" value={customerName}
                       onChange={(e) => { setCustomerName(e.target.value); if (touched.name) setErrors(p => ({ ...p, name: validateField('name', e.target.value) })); }}
                       onBlur={(e) => handleBlur('name', e.target.value)}
                       placeholder="Your full name"
-                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors ${
-                        errors.name ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                      }`} />
+                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors ${errors.name ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
                   </div>
-                  {errors.name && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.name}
-                    </p>
-                  )}
+                  {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.name}</p>}
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
-                  <div className={`flex items-center border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/30 transition-colors ${
-                    errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                  }`}>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number <span className="text-red-500">*</span></label>
+                  <div className={`flex items-center border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/30 transition-colors ${errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
                     <span className="pl-3 pr-2 text-gray-500 text-xs font-semibold whitespace-nowrap">+91</span>
                     <div className="w-px h-4 bg-gray-200" />
                     <input type="tel" value={customerPhone}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, '').slice(0, 10);
-                        setCustomerPhone(v);
-                        if (touched.phone) setErrors(p => ({ ...p, phone: validateField('phone', v) }));
-                      }}
+                      onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); setCustomerPhone(v); if (touched.phone) setErrors(p => ({ ...p, phone: validateField('phone', v) })); }}
                       onBlur={(e) => handleBlur('phone', e.target.value)}
                       placeholder="10-digit mobile number" maxLength={10} inputMode="numeric"
                       className="flex-1 px-3 py-2.5 bg-transparent focus:outline-none text-sm" />
                   </div>
-                  {errors.phone && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.phone}
-                    </p>
-                  )}
+                  {errors.phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.phone}</p>}
                 </div>
 
                 {/* Email */}
@@ -472,48 +485,31 @@ onClick={() => {
                       onChange={(e) => { setCustomerEmail(e.target.value); if (touched.email) setErrors(p => ({ ...p, email: validateField('email', e.target.value) })); }}
                       onBlur={(e) => handleBlur('email', e.target.value)}
                       placeholder="you@example.com"
-                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors ${
-                        errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                      }`} />
+                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors ${errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
                   </div>
-                  {errors.email && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.email}
-                    </p>
-                  )}
+                  {errors.email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.email}</p>}
                 </div>
 
-                {/* Delivery Address */}
+                {/* Address */}
                 <div>
-                  <label htmlFor="customer-address" className="block text-xs font-semibold text-gray-700 mb-1">
-                    Delivery Address <span className="text-red-500">*</span>
-                  </label>
+                  <label htmlFor="customer-address" className="block text-xs font-semibold text-gray-700 mb-1">Delivery Address <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Icon icon="ph:map-pin-fill" className="absolute left-3 top-3 text-gray-400" width={13} />
                     <textarea id="customer-address" value={customerAddress} rows={3}
                       onChange={(e) => { setCustomerAddress(e.target.value); if (touched.address) setErrors(p => ({ ...p, address: validateField('address', e.target.value) })); }}
                       onBlur={(e) => handleBlur('address', e.target.value)}
                       placeholder="House/Flat No., Street, Area, City, Pincode"
-                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none ${
-                        errors.address ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                      }`} />
+                      className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none ${errors.address ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
                   </div>
-                  {errors.address && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <Icon icon="ph:warning-circle-fill" width={11} />{errors.address}
-                    </p>
-                  )}
+                  {errors.address && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.address}</p>}
                 </div>
 
-                {/* Completion indicator */}
                 {(() => {
                   const filled = [customerName, customerPhone, customerEmail, customerAddress].filter(v => v.trim().length > 2).length;
                   return filled < 4 ? (
                     <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
                       <Icon icon="ph:warning-fill" width={14} className="text-amber-500 flex-shrink-0" />
-                      <p className="text-xs text-amber-700 font-medium">
-                        Fill all {4 - filled} remaining field{4 - filled !== 1 ? 's' : ''} to proceed to payment
-                      </p>
+                      <p className="text-xs text-amber-700 font-medium">Fill all {4 - filled} remaining field{4 - filled !== 1 ? 's' : ''} to proceed to payment</p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 p-2.5 bg-green-50 border border-green-200 rounded-xl">
@@ -524,7 +520,7 @@ onClick={() => {
                 })()}
               </div>
 
-              {/* ── Payment Buttons ── */}
+              {/* Payment Buttons */}
               <div className="border-t border-gray-100 pt-4 space-y-3">
                 {paymentTab === 'online' ? (
                   <>
@@ -533,7 +529,7 @@ onClick={() => {
                       customerName={customerName || undefined}
                       customerPhone={customerPhone ? `+91${customerPhone}` : undefined}
                       customerEmail={customerEmail || undefined}
-                      items={cartItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
+                      items={activeItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
                       label={`Pay ${inr(totalOnline)} · Save ${inr(onlineDiscountAmt)}`}
                       onBeforePay={validateForm}
                     />

@@ -14,9 +14,9 @@ const categoryFilterMap: Record<string, string> = {
 }
 
 const SLIDES = [
-  { id: 0, type: 'image' as const, src: '/images/hero/Product_range.png', alt: 'Microtek Product Range' },
-  { id: 1, type: 'image' as const, src: '/images/hero/startup-india.png', alt: 'Startup India Certificate' },
-  { id: 2, type: 'image' as const, src: '/images/hero/startup-telangana.png', alt: 'Startup Telangana Certificate' },
+  { id: 0, type: 'image' as const, src: '/images/hero/Product_range.png', alt: 'Microtek Product Range', fit: 'cover' },
+  { id: 1, type: 'image' as const, src: '/images/hero/startup-india.png', alt: 'Startup India Certificate', fit: 'contain' },
+  { id: 2, type: 'image' as const, src: '/images/hero/startup-telangana.png', alt: 'Startup Telangana Certificate', fit: 'contain' },
 ]
 
 function useScrollReveal() {
@@ -126,18 +126,27 @@ function HeroSlideshow() {
   }, [])
   const slide = SLIDES[current]
   return (
-    <div className="relative w-full h-full min-h-[300px] lg:min-h-0 overflow-hidden bg-gray-50/50">
+    <div className="relative w-full h-full min-h-[480px] lg:min-h-0 overflow-hidden bg-gradient-to-br from-emerald-50/40 to-gray-50/30">
       <AnimatePresence mode="wait">
-        <motion.div key={current}
-          initial={{ opacity: 0, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-          className="absolute inset-0 flex items-center justify-center p-6 sm:p-10">
-          <img
+       <motion.div key={current}
+  initial={{ opacity: 0, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
+  transition={{ duration: 0.5, ease: 'easeInOut' }}
+  className="absolute inset-0 flex items-center justify-center p-3 sm:p-5">
+  <div className="w-full h-full flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-white/50 p-2 sm:p-3"
+  style={{ maxWidth: '96%', maxHeight: '94%' }}>
+<img
   src={slide.src}
   alt={slide.alt}
-  className="w-full h-full object-contain max-h-[420px] drop-shadow-lg"
+  className="w-full h-full drop-shadow-md"
+  style={{ 
+    minHeight: '400px', 
+    maxHeight: '600px',
+    objectFit: slide.fit as 'cover' | 'contain',
+    objectPosition: 'center'
+  }}
 />
-        </motion.div>
+</div>
+</motion.div>
       </AnimatePresence>
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/70 backdrop-blur-md rounded-full px-3 py-2 shadow border border-white/50">
         <button onClick={prev} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
@@ -314,7 +323,7 @@ export default function HomePageClient() {
           </div>
           {/* RIGHT */}
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-            className="relative bg-gradient-to-br from-gray-50 to-emerald-50/30 lg:border-l border-gray-100">
+          className="relative bg-gradient-to-br from-gray-50 to-emerald-50/30 lg:border-l border-gray-100 min-h-[500px] lg:min-h-0">
             <HeroSlideshow />
           
           </motion.div>

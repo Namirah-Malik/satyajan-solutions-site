@@ -7,21 +7,9 @@ import { useCart } from '@/context/CartContext'
 import { useState } from 'react'
 import WishlistButton from '@/components/WishlistButton';
 
-
 function proxyImageUrl(src: string | null): string | null {
   if (!src) return null;
-  let resolved = src;
-  try {
-    if (src.includes('/_next/image')) {
-      const parsed = new URL(src);
-      const inner = parsed.searchParams.get('url');
-      if (inner) resolved = decodeURIComponent(inner);
-    }
-  } catch { }
-  if (resolved.startsWith('http://') || resolved.startsWith('https://')) {
-    return `/api/image-proxy?url=${encodeURIComponent(resolved)}`;
-  }
-  return resolved;
+  return src;
 }
 
 const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
@@ -55,13 +43,26 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
     setTimeout(() => setAdding(false), 500);
   };
 
+  const handleBuyNow = () => {
+    sessionStorage.setItem(
+      'buyNowItem',
+      JSON.stringify({
+        id: slug,
+        name,
+        SKU,
+        price,
+        image: mainImage || '/images/fallback.jpg',
+        quantity: 1,
+      })
+    );
+    window.location.href = '/cart?mode=buynow';
+  };
+
   return (
     <div className="w-full transition-transform duration-200 hover:-translate-y-0.5">
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden flex flex-col h-full shadow-sm hover:shadow-lg transition-shadow duration-200">
 
-        {/* ── IMAGE ─────────────────────────────────────────────────────
-            Mobile : 4:3 ratio (Microtek style, prominent)
-            Desktop: square                                              */}
+        {/* ── IMAGE ── */}
         <Link href={slug ? `/products/${slug}` : '#'} className="block flex-shrink-0">
           <div className="relative w-full bg-gray-50 overflow-hidden aspect-[4/3] sm:aspect-square">
             {showImage ? (
@@ -78,36 +79,33 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
                 <Icon icon="ph:lightning-fill" className="text-gray-300" width={48} />
               </div>
             )}
-            {/* Category badge — on image for mobile, hidden (shown below) for desktop */}
             {category && (
               <span className="sm:hidden absolute top-2 left-2 text-[9px] font-bold text-white bg-primary/90 px-1.5 py-0.5 rounded-full z-10">
                 {category}
               </span>
             )}
-            {/* ✅ Wishlist button — always inside image area, top-right */}
-  <div className="absolute top-2 right-2 z-10">
-    <WishlistButton
-      item={{
-        id: String(slug || ''),
-        name: name || '',
-        price: price,
-        image: mainImage || '/images/fallback.jpg',
-        category: category || '',
-        SKU: SKU,
-      }}
-      size="sm"
-    />
-  </div>
-</div>
-          
+            <div className="absolute top-2 right-2 z-10">
+              <WishlistButton
+                item={{
+                  id: String(slug || ''),
+                  name: name || '',
+                  price: price,
+                  image: mainImage || '/images/fallback.jpg',
+                  category: category || '',
+                  SKU: SKU,
+                }}
+                size="sm"
+              />
+            </div>
+          </div>
         </Link>
 
-        {/* ── CONTENT ───────────────────────────────────────────────── */}
+        {/* ── CONTENT ── */}
         <div className="flex flex-col flex-1 p-3 sm:p-5">
 
-          {/* ════════════════════════════════════════════════════════
-              MOBILE layout (< sm) — Microtek style: centered, simple
-              ════════════════════════════════════════════════════════ */}
+          {/* ════════════════════════════════════════
+              MOBILE layout (< sm)
+              ════════════════════════════════════════ */}
           <div className="flex flex-col gap-2 sm:hidden">
             <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2 text-center">
               {name}
@@ -123,46 +121,45 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
                 <span className="text-xs text-gray-400">Price on request</span>
               )}
             </div>
-            <div className="flex gap-2 mt-1">
-              <Link
-                href={slug ? `/products/${slug}` : '#'}
-                className="flex-1 text-center py-2 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary hover:text-white transition-colors"
-              >
-                View More
-              </Link>
+
+            {/* Mobile buttons — stacked */}
+            <div className="flex flex-col gap-1.5 mt-1">
               <button
                 onClick={handleAddToCart}
                 disabled={adding}
-                className="flex-1 py-2 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-dark transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
+                className="w-full py-2 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-dark transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
               >
                 {adding
                   ? <Icon icon="svg-spinners:3-dots-fade" width={14} />
-                  : <><Icon icon="solar:cart-large-4-bold" width={14} /> Cart</>
+                  : <><Icon icon="solar:cart-large-4-bold" width={14} /> Add to Cart</>
                 }
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="w-full text-center py-2 border-2 border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-1"
+              >
+                <Icon icon="solar:bolt-bold" width={13} /> Buy Now
               </button>
             </div>
           </div>
 
-          {/* ════════════════════════════════════════════════════════
-              DESKTOP layout (≥ sm) — matches official satyajan.com
-              ════════════════════════════════════════════════════════ */}
+          {/* ════════════════════════════════════════
+              DESKTOP layout (≥ sm)
+              ════════════════════════════════════════ */}
           <div className="hidden sm:flex flex-col flex-1 gap-3">
 
-            {/* Category label — uppercase small text like official site */}
             {category && (
               <p className="text-xs font-bold text-primary uppercase tracking-wider">
                 {category}
               </p>
             )}
 
-            {/* Product name — full, not truncated */}
             <Link href={slug ? `/products/${slug}` : '#'}>
               <h3 className="text-base font-bold text-gray-900 leading-snug hover:text-primary transition-colors">
                 {name}
               </h3>
             </Link>
 
-            {/* Key Features section */}
             {visibleFeatures.length > 0 && (
               <div className="flex flex-col gap-1.5 flex-1">
                 <p className="text-xs font-semibold text-gray-700">Key Features:</p>
@@ -187,7 +184,6 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
 
             <div className="flex-1" />
 
-            {/* Price pill + View Details — matches official site exactly */}
             <div className="flex items-center justify-between gap-2 mt-1">
               {formattedRate ? (
                 <span className="bg-gray-100 text-primary font-bold text-sm px-3 py-1.5 rounded-lg">
@@ -204,19 +200,27 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
               </Link>
             </div>
 
-            {/* Full-width Add to Cart button — matches official site */}
-            <button
-              onClick={handleAddToCart}
-              disabled={adding}
-              className="w-full py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-dark transition-colors flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
-            >
-              {adding
-                ? <><Icon icon="svg-spinners:3-dots-fade" width={18} /> Adding…</>
-                : <><Icon icon="solar:cart-large-4-bold" width={18} /> Add to Cart</>
-              }
-            </button>
-          </div>
+            {/* Desktop buttons — stacked */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleAddToCart}
+                disabled={adding}
+                className="w-full py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-dark transition-colors flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+              >
+                {adding
+                  ? <><Icon icon="svg-spinners:3-dots-fade" width={18} /> Adding…</>
+                  : <><Icon icon="solar:cart-large-4-bold" width={18} /> Add to Cart</>
+                }
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="w-full py-2.5 border-2 border-primary text-primary rounded-lg font-semibold text-sm hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-2 active:scale-95"
+              >
+                <Icon icon="solar:bolt-bold" width={18} /> Buy Now
+              </button>
+            </div>
 
+          </div>
         </div>
       </div>
     </div>

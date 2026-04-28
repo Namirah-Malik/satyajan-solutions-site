@@ -1,4 +1,3 @@
-// src/app/api/payment/status/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 let phonePeClient: any = null;
@@ -7,7 +6,6 @@ let initializedEnv: string | undefined;
 async function getPhonePeClient() {
   const currentEnv = process.env.PHONEPE_ENV;
   if (phonePeClient && initializedEnv === currentEnv) return phonePeClient;
-
   try {
     const { StandardCheckoutClient, Env } = await import('pg-sdk-node');
     const env = currentEnv === 'PRODUCTION' ? Env.PRODUCTION : Env.SANDBOX;
