@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
+// ── CHANGES: Added `slug` field for SEO-friendly URLs ────────────────────────
 
 generator client {
   provider = "prisma-client-js"
@@ -19,8 +16,14 @@ model Product {
   SKU              String
   description      String
   price            Float
-  images           String[]   // Already supports multiple!
-  video            String?    // NEW: YouTube URL or Microtek video URL
+  images           String[]
+  video            String?
+
+  // ── NEW: SEO slug field ───────────────────────────────────────────────────
+  // Run `npx ts-node scripts/generate-slugs.ts` after adding this field
+  // Then run: npx prisma generate && npx prisma db push
+ slug             String?  @unique
+
   salient_features String[]
   features         String[]
   specifications   Json[]

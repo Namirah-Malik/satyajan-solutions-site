@@ -1,114 +1,118 @@
-/**
- * src/lib/page-metadata.ts
- * Per-page metadata exports — import into each page's server component
- */
+// lib/page-metadata.ts
+// Central place for all static page metadata.
+// Import whichever you need in each page.tsx
 
 import type { Metadata } from 'next';
 
-const domain = 'https://satyajan.com';
-const defaultOgImage = `${domain}/images/og-default.jpg`;
-
+// ── Homepage ──────────────────────────────────────────────────────────────────
 export const homeMetadata: Metadata = {
-  title: {
-    absolute: 'Satyajan Energy Solutions – Solar, Inverter & Battery in Hyderabad',
-  },
+  title: 'Buy Microtek Inverter, Battery & Solar in Hyderabad | Satyajan Energy Solutions',
   description:
-    'Authorised Microtek dealer in Hyderabad. Buy solar panels, inverters, UPS & batteries. Save up to 80% on electricity bills. Easy EMI. Free consultation. Call +91 8019179159.',
-  keywords: [
-    'solar panels Hyderabad', 'Microtek inverter Hyderabad', 'battery dealer Hyderabad',
-    'solar installation Hyderabad', 'power backup Hyderabad', 'UPS Hyderabad',
-    'satyajan energy solutions', 'solar company Telangana',
-  ],
-  alternates: { canonical: `${domain}/` },
+    'Shop Microtek inverters, tubular batteries, solar panels & online UPS at Satyajan Energy Solutions, Hyderabad. 101+ products. Best prices. Free delivery. EMI available. Call +91 8019179159.',
+  alternates: { canonical: 'https://satyajan.com' },
   openGraph: {
-    url: `${domain}/`,
-    title: 'Satyajan Energy Solutions – Solar, Inverter & Battery in Hyderabad',
-    description: 'Authorised Microtek dealer in Hyderabad. Solar panels, inverters, batteries & UPS. Easy EMI. Call +91 8019179159.',
-    images: [{ url: defaultOgImage, width: 1200, height: 630 }],
+    url:         'https://satyajan.com',
+    title:       'Buy Microtek Inverter, Battery & Solar in Hyderabad | Satyajan',
+    description: 'Shop Microtek inverters, tubular batteries, solar panels & UPS. 101+ products. Free delivery. EMI available.',
+    images: [{ url: 'https://satyajan.com/images/og-default.jpg', width: 1200, height: 630 }],
   },
 };
 
+// ── All Products page ─────────────────────────────────────────────────────────
 export const productsMetadata: Metadata = {
-  title: 'Solar Panels, Inverters & Batteries – Buy Online',
+  title: 'Shop All Power Backup Products | Inverters, Batteries, UPS & Solar | Satyajan',
   description:
-    'Shop Microtek solar panels, inverters, tubular batteries, UPS & lithium batteries in Hyderabad. Best prices, EMI available, doorstep delivery.',
-  keywords: [
-    'buy solar panels Hyderabad', 'Microtek inverter price', 'tubular battery Hyderabad',
-    'lithium battery India', 'UPS buy online', 'solar inverter combo',
-  ],
-  alternates: { canonical: `${domain}/products` },
+    'Browse 101+ Microtek products — pure sine wave inverters, tubular batteries, online UPS, solar panels & lithium batteries. Best prices in Hyderabad. Free delivery. EMI available.',
+  alternates: { canonical: 'https://satyajan.com/products' },
   openGraph: {
-    url: `${domain}/products`,
-    title: 'Solar Panels, Inverters & Batteries | Satyajan Energy Solutions',
-    description: 'Microtek solar panels, inverters, batteries & UPS at best prices. EMI available. Hyderabad delivery.',
-    images: [{ url: defaultOgImage, width: 1200, height: 630 }],
+    url:         'https://satyajan.com/products',
+    title:       'Shop All Power Backup Products | Satyajan Hyderabad',
+    description: 'Browse 101+ Microtek inverters, batteries, UPS & solar products. Best prices in Hyderabad.',
+    images: [{ url: 'https://satyajan.com/images/og-products.jpg', width: 1200, height: 630 }],
   },
 };
 
+// ── Category metadata map ─────────────────────────────────────────────────────
+// Use this in pages that render a specific category.
+export const categoryMetadata: Record<string, Metadata> = {
+  Inverter: {
+    title: 'Buy Microtek Inverters Online | Pure Sine Wave & Digital Wave | Satyajan Hyderabad',
+    description:
+      'Shop Microtek Smart Hybrid, Energy Saver, Heavy Duty, Luxe & iMerlyn inverters. 725VA–2000VA. Pure sine wave. 2–3 year warranty. Best price in Hyderabad.',
+    alternates: { canonical: 'https://satyajan.com/products?category=Inverter' },
+  },
+  Battery: {
+    title: 'Microtek Tubular Inverter Batteries | 130Ah–250Ah | Satyajan Hyderabad',
+    description:
+      'Buy Microtek Dura Long & Dura Strong tall tubular batteries. 130Ah to 250Ah. ADC technology. 48–60 month warranty. Free delivery in Hyderabad.',
+    alternates: { canonical: 'https://satyajan.com/products?category=Battery' },
+  },
+  'ONLINE UPS': {
+    title: 'Online UPS for Home & Office | 1KVA–6KVA | Satyajan Energy Solutions Hyderabad',
+    description:
+      'True double-conversion online UPS systems. 1KVA to 6KVA. DSP + IGBT technology. For computers, servers & sensitive equipment. Buy in Hyderabad.',
+    alternates: { canonical: 'https://satyajan.com/products?category=ONLINE+UPS' },
+  },
+  Solar: {
+    title: 'Solar Panels in Hyderabad | 550W Bi-Facial | Buy Online | Satyajan',
+    description:
+      'Buy 550W bi-facial solar panels in Hyderabad. Anti-reflective AR glass. Maximize energy generation. Reduce electricity bills by up to 80%. Free consultation.',
+    alternates: { canonical: 'https://satyajan.com/products?category=Solar' },
+  },
+  'High Capacity UPS': {
+    title: 'High Capacity Jumbo Home UPS | 2KVA–7KVA | Satyajan Hyderabad',
+    description:
+      'Microtek Jumbo Home UPS series. 2KVA to 7KVA. Pure sine wave. DSP/PWM technology. Ideal for offices, shops & large homes in Hyderabad.',
+    alternates: { canonical: 'https://satyajan.com/products?category=High+Capacity+UPS' },
+  },
+  'New Lithium Battery': {
+    title: 'Lithium LiFePO4 Batteries for Inverter | 100Ah | Satyajan Hyderabad',
+    description:
+      'Buy LiFePO4 lithium batteries for inverters. 100Ah / 25.6V. 3500+ cycles. 10+ year lifespan. Built-in BMS. Maintenance-free. Best price in Hyderabad.',
+    alternates: { canonical: 'https://satyajan.com/products?category=New+Lithium+Battery' },
+  },
+  Combo: {
+    title: 'Inverter + Battery Combo Deals | Best Price in Hyderabad | Satyajan',
+    description:
+      'Shop inverter and battery combo packs. Matched for optimal performance. Best prices in Hyderabad. Free installation consultation. EMI available.',
+    alternates: { canonical: 'https://satyajan.com/products?category=Combo' },
+  },
+};
 export const servicesMetadata: Metadata = {
-  title: 'Solar & Power Backup Services in Hyderabad',
+  title: 'Power Backup & Solar Services in Hyderabad | Satyajan',
   description:
-    'Professional solar installation, inverter repair, battery maintenance & 24/7 technical support in Hyderabad. Trusted by 1000+ customers. Call +91 8019179159.',
-  keywords: [
-    'solar installation Hyderabad', 'inverter repair Hyderabad', 'battery maintenance',
-    'solar panel maintenance', 'UPS installation', 'power backup service Hyderabad',
-  ],
-  alternates: { canonical: `${domain}/services` },
-  openGraph: {
-    url: `${domain}/services`,
-    title: 'Solar & Power Backup Services in Hyderabad | Satyajan',
-    description: 'Solar installation, inverter repair & battery maintenance in Hyderabad. Call +91 8019179159.',
-    images: [{ url: defaultOgImage, width: 1200, height: 630 }],
-  },
+    'Expert inverter installation, battery maintenance, solar panel setup & UPS services in Hyderabad. Trusted service by Satyajan Energy Solutions.',
+  alternates: { canonical: 'https://satyajan.com/services' },
 };
 
-export const blogsMetadata: Metadata = {
-  title: 'Solar & Energy Blog – Tips, Guides & Insights',
-  description:
-    'Expert articles on solar panels, inverters, batteries, power backup & energy savings for Indian homes and businesses. Stay informed with Satyajan.',
-  keywords: [
-    'solar energy blog India', 'inverter buying guide', 'battery tips India',
-    'power backup guide', 'solar savings', 'energy blog Hyderabad',
-  ],
-  alternates: { canonical: `${domain}/blogs` },
-  openGraph: {
-    url: `${domain}/blogs`,
-    title: 'Solar & Energy Blog | Satyajan Energy Solutions',
-    description: 'Tips, guides and expert insights on solar, inverters & batteries for Indian homes.',
-    images: [{ url: defaultOgImage, width: 1200, height: 630 }],
-  },
-};
 
+// ── Blog page ─────────────────────────────────────────────────────────────────
+export const blogMetadata: Metadata = {
+  title: 'Power Backup & Solar Energy Blog | Inverter, Battery & UPS Tips | Satyajan',
+  description:
+    'Expert articles on choosing the right inverter, extending battery life, solar installation in Hyderabad, UPS for office, and more. Free guides from Satyajan Energy Solutions.',
+  alternates: { canonical: 'https://satyajan.com/blog' },
+};
+// ── Careers page ──────────────────────────────────────────────────────────────
 export const careersMetadata: Metadata = {
-  title: 'Careers at Satyajan – Jobs in Solar & Energy | Hyderabad',
+  title: 'Careers at Satyajan Energy Solutions | Join Our Team',
   description:
-    'Join Satyajan Energy Solutions. We are hiring solar technicians, sales executives, engineers & more in Hyderabad. Apply now and power your career.',
-  keywords: [
-    'solar jobs Hyderabad', 'energy company jobs Telangana', 'solar technician job India',
-    'satyajan careers', 'jobs in solar industry',
-  ],
-  alternates: { canonical: `${domain}/careers` },
-  openGraph: {
-    url: `${domain}/careers`,
-    title: 'Careers at Satyajan Energy Solutions – Hyderabad',
-    description: 'Join our growing team. Solar technicians, engineers & sales roles in Hyderabad. Apply now.',
-    images: [{ url: defaultOgImage, width: 1200, height: 630 }],
-  },
+    'Explore job opportunities at Satyajan Energy Solutions in Hyderabad. Join our growing team in solar, inverter, and power backup solutions.',
+  alternates: { canonical: 'https://satyajan.com/careers' },
 };
 
-export const contactMetadata: Metadata = {
-  title: 'Contact Us – Satyajan Energy Solutions Hyderabad',
+// ── About page ────────────────────────────────────────────────────────────────
+export const aboutMetadata: Metadata = {
+  title: 'About Satyajan Energy Solutions | Authorised Microtek Dealer Hyderabad',
   description:
-    'Contact Satyajan Energy Solutions in Hyderabad. Call +91 8019179159 or WhatsApp us for solar, inverter & battery queries. Free consultation available.',
-  keywords: [
-    'contact satyajan', 'solar company contact Hyderabad', 'inverter dealer contact',
-    'energy solutions Hyderabad phone', 'satyajan WhatsApp',
-  ],
-  alternates: { canonical: `${domain}/contactus` },
-  openGraph: {
-    url: `${domain}/contactus`,
-    title: 'Contact Satyajan Energy Solutions – Hyderabad',
-    description: 'Call or WhatsApp +91 8019179159. Free solar & power backup consultation.',
-    images: [{ url: defaultOgImage, width: 1200, height: 630 }],
-  },
+    'Satyajan Energy Solutions is an authorised Microtek dealer in Hyderabad, Telangana. We specialise in solar panels, inverters, batteries, and power backup solutions.',
+  alternates: { canonical: 'https://satyajan.com/about' },
+};
+
+// ── Contact page ──────────────────────────────────────────────────────────────
+export const contactMetadata: Metadata = {
+  title: 'Contact Satyajan Energy Solutions | Karmanghat, Hyderabad | +91 8019179159',
+  description:
+    'Contact Satyajan Energy Solutions in Hyderabad. Visit our showroom at Green Lands Colony, Karmanghat. Call +91 8019179159 or email info@satyajan.com.',
+  alternates: { canonical: 'https://satyajan.com/contact' },
 };

@@ -27,7 +27,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const blog = existingBlogs.find((post) => post.slug === slug);
   const blogContent = blogDetailsContent.find((content) => content.id === blog?.id);
-  if (!blog || !blogContent) notFound();
+  if (!blog) notFound();
+const content = blogContent?.content || (blog as any).content || '<p>Content coming soon.</p>';
 
   return (
     <section className="min-h-screen bg-gray-50 pt-44">
@@ -64,8 +65,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
             <div
               className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:text-gray-700 prose-p:leading-7 prose-p:mb-4 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600 prose-a:hover:text-blue-700 prose-img:rounded-lg prose-img:my-8 prose-blockquote:border-l-4 prose-blockquote:border-blue-600 prose-blockquote:pl-4 prose-blockquote:italic"
-              dangerouslySetInnerHTML={{ __html: blogContent.content }}
-            />
+              dangerouslySetInnerHTML={{ __html: content }}
+
+/>
           </div>
           <div className="bg-gray-100 p-8 border-t border-gray-200">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Related Posts</h3>

@@ -1,24 +1,43 @@
-// 👋 No 'use client' here! This is a Server Component.
+import type { Metadata } from 'next';
+import HeroSub        from '@/components/shared/HeroSub';
+import ProductsClient from './ProductsClient';
+import { categoryMetadata, productsMetadata } from '@/lib/page-metadata';
 
-import HeroSub from "@/components/shared/HeroSub";
-import { productsMetadata } from '@/lib/page-metadata';
-import ProductsClient from "./ProductsClient"; // Import the client component
+export async function generateMetadata(
+  { searchParams }: { searchParams: Promise<{ category?: string }> }
+): Promise<Metadata> {
+  const { category } = await searchParams;
+  if (category && categoryMetadata[category]) {
+    return categoryMetadata[category];
+  }
+  return productsMetadata;
+}
 
-// ✅ Now you can export metadata correctly
-export const metadata = productsMetadata;
+const Page = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) => {
+  const { category } = await searchParams;
 
-const Page = () => {
-    return (
-        <>
-            <HeroSub
-                title="Discover Our Products."
-                description="Explore our exclusive range of products, crafted to deliver quality, innovation, and satisfaction for every need."
-                badge="Products"
-            />
-            {/* Render the client component */}
-            <ProductsClient />
-        </>
-    );
+  const heroTitle = category
+    ? `${category} Products`
+    : 'Discover Our Products.';
+
+  const heroDescription = category
+    ? `Browse our full range of ${category} products — best prices in Hyderabad with EMI available.`
+    : 'Explore 101+ Microtek inverters, batteries, solar panels & UPS — crafted for reliable power backup.';
+
+  return (
+    <>
+      <HeroSub
+        title={heroTitle}
+        description={heroDescription}
+        badge="Products"
+      />
+      <ProductsClient />
+    </>
+  );
 };
 
 export default Page;
