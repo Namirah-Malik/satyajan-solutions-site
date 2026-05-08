@@ -1,3 +1,5 @@
+// app/(site)/products/[slug]/page.tsx
+
 import type { Metadata } from 'next';
 import { notFound }      from 'next/navigation';
 import ProductDetailsClient from '@/components/ProductDetailsClient';
@@ -27,7 +29,7 @@ function generateSlug(name: string): string {
     .trim();
 }
 
-// ── MongoDB ObjectID validator — must be exactly 24 hex chars ─────────────────
+// ── MongoDB ObjectID validator ────────────────────────────────────────────────
 function isMongoId(str: string): boolean {
   return /^[a-f0-9]{24}$/i.test(str);
 }
@@ -37,8 +39,6 @@ async function fetchProduct(slug: string): Promise<any | null> {
   try {
     const db = await getPrisma();
     if (db) {
-      // Build OR conditions — only add { id: slug } if it's a real MongoDB ObjectID
-      // Passing a slug string as an ObjectID causes Prisma/MongoDB to throw
       const orConditions: any[] = [
         { slug },
         { slug: { contains: slug } },
@@ -46,7 +46,6 @@ async function fetchProduct(slug: string): Promise<any | null> {
       if (isMongoId(slug)) {
         orConditions.push({ id: slug });
       }
-
       const product = await db.product.findFirst({
         where: { OR: orConditions },
       });
@@ -56,7 +55,6 @@ async function fetchProduct(slug: string): Promise<any | null> {
     console.error('DB error:', e);
   }
 
-  // Mock fallback — match by id, slug field, or generated slug from name
   const mock = mockProducts.find((p: any) =>
     p.id === slug ||
     p.slug === slug ||
@@ -64,7 +62,6 @@ async function fetchProduct(slug: string): Promise<any | null> {
   );
   if (mock) return mock;
 
-  // Live API fallback
   try {
     const res = await fetch(`https://satyajan.com/api/products/${slug}`, {
       next: { revalidate: 3600 },
@@ -78,7 +75,7 @@ async function fetchProduct(slug: string): Promise<any | null> {
   return null;
 }
 
-// ── Unwrap proxy / Next.js image URLs → direct URL ────────────────────────────
+// ── Image URL extractor ───────────────────────────────────────────────────────
 function extractDirectImageUrl(img: any): string {
   if (!img) return '';
   let src =
@@ -86,10 +83,8 @@ function extractDirectImageUrl(img: any): string {
     img.src   ? img.src   :
     img.url   ? img.url   :
     img.image ? img.image : '';
-
   if (!src) return '';
   src = src.trim();
-
   if (src.includes('/api/image-proxy?url=')) {
     try { src = decodeURIComponent(src.split('/api/image-proxy?url=')[1].split('&')[0]); }
     catch { return ''; }
@@ -121,6 +116,95 @@ function cleanName(name: string): string {
     .replace(/\s*shareicon\s*/gi, '')
     .replace(/\s*wishlist\s*/gi, '')
     .trim();
+}
+
+// ── Auto-generate tags from product name + category ───────────────────────────
+function generateTags(product: any, name: string): string[] {
+  const tags: string[] = [];
+  const nameLower = name.toLowerCase();
+  const category  = (product.category || '').toLowerCase();
+
+  // Always add brand
+  tags.push('Microtek');
+
+  // ── Inverter tags ──────────────────────────────────────────────────────────
+  if (category === 'inverter') {
+    tags.push('inverter for home', 'power backup inverter', 'home inverter', 'microtek inverter');
+
+    if (nameLower.includes('pure sine wave'))  tags.push('pure sine wave inverter');
+    if (nameLower.includes('digital wave'))    tags.push('digital wave inverter');
+    if (nameLower.includes('smart hybrid'))    tags.push('smart hybrid inverter', 'hybrid ups');
+    if (nameLower.includes('heavy duty'))      tags.push('heavy duty inverter', 'heavy duty ups');
+    if (nameLower.includes('energy saver'))    tags.push('energy saver inverter');
+    if (nameLower.includes('luxe wifi') || nameLower.includes('wifi')) {
+      tags.push('wifi inverter', 'smart inverter', 'microtek luxe wifi', 'smart energy wall');
+    }
+    if (nameLower.includes('luxe'))            tags.push('microtek luxe inverter');
+    if (nameLower.includes('imerlyn'))         tags.push('microtek imerlyn', 'imerlyn inverter');
+    if (nameLower.includes('super power'))     tags.push('super power inverter');
+    if (nameLower.includes('jumbo') || nameLower.includes('jm sw')) {
+      tags.push('jumbo home ups', 'high capacity inverter', 'commercial inverter');
+    }
+    if (nameLower.includes('lithium') || nameLower.includes('i-lithium')) {
+      tags.push('lithium inverter', 'lithium ups', 'inverter with battery');
+    }
+  }
+
+  // ── Battery tags ───────────────────────────────────────────────────────────
+  if (category === 'battery') {
+    tags.push('inverter battery', 'tubular battery', 'battery for inverter', 'microtek battery');
+    if (nameLower.includes('tall tubular'))  tags.push('tall tubular battery');
+    if (nameLower.includes('jumbo tubular')) tags.push('jumbo tubular battery');
+    if (nameLower.includes('dura long'))     tags.push('microtek dura long');
+    if (nameLower.includes('dura strong'))   tags.push('microtek dura strong');
+    const ahMatch = nameLower.match(/(\d+)\s*ah/i);
+    if (ahMatch) tags.push(`${ahMatch[1]}ah battery`, `${ahMatch[1]}ah tubular battery`);
+  }
+
+  // ── Lithium battery tags ───────────────────────────────────────────────────
+  if (category === 'new lithium battery') {
+    tags.push('lithium battery', 'lifepo4 battery', 'lithium inverter battery',
+              'maintenance free battery', 'deep cycle battery', 'microtek lithium');
+    const ahMatch = nameLower.match(/(\d+)\s*ah/i);
+    if (ahMatch) tags.push(`${ahMatch[1]}ah lithium battery`);
+  }
+
+  // ── Online UPS tags ────────────────────────────────────────────────────────
+  if (category === 'online ups') {
+    tags.push('online ups', 'ups for computer', 'double conversion ups',
+              'ups for office', 'microtek ups');
+    const kvaMatch = nameLower.match(/(\d+\.?\d*)\s*kva/i);
+    if (kvaMatch) tags.push(`${kvaMatch[1]}kva ups`, `${kvaMatch[1]}kva online ups`);
+  }
+
+  // ── Solar tags ─────────────────────────────────────────────────────────────
+  if (category === 'solar') {
+    tags.push('solar panel', 'solar energy', 'bifacial solar panel',
+              'solar panel hyderabad', 'microtek solar');
+    const wMatch = nameLower.match(/(\d+)\s*watt/i) || nameLower.match(/(\d+)\s*w\b/i);
+    if (wMatch) tags.push(`${wMatch[1]}w solar panel`);
+  }
+
+  // ── High Capacity UPS tags ─────────────────────────────────────────────────
+  if (category === 'high capacity ups') {
+    tags.push('high capacity inverter', 'jumbo ups', 'commercial inverter',
+              'heavy load inverter', 'microtek jumbo ups');
+  }
+
+  // ── Combo tags ─────────────────────────────────────────────────────────────
+  if (category === 'combo' || category === 'combos') {
+    tags.push('inverter battery combo', 'inverter combo', 'power backup combo');
+  }
+
+  // ── Extract VA/W numbers from name ─────────────────────────────────────────
+  const vaMatch = nameLower.match(/(\d+)\s*va/i);
+  if (vaMatch) tags.push(`${vaMatch[1]}va inverter`);
+
+  // ── Location tags ──────────────────────────────────────────────────────────
+  tags.push('inverter hyderabad', 'buy inverter online', 'satyajan energy solutions');
+
+  // Deduplicate + limit to 14
+  return [...new Set(tags)].slice(0, 14);
 }
 
 // ── Build FAQs ────────────────────────────────────────────────────────────────
@@ -173,15 +257,15 @@ export async function generateMetadata(
 
   if (!product) {
     return {
-      title:  'Product Not Found | Satyajan',
+      title:  'Product Not Found | Satyajan Energy Solutions',
       robots: { index: false, follow: false },
     };
   }
 
   const name  = cleanName(product.name);
   const price = Number(product.price || product.rate || 0);
+  const title = `${name} – Price, Specs & Buy Online | Satyajan Energy Solutions`;
 
-  const title       = `${name} – Price, Specs & Buy Online | Satyajan | Satyajan Energy Solutions`;
   const description = product.description
     ? `${product.description.slice(0, 140)}… Buy online at Satyajan Energy Solutions, Hyderabad.`
     : `Buy ${name} at ₹${price.toLocaleString('en-IN')}. Best price in Hyderabad. EMI available. Free delivery. Call +91 8019179159.`;
@@ -190,6 +274,11 @@ export async function generateMetadata(
   const ogImage  = extractDirectImageUrl(rawFirst) || 'https://satyajan.com/images/og-default.jpg';
   const slug_id  = product.slug || generateSlug(product.name) || slug;
   const url      = `https://satyajan.com/products/${slug_id}`;
+
+  // Use DB tags if available, otherwise auto-generate for metadata keywords
+  const tags = (product.tags && product.tags.length > 0)
+    ? product.tags
+    : generateTags(product, name);
 
   return {
     title,
@@ -203,6 +292,7 @@ export async function generateMetadata(
       product.category || 'inverter battery',
       'microtek hyderabad',
       'satyajan energy solutions',
+      ...tags,
     ],
     alternates: { canonical: url },
     openGraph: {
@@ -243,6 +333,11 @@ export default async function Details(
 
   const productSlug = dbProduct.slug || generateSlug(dbProduct.name) || slug;
 
+  // Use DB tags if available, otherwise auto-generate
+  const tags: string[] = (dbProduct.tags && dbProduct.tags.length > 0)
+    ? dbProduct.tags
+    : generateTags(dbProduct, name);
+
   const product = {
     id:               slug,
     name,
@@ -258,6 +353,7 @@ export default async function Details(
     data:             Array.isArray(dbProduct.specifications) ? dbProduct.specifications.slice(0, 3) : [],
     video:            dbProduct.video || '',
     slug:             productSlug,
+    tags,             // ← pass tags to client
   };
 
   const formattedPrice = price
@@ -273,6 +369,7 @@ export default async function Details(
     image:       images.map((i) => i.src),
     sku:         product.SKU,
     brand:       { '@type': 'Brand', name: 'Microtek' },
+    keywords:    tags.join(', '),   // ← tags in schema
     seller: {
       '@type': 'Organization',
       name:    'Satyajan Energy Solutions',
@@ -291,6 +388,14 @@ export default async function Details(
         name:    'Satyajan Energy Solutions',
       },
     },
+    // Uncomment when you have real reviews:
+    // aggregateRating: {
+    //   '@type':      'AggregateRating',
+    //   ratingValue:  '4.5',
+    //   reviewCount:  '32',
+    //   bestRating:   '5',
+    //   worstRating:  '1',
+    // },
   };
 
   const faqs = buildFAQs(dbProduct, name, price);
