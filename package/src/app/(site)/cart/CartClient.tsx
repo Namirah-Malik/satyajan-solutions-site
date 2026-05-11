@@ -1,5 +1,4 @@
 'use client';
-// src/app/(site)/cart/CartClient.tsx
 
 import { useCart } from '@/context/CartContext';
 import { Icon } from '@iconify/react';
@@ -9,8 +8,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import PhonePeButton from '@/components/PhonePeButton';
 
 const WHATSAPP_NUMBER     = '918019179159';
-const COD_DISCOUNT_PCT    = 5;
-const ONLINE_DISCOUNT_PCT = 10;
+const COD_DISCOUNT_PCT    = 2.5;
+const ONLINE_DISCOUNT_PCT = 5;
 
 function inr(n: number) {
   return new Intl.NumberFormat('en-IN', {
@@ -346,9 +345,7 @@ export default function CartClient() {
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:calendar-check-fill" width={15} />
                     EMI
-                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5 ${paymentTab === 'emi' ? 'bg-yellow-400 text-gray-900' : 'bg-blue-500 text-white'}`}>
-                      0% Interest
-                    </span>
+                    
                   </button>
 
                   {/* Tab 3: COD */}
