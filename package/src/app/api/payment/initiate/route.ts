@@ -50,12 +50,10 @@ export async function POST(req: NextRequest) {
         ? 'https://satyajan.com'
         : 'http://localhost:3000');
 
-    const redirectUrl = `${baseUrl}/payment/status?orderId=${merchantOrderId}&method=online`;
+    const redirectUrl = `${baseUrl}/payment/status?orderId=${merchantOrderId}&method=${body.method || 'online'}`;
 
     const { StandardCheckoutPayRequest } = await import('pg-sdk-node');
 
-    // Build request — callbackUrl is not supported by pg-sdk-node builder types.
-    // Configure webhook URL in PhonePe merchant dashboard instead.
     const request = StandardCheckoutPayRequest.builder()
       .merchantOrderId(merchantOrderId)
       .amount(Math.round(amount * 100))

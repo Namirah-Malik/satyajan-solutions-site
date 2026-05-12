@@ -1,11 +1,4 @@
-/**
- * seo.config.ts
- * ─────────────────────────────────────────────────────────────
- * Single source of truth for all SEO defaults across the site.
- * Import from this file in every page's metadata export.
- *
- * Deploy to: src/lib/seo.config.ts
- */
+
 
 export const SEO = {
   siteName:    'Satyajan Energy Solutions',

@@ -4,9 +4,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Icon } from '@iconify/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, CheckCircle, Star, Send, MessageCircle, ChevronLeft, ChevronRight, Calculator, Award } from 'lucide-react'
+import { ArrowRight, CheckCircle, Star, Send, MessageCircle, ChevronLeft, ChevronRight, Calculator } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
-import { companyInfo, products, benefits, testimonials, faqs } from '@/mock/data'
+import { companyInfo, products, benefits, testimonials } from '@/mock/data'
 
 const categoryFilterMap: Record<string, string> = {
   'solar': 'Solar', 'inverter': 'Inverter', 'jumbo-ups': 'High Capacity UPS',
@@ -97,6 +97,35 @@ function StatCard({ value, label }: { value: string; label: string }) {
   )
 }
 
+function GoogleRatingBadge() {
+  return (
+    <a href="https://share.google/xEUrHKGcodkwsSfRF" target="_blank" rel="noopener noreferrer"
+      className="inline-flex items-center gap-2.5 bg-white border border-gray-200 rounded-full px-4 py-2 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 group w-fit">
+      <GoogleIcon size={16} />
+      <div className="flex items-center gap-0.5">
+        {[1,2,3,4,5].map((i) => (
+          <svg key={i} width="13" height="13" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              fill={i === 5 ? 'url(#halfStar)' : i <= 4 ? '#FBBF24' : '#E5E7EB'} />
+            {i === 5 && (
+              <defs>
+                <linearGradient id="halfStar" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="80%" stopColor="#FBBF24" /><stop offset="80%" stopColor="#E5E7EB" />
+                </linearGradient>
+              </defs>
+            )}
+          </svg>
+        ))}
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-sm font-extrabold text-gray-900">4.8</span>
+        <span className="text-xs text-gray-500 font-medium">· 150+ Reviews</span>
+      </div>
+      <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
+    </a>
+  )
+}
+
 const MARQUEE_ITEMS = ['Solar Panel Installation','Battery Replacement','Inverter Setup & Repair','Free Consultation','24/7 Support','Easy EMI Options','Pan-India Delivery','Free Installation','Microtek Authorized Partner']
 
 function MarqueeTicker() {
@@ -128,25 +157,16 @@ function HeroSlideshow() {
   return (
     <div className="relative w-full h-full min-h-[480px] lg:min-h-0 overflow-hidden bg-gradient-to-br from-emerald-50/40 to-gray-50/30">
       <AnimatePresence mode="wait">
-       <motion.div key={current}
-  initial={{ opacity: 0, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
-  transition={{ duration: 0.5, ease: 'easeInOut' }}
-  className="absolute inset-0 flex items-center justify-center p-3 sm:p-5">
-  <div className="w-full h-full flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-white/50 p-2 sm:p-3"
-  style={{ maxWidth: '96%', maxHeight: '94%' }}>
-<img
-  src={slide.src}
-  alt={slide.alt}
-  className="w-full h-full drop-shadow-md"
-  style={{ 
-    minHeight: '400px', 
-    maxHeight: '600px',
-    objectFit: slide.fit as 'cover' | 'contain',
-    objectPosition: 'center'
-  }}
-/>
-</div>
-</motion.div>
+        <motion.div key={current}
+          initial={{ opacity: 0, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          className="absolute inset-0 flex items-center justify-center p-3 sm:p-5">
+          <div className="w-full h-full flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-white/50 p-2 sm:p-3"
+            style={{ maxWidth: '96%', maxHeight: '94%' }}>
+            <img src={slide.src} alt={slide.alt} className="w-full h-full drop-shadow-md"
+              style={{ minHeight: '400px', maxHeight: '600px', objectFit: slide.fit as 'cover' | 'contain', objectPosition: 'center' }} />
+          </div>
+        </motion.div>
       </AnimatePresence>
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/70 backdrop-blur-md rounded-full px-3 py-2 shadow border border-white/50">
         <button onClick={prev} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
@@ -206,9 +226,119 @@ function TestimonialRow({ items, direction = 'left', speed = 40 }: { items: any[
   )
 }
 
+// ── Why Not Amazon comparison data ─────────────────────────────────────────────
+const COMPARISON_ROWS = [
+  { feature: 'Product Only',                amazon: true,  local: true,  us: true,  note: '' },
+  { feature: 'Expert Guidance',             amazon: false, local: false, us: true,  note: 'Experienced Team' },
+  { feature: 'Correct Product Sizing',      amazon: false, local: false, us: true,  note: '' },
+  { feature: 'Installation Support',        amazon: false, local: false, us: true,  note: '' },
+  { feature: 'Fast Local Delivery',         amazon: false, local: false, us: true,  note: 'Same / Next Day' },
+  { feature: 'Paperless Warranty',          amazon: false, local: false, us: true,  note: '' },
+  { feature: 'Warranty Claim Support',      amazon: false, local: false, us: true,  note: '' },
+  { feature: 'After-Sales Service',         amazon: false, local: false, us: true,  note: '' },
+  { feature: 'Direct Contact (Call/WhatsApp)', amazon: false, local: false, us: true, note: '' },
+]
+
+const Tick = () => (
+  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M2 7l3.5 3.5L12 3" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </span>
+)
+
+const Cross = () => (
+  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-red-50">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M2 2l8 8M10 2l-8 8" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  </span>
+)
+
+function WhyNotAmazonSection() {
+  return (
+    <section id="why-not-amazon" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto">
+
+        {/* Header */}
+        <div className="sr text-center mb-8 sm:mb-12">
+          <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full mb-4">
+            Why Choose Us?
+          </span>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
+            Why Not Just Buy from Amazon?
+          </h2>
+          <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto font-medium">
+            A product is just a box. We deliver expertise, installation, and long-term support — things Amazon simply cannot.
+          </p>
+        </div>
+
+        {/* Comparison table */}
+        <div className="sr overflow-x-auto rounded-2xl shadow-xl border border-gray-100">
+          <table className="w-full text-sm min-w-[560px]">
+            <thead>
+              <tr className="bg-gray-900 text-white">
+                <th className="text-left px-5 py-4 font-semibold text-sm rounded-tl-2xl">Feature</th>
+                <th className="text-center px-4 py-4 font-semibold text-sm">
+                  <span className="flex flex-col items-center gap-1">
+                    <span className="text-gray-400 text-xs">🛒</span>Amazon
+                  </span>
+                </th>
+                <th className="text-center px-4 py-4 font-semibold text-sm">
+                  <span className="flex flex-col items-center gap-1">
+                    <span className="text-gray-400 text-xs">🏪</span>Local Shop
+                  </span>
+                </th>
+                <th className="text-center px-5 py-4 font-bold text-sm bg-primary rounded-tr-2xl">
+                  <span className="flex flex-col items-center gap-1">
+                    <span className="text-white/80 text-xs">⚡</span>Satyajan Energy
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON_ROWS.map((row, i) => (
+                <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}>
+                  <td className="px-5 py-3.5 font-medium text-gray-800 text-sm">{row.feature}</td>
+                  <td className="px-4 py-3.5 text-center">
+                    {row.amazon ? <Tick /> : <Cross />}
+                  </td>
+                  <td className="px-4 py-3.5 text-center">
+                    {row.local ? <Tick /> : <Cross />}
+                  </td>
+                  <td className="px-5 py-3.5 text-center bg-primary/5">
+                    <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
+                      <Tick />
+                      {row.note && (
+                        <span className="text-[11px] text-primary font-semibold whitespace-nowrap">({row.note})</span>
+                      )}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="sr mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="https://wa.me/918019179159?text=Hi, I want expert guidance before buying"
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fba58] text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-[1.03]">
+            <Icon icon="mdi:whatsapp" width={18} /> Get Expert Advice — Free
+          </a>
+          <Link href="/products"
+            className="inline-flex items-center gap-2 border-2 border-primary text-primary px-6 py-3 rounded-full font-bold text-sm hover:bg-primary hover:text-white transition-all hover:scale-[1.03]">
+            Browse Products <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function HomePageClient() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' })
-  const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [contactErrors, setContactErrors] = useState({ name: '', email: '', phone: '', message: '' })
   const [contactTouched, setContactTouched] = useState({ name: false, email: false, phone: false, message: false })
   const [contactSuccess, setContactSuccess] = useState(false)
@@ -243,8 +373,6 @@ export default function HomePageClient() {
     setContactErrors({ name: '', email: '', phone: '', message: '' }); setContactTouched({ name: false, email: false, phone: false, message: false })
   }
 
-  const removedFaqs = ['How long do solar panels last?','Do you provide installation services?','What are the benefits of joining as a dealer?','Are the products covered under warranty?']
-  const visibleFaqs = faqs.filter((f: any) => !removedFaqs.includes(f.question))
   const allProducts = products.filter((p: any) => p.name !== 'Combos')
 
   const renderProductCard = (product: any) => (
@@ -274,7 +402,7 @@ export default function HomePageClient() {
   return (
     <main className="min-h-screen overflow-x-hidden">
 
-      {/* HERO */}
+      {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section id="hero" className="relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-gray-50">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute w-[500px] h-[500px] bg-primary/5 rounded-full -top-40 -left-40 blur-3xl" />
@@ -297,7 +425,7 @@ export default function HomePageClient() {
               Save up to 80% on electricity bills. 30-year warranty. Easy EMI options. Join 1000+ satisfied customers across India.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.65 }}
-              className="flex flex-col sm:flex-row gap-3 mb-10">
+              className="flex flex-col sm:flex-row gap-3 mb-8">
               <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                 className="inline-flex items-center justify-center gap-2 bg-primary text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-primary/90 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-sm">
                 Book Free Consultation <ArrowRight className="w-4 h-4" />
@@ -307,25 +435,27 @@ export default function HomePageClient() {
                 <Calculator className="w-4 h-4 text-primary" /> Calculate Savings
               </Link>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.8 }}
-              className="flex items-center gap-5 sm:gap-8 pt-4 border-t border-gray-100">
 
+            {/* Google Rating Badge */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.75 }} className="mb-8">
+              <GoogleRatingBadge />
+            </motion.div>
+
+            {/* Stat cards */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.85 }}
+              className="flex items-center gap-5 sm:gap-8 pt-4 border-t border-gray-100">
               <StatCard value="1000+" label="Happy Customers" />
               <div className="w-px h-10 bg-gray-200" />
               <StatCard value="30 Yrs" label="Warranty" />
               <div className="w-px h-10 bg-gray-200" />
               <StatCard value="80%" label="Bill Savings" />
             </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 1.0 }}
-              className="flex flex-wrap items-center gap-2 mt-5">
-              
-            </motion.div>
           </div>
-          {/* RIGHT */}
+
+          {/* RIGHT: Slideshow */}
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-          className="relative bg-gradient-to-br from-gray-50 to-emerald-50/30 lg:border-l border-gray-100 min-h-[500px] lg:min-h-0">
+            className="relative bg-gradient-to-br from-gray-50 to-emerald-50/30 lg:border-l border-gray-100 min-h-[500px] lg:min-h-0">
             <HeroSlideshow />
-          
           </motion.div>
         </div>
         <MarqueeTicker />
@@ -391,6 +521,9 @@ export default function HomePageClient() {
         </div>
       </section>
 
+      {/* ── WHY NOT AMAZON — replaces FAQ ─────────────────────────────────────── */}
+      <WhyNotAmazonSection />
+
       {/* TESTIMONIALS */}
       <section id="testimonials" className="py-10 sm:py-14 md:py-20 bg-gradient-to-b from-yellow-50/60 to-white overflow-hidden">
         <WavyDivider flip />
@@ -411,38 +544,6 @@ export default function HomePageClient() {
             className="flex items-center gap-2 text-xs text-gray-500 hover:text-orange-600 transition-colors border border-gray-200 rounded-full px-4 py-2 bg-white shadow-sm hover:shadow-md">
             <IndiaMART_Icon size={14} /> View all IndiaMART Reviews
           </a>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="sr mb-6 sm:mb-8 md:mb-10">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-1 sm:mb-2 tracking-tight">Frequently Asked Questions</h2>
-          <p className="text-xs sm:text-sm md:text-base text-gray-600 max-w-3xl font-medium">Everything you need to know about our products and services.</p>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 items-start">
-          <div className="space-y-2 sm:space-y-3">
-            {visibleFaqs.map((f: any, i: number) => (
-              <div key={i} className="sr bg-white/60 backdrop-blur-lg rounded-xl sm:rounded-2xl border border-white/40 shadow-md overflow-hidden hover:border-emerald-200 transition-colors duration-300">
-                <button type="button" onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-4 text-left">
-                  <span className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base leading-snug">{f.question}</span>
-                  <span className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-colors duration-200 ${openFaq === i ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
-                    <Icon icon={openFaq === i ? 'ph:minus-bold' : 'ph:plus-bold'} width={12} />
-                  </span>
-                </button>
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${openFaq === i ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <p className="px-4 sm:px-5 pb-3 sm:pb-4 text-gray-600 text-xs sm:text-sm leading-relaxed font-medium border-t border-gray-100 pt-2">{f.answer}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="hidden lg:block sticky top-24 sr">
-            <div className="rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-white/30 hover:scale-[1.02] transition-transform duration-500">
-              <img src="/images/faqs/homeimagefaq.jpeg" alt="FAQ illustration" className="w-full h-full object-cover"
-                style={{ maxHeight: `${visibleFaqs.length * 68}px`, minHeight: '320px' }} />
-            </div>
-          </div>
         </div>
       </section>
 
@@ -486,7 +587,7 @@ export default function HomePageClient() {
               <h4 className="text-base sm:text-lg md:text-2xl font-bold text-emerald-800 mb-1 tracking-tight">Send Us a Message</h4>
               <p className="text-xs md:text-sm text-gray-600 mb-3 sm:mb-4 md:mb-6 font-medium">We&apos;ll get back to you within 24 hours.</p>
               {contactSuccess && (
-                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-emerald-700 text-xs sm:text-sm font-medium animate-fade-in">
+                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-emerald-700 text-xs sm:text-sm font-medium">
                   <CheckCircle className="w-4 h-4 flex-shrink-0" /> Message sent! We&apos;ll get back to you soon.
                 </div>
               )}
