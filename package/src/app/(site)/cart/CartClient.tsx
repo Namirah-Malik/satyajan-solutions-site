@@ -287,43 +287,7 @@ export default function CartClient() {
             <div className="bg-white border border-gray-200 rounded-2xl p-6 sticky top-24 space-y-5">
               <h2 className="text-xl font-bold text-dark">Order Summary</h2>
 
-              {/* ── Coupon ── */}
-              <div>
-                <label className="block text-sm font-semibold text-dark mb-2">Coupon Code</label>
-                {appliedCoupon ? (
-                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
-                    <div className="flex items-center gap-2">
-                      <Icon icon="mdi:check-circle" width={18} className="text-green-600" />
-                      <span className="text-sm font-semibold text-green-800">{appliedCoupon} applied</span>
-                    </div>
-                    <button onClick={handleRemoveCoupon} className="text-red-500 text-xs hover:text-red-700 font-medium">Remove</button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
-                      placeholder="Enter code" onKeyPress={(e) => e.key === 'Enter' && handleApplyCoupon()}
-                      className="flex-1 px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-                    <button onClick={handleApplyCoupon} className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-dark transition-colors">Apply</button>
-                  </div>
-                )}
-                <button
-                  onClick={() => {
-                    const itemLines = activeItems.map((item, i) =>
-                      `${i + 1}. *${item.name}*\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`
-                    ).join('\n\n');
-                    const message = ['🛒 *Satyajan Energy Solutions*', '━━━━━━━━━━━━━━━━━━━━━━━', itemLines,
-                      '━━━━━━━━━━━━━━━━━━━━━━━', `   *Cart Total: ${inr(subtotal)}*`,
-                      customerName ? `👤 ${customerName}` : '', customerPhone ? `📞 +91${customerPhone}` : '',
-                      '\n🙏 Hi! I\'d like an extra discount. Please assist.'].filter(Boolean).join('\n');
-                    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
-                  }}
-                  className="mt-2.5 w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/40 text-[#128C7E] rounded-xl text-xs font-bold transition-all"
-                >
-                  <Icon icon="mdi:whatsapp" width={15} className="text-[#25D366]" />
-                  Chat for Extra Discount on WhatsApp
-                </button>
-                <p className="text-[10px] text-gray-400 mt-1 text-center">Talk to us directly — we&apos;ll give you the best price!</p>
-              </div>
+              
 
               {/* ── 3 Payment Method Tabs ── */}
               <div>

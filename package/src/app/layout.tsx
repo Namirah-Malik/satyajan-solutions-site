@@ -73,11 +73,14 @@ export const metadata: Metadata = {
     },
   },
 
-  icons: {
-    icon:  '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
-  manifest: '/site.webmanifest',
+ icons: {
+  icon:  [
+    { url: '/favicon.ico' },
+    { url: '/web-app-manifest-192x192.png', sizes: '192x192', type: 'image/png' },
+  ],
+  apple: '/apple-touch-icon.png',
+},
+manifest: '/site.webmanifest',
 
   verification: {
     google: 'DuItGjg2FPhjS2UzApHHpW7H28gAQBZrvYOHoDaxzLk',
