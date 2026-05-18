@@ -19,6 +19,16 @@ declare global {
 
 const CACHE_TTL = 5 * 60 * 1000;
 
+// ── Sort options ──────────────────────────────────────────────────────────────
+type SortOption = 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
+
+const SORT_OPTIONS: { value: SortOption; label: string; icon: string }[] = [
+  { value: 'price-asc',  label: 'Price: Low to High', icon: 'ph:sort-ascending-fill'  },
+  { value: 'price-desc', label: 'Price: High to Low', icon: 'ph:sort-descending-fill' },
+  { value: 'name-asc',   label: 'Name: A to Z',       icon: 'ph:text-aa-fill'         },
+  { value: 'name-desc',  label: 'Name: Z to A',        icon: 'ph:text-aa-fill'         },
+];
+
 const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
   <div className={`bg-white/40 backdrop-blur-lg rounded-3xl shadow-xl border border-white/30 transition-all duration-300 hover:shadow-2xl ${className}`}>
     {children}
@@ -43,26 +53,19 @@ const SkeletonGrid = () => (
   </div>
 );
 
-// ── Get a clean direct image URL — NO proxy wrapping ──────────────────────────
+// ── Get a clean direct image URL ──────────────────────────────────────────────
 function getDirectImageUrl(img: any): string {
   if (!img) return '';
-
   let src =
     typeof img === 'string' ? img :
     img.src   ? img.src   :
     img.url   ? img.url   :
     img.image ? img.image : '';
-
   if (!src) return '';
-
-  // Unwrap /api/image-proxy?url=... if it somehow got stored
   if (src.includes('/api/image-proxy?url=')) {
-    try {
-      src = decodeURIComponent(src.split('/api/image-proxy?url=')[1].split('&')[0]);
-    } catch { return ''; }
+    try { src = decodeURIComponent(src.split('/api/image-proxy?url=')[1].split('&')[0]); }
+    catch { return ''; }
   }
-
-  // Unwrap /_next/image?url=...
   if (src.includes('/_next/image')) {
     try {
       const u = new URL(src.startsWith('http') ? src : `https://x.com${src}`);
@@ -71,29 +74,18 @@ function getDirectImageUrl(img: any): string {
       else return '';
     } catch { return ''; }
   }
-
-  // Fix protocol-relative
   if (src.startsWith('//'))    src = `https:${src}`;
   if (src.startsWith('/http')) src = src.replace(/^\//, '');
-
-  // Must be absolute http URL
   if (!src.startsWith('http://') && !src.startsWith('https://')) return '';
-
-  return src; // ← return the direct URL, no proxy
+  return src;
 }
 
 // ── Normalize product from API ────────────────────────────────────────────────
 function normalizeProduct(raw: any): PropertyHomes {
   const rawImages: any[] = Array.isArray(raw.images) ? raw.images : [];
-
-  // Build clean { src } array — direct URLs only, NO proxy
   const images = rawImages
-    .map((img: any) => {
-      const src = getDirectImageUrl(img);
-      return src ? { src } : null;
-    })
+    .map((img: any) => { const src = getDirectImageUrl(img); return src ? { src } : null; })
     .filter(Boolean) as { src: string }[];
-
   const slug = raw.slug || raw.id || '';
   const rate = raw.rate ?? raw.price ?? 0;
   const name = (raw.name || '')
@@ -101,7 +93,6 @@ function normalizeProduct(raw: any): PropertyHomes {
     .replace(/\s*shareicon\s*/gi, '')
     .replace(/\s*wishlist\s*/gi, '')
     .trim();
-
   return { ...raw, slug, rate, images, name, category: raw.category || '', description: raw.description || '' };
 }
 
@@ -138,6 +129,59 @@ function sortCategories(allCats: string[]): string[] {
   ];
 }
 
+// ── Sort Dropdown Component ───────────────────────────────────────────────────
+function SortDropdown({
+  value,
+  onChange,
+  count,
+}: {
+  value: SortOption;
+  onChange: (v: SortOption) => void;
+  count: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const current = SORT_OPTIONS.find(o => o.value === value)!;
+
+  return (
+    <div className="relative flex-shrink-0">
+      <button
+        onClick={() => setOpen(p => !p)}
+        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-primary hover:text-primary transition-all shadow-sm whitespace-nowrap"
+      >
+        <Icon icon={current.icon} width={16} className="text-primary" />
+        <span className="hidden sm:inline">{current.label}</span>
+        <span className="sm:hidden">Sort</span>
+        <Icon icon={open ? 'ph:caret-up-bold' : 'ph:caret-down-bold'} width={12} className="text-gray-400" />
+      </button>
+
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          {/* Dropdown */}
+          <div className="absolute right-0 top-full mt-2 z-20 bg-white border border-gray-200 rounded-2xl shadow-xl py-1.5 min-w-[200px]">
+            {SORT_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors ${
+                  value === opt.value
+                    ? 'bg-primary/5 text-primary font-semibold'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Icon icon={opt.icon} width={15} className={value === opt.value ? 'text-primary' : 'text-gray-400'} />
+                {opt.label}
+                {value === opt.value && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 const ProductsContent = () => {
   const searchParams = useSearchParams();
@@ -148,6 +192,8 @@ const ProductsContent = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState<string>('all');
+  // ✅ Default sort: Price Low to High
+  const [sort, setSort] = useState<SortOption>('price-asc');
 
   useEffect(() => {
     if (urlCategory) setFilter(urlCategory);
@@ -161,7 +207,6 @@ const ProductsContent = () => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
-
       if (window.__productCache && Date.now() - window.__productCache.ts < CACHE_TTL) {
         const cached = window.__productCache.products;
         if (!cancelled) {
@@ -173,7 +218,6 @@ const ProductsContent = () => {
         }
         return;
       }
-
       try {
         const res        = await fetch('/api/products');
         const data       = await res.json();
@@ -195,53 +239,87 @@ const ProductsContent = () => {
     return () => { cancelled = true; };
   }, []);
 
+  // ✅ Filter + Sort combined
   const filtered = useMemo(() => {
-    if (filter === 'all') return products;
-    return products.filter(p => p.category === filter);
-  }, [products, filter]);
+    let list = filter === 'all' ? products : products.filter(p => p.category === filter);
+
+    switch (sort) {
+      case 'price-asc':
+        list = [...list].sort((a, b) => (Number(a.rate) || 0) - (Number(b.rate) || 0));
+        break;
+      case 'price-desc':
+        list = [...list].sort((a, b) => (Number(b.rate) || 0) - (Number(a.rate) || 0));
+        break;
+      case 'name-asc':
+        list = [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        break;
+      case 'name-desc':
+        list = [...list].sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+        break;
+    }
+    return list;
+  }, [products, filter, sort]);
 
   return (
     <main className="min-h-screen">
       <section className="px-3 sm:px-4 max-w-7xl mx-auto pb-12">
 
-        {/* Filter tabs */}
+        {/* ── Filter tabs + Sort dropdown ── */}
         <GlassCard className="p-3 sm:p-4 mb-6 sm:mb-8">
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x">
-            {loading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-9 w-24 rounded-full bg-gray-100 animate-pulse flex-shrink-0" />
-              ))
-            ) : (
-              [{ label: 'All Products', value: 'all' }, ...categories.map(cat => ({ label: cat, value: cat }))].map((f) => (
-                <button key={f.value} onClick={() => setFilter(f.value)} type="button"
-                  className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 whitespace-nowrap flex-shrink-0 snap-start ${
-                    filter === f.value
-                      ? 'bg-primary text-white shadow-md'
-                      : 'bg-white/60 text-gray-700 hover:bg-primary/10 hover:text-primary border border-white/40'
-                  }`}>
-                  {f.label}
-                </button>
-              ))
+          <div className="flex items-center gap-3">
+
+            {/* Category filter chips — scrollable */}
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x flex-1 min-w-0">
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-9 w-24 rounded-full bg-gray-100 animate-pulse flex-shrink-0" />
+                ))
+              ) : (
+                [{ label: 'All Products', value: 'all' }, ...categories.map(cat => ({ label: cat, value: cat }))].map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => setFilter(f.value)}
+                    type="button"
+                    className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 whitespace-nowrap flex-shrink-0 snap-start ${
+                      filter === f.value
+                        ? 'bg-primary text-white shadow-md'
+                        : 'bg-white/60 text-gray-700 hover:bg-primary/10 hover:text-primary border border-white/40'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))
+              )}
+            </div>
+
+            {/* ✅ Sort dropdown — right side */}
+            {!loading && (
+              <SortDropdown value={sort} onChange={setSort} count={filtered.length} />
             )}
           </div>
         </GlassCard>
 
         {/* Heading */}
-        <div className="mb-5 sm:mb-8">
+        <div className="mb-5 sm:mb-8 flex items-center justify-between gap-4">
           {loading ? (
             <div className="space-y-2">
               <div className="h-8 bg-gray-100 rounded-full w-48 animate-pulse" />
               <div className="h-4 bg-gray-100 rounded-full w-32 animate-pulse" />
             </div>
           ) : (
-            <>
+            <div>
               <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900 mb-1 sm:mb-2 tracking-tight">
                 {filter === 'all' ? 'All Products' : filter}
               </h2>
               <p className="text-xs sm:text-lg text-gray-600 font-medium">
                 {filtered.length} product{filtered.length !== 1 ? 's' : ''} available
+                {sort === 'price-asc' && (
+                  <span className="ml-2 text-xs text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded-full">
+                    Price: Low to High
+                  </span>
+                )}
               </p>
-            </>
+            </div>
           )}
         </div>
 

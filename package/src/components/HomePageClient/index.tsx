@@ -227,16 +227,25 @@ function TestimonialRow({ items, direction = 'left', speed = 40 }: { items: any[
 }
 
 // ── Why Not Amazon comparison data ─────────────────────────────────────────────
-const COMPARISON_ROWS = [
-  { feature: 'Product Only',                amazon: true,  local: true,  us: true,  note: '' },
-  { feature: 'Expert Guidance',             amazon: false, local: false, us: true,  note: 'Experienced Team' },
-  { feature: 'Correct Product Sizing',      amazon: false, local: false, us: true,  note: '' },
-  { feature: 'Installation Support',        amazon: false, local: false, us: true,  note: '' },
-  { feature: 'Fast Local Delivery',         amazon: false, local: false, us: true,  note: 'Same / Next Day' },
-  { feature: 'Paperless Warranty',          amazon: false, local: false, us: true,  note: '' },
-  { feature: 'Warranty Claim Support',      amazon: false, local: false, us: true,  note: '' },
-  { feature: 'After-Sales Service',         amazon: false, local: false, us: true,  note: '' },
-  { feature: 'Direct Contact (Call/WhatsApp)', amazon: false, local: false, us: true, note: '' },
+type CellValue = true | false | string
+
+interface ComparisonRow {
+  feature: string
+  online: CellValue
+  local: CellValue
+  us: CellValue
+}
+
+const COMPARISON_ROWS: ComparisonRow[] = [
+  { feature: 'Product Availability',                  online: true,            local: true,                   us: true },
+  { feature: 'Expert Guidance',                       online: 'Limited',       local: 'Depends on Seller',    us: 'Experienced Team' },
+  { feature: 'Proper Product Recommendation',         online: 'Limited',       local: 'Depends on Seller',    us: true },
+  { feature: 'Installation Support',                  online: 'Limited',       local: 'Depends on Seller',    us: true },
+  { feature: 'Fast Delivery',                         online: 'Depends on Location', local: 'Limited',        us: 'Same / Next Day' },
+  { feature: 'Paperless Warranty Support',            online: 'Limited',       local: 'Depends on Seller',    us: true },
+  { feature: 'Warranty Claim Assistance',             online: 'Limited',       local: 'Depends on Seller',    us: true },
+  { feature: 'After-Sales Service',                   online: 'Limited',       local: 'Limited',              us: true },
+  { feature: 'Direct Expert Support (Call/WhatsApp)', online: 'Usually Not Available', local: 'Limited',      us: true },
 ]
 
 const Tick = () => (
@@ -255,6 +264,22 @@ const Cross = () => (
   </span>
 )
 
+function CellContent({ value }: { value: CellValue }) {
+  if (value === true)  return <Tick />
+  if (value === false) return <Cross />
+  return <span className="text-xs text-gray-500 font-medium">{value}</span>
+}
+
+function UsCellContent({ value }: { value: CellValue }) {
+  if (value === true) return <Tick />
+  return (
+    <span className="inline-flex items-center gap-1.5 flex-wrap justify-center">
+      <Tick />
+      <span className="text-[11px] text-primary font-semibold whitespace-nowrap">({value})</span>
+    </span>
+  )
+}
+
 function WhyNotAmazonSection() {
   return (
     <section id="why-not-amazon" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6">
@@ -269,24 +294,24 @@ function WhyNotAmazonSection() {
             Why Not Just Buy from Amazon?
           </h2>
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto font-medium">
-            A product is just a box. We deliver expertise, installation, and long-term support — things Amazon simply cannot.
+            A product is just a box. We deliver expertise, installation, and long-term support — things online platforms simply cannot.
           </p>
         </div>
 
         {/* Comparison table */}
         <div className="sr overflow-x-auto rounded-2xl shadow-xl border border-gray-100">
-          <table className="w-full text-sm min-w-[560px]">
+          <table className="w-full text-sm min-w-[580px]">
             <thead>
               <tr className="bg-gray-900 text-white">
                 <th className="text-left px-5 py-4 font-semibold text-sm rounded-tl-2xl">Feature</th>
                 <th className="text-center px-4 py-4 font-semibold text-sm">
                   <span className="flex flex-col items-center gap-1">
-                    <span className="text-gray-400 text-xs">🛒</span>Amazon
+                    <span className="text-gray-400 text-xs">🛒</span>Online Platforms
                   </span>
                 </th>
                 <th className="text-center px-4 py-4 font-semibold text-sm">
                   <span className="flex flex-col items-center gap-1">
-                    <span className="text-gray-400 text-xs">🏪</span>Local Shop
+                    <span className="text-gray-400 text-xs">🏪</span>Local Sellers
                   </span>
                 </th>
                 <th className="text-center px-5 py-4 font-bold text-sm bg-primary rounded-tr-2xl">
@@ -300,20 +325,9 @@ function WhyNotAmazonSection() {
               {COMPARISON_ROWS.map((row, i) => (
                 <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}>
                   <td className="px-5 py-3.5 font-medium text-gray-800 text-sm">{row.feature}</td>
-                  <td className="px-4 py-3.5 text-center">
-                    {row.amazon ? <Tick /> : <Cross />}
-                  </td>
-                  <td className="px-4 py-3.5 text-center">
-                    {row.local ? <Tick /> : <Cross />}
-                  </td>
-                  <td className="px-5 py-3.5 text-center bg-primary/5">
-                    <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
-                      <Tick />
-                      {row.note && (
-                        <span className="text-[11px] text-primary font-semibold whitespace-nowrap">({row.note})</span>
-                      )}
-                    </span>
-                  </td>
+                  <td className="px-4 py-3.5 text-center"><CellContent value={row.online} /></td>
+                  <td className="px-4 py-3.5 text-center"><CellContent value={row.local} /></td>
+                  <td className="px-5 py-3.5 text-center bg-primary/5"><UsCellContent value={row.us} /></td>
                 </tr>
               ))}
             </tbody>

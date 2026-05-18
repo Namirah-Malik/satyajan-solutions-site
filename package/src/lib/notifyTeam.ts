@@ -1,7 +1,6 @@
 // src/lib/notifyTeam.ts
-import { Resend } from 'resend';
+// Resend initialized lazily inside function — prevents build-time crash
 
-const resend  = new Resend(process.env.RESEND_API_KEY);
 const TEAM_EMAIL = process.env.TEAM_EMAIL || 'info@satyajan.com';
 
 function inr(n: number) {
@@ -27,6 +26,15 @@ export interface NotifyOrderPayload {
 
 export async function notifyTeamWhatsApp(order: NotifyOrderPayload): Promise<void> {
   try {
+    // ✅ Lazy init — only runs at request time, not build time
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.warn('[Email Notify] RESEND_API_KEY not set — skipping email');
+      return;
+    }
+    const { Resend } = await import('resend');
+    const resend = new Resend(apiKey);
+
     const isOnline = order.method === 'online';
 
     const itemRows = order.items.map((item, i) => `
