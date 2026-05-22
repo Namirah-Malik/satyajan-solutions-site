@@ -1,21 +1,15 @@
-// src/app/api/payment/initiate/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 
-// Singleton — reset if env changes between deploys
 let phonePeClient: any = null;
 let initializedEnv: string | undefined;
 
 async function getPhonePeClient() {
   const currentEnv = process.env.PHONEPE_ENV;
-
-  // Re-init if env changed (e.g. sandbox → production)
   if (phonePeClient && initializedEnv === currentEnv) return phonePeClient;
 
   try {
     const { StandardCheckoutClient, Env } = await import('pg-sdk-node');
-
-    // PRODUCTION uses Env.PRODUCTION, everything else is SANDBOX
     const env = currentEnv === 'PRODUCTION' ? Env.PRODUCTION : Env.SANDBOX;
 
     phonePeClient = StandardCheckoutClient.getInstance(
@@ -56,15 +50,16 @@ export async function POST(req: NextRequest) {
         ? 'https://satyajan.com'
         : 'http://localhost:3000');
 
-    const redirectUrl = `${baseUrl}/payment/status?orderId=${merchantOrderId}&method=online`;
+    const redirectUrl = `${baseUrl}/payment/status?orderId=${merchantOrderId}&method=${body.method || 'online'}`;
 
     const { StandardCheckoutPayRequest } = await import('pg-sdk-node');
+
     const request = StandardCheckoutPayRequest.builder()
       .merchantOrderId(merchantOrderId)
-      .amount(Math.round(amount * 100)) // paise
+      .amount(Math.round(amount * 100))
       .redirectUrl(redirectUrl)
       .build();
- 
+
     const response = await client.pay(request);
 
     return NextResponse.json({

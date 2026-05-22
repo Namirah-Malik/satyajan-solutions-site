@@ -51,9 +51,15 @@ const Footer = () => {
                 <span className="text-primary text-sm font-medium">Energy Solutions</span>
               </h3>
             </div>
-            <p className="text-white/70 text-sm leading-relaxed">
-              Your trusted partner for solar solutions, power backup systems, and battery management across India.
-            </p>
+           <p className="text-white/70 text-sm leading-relaxed">
+  Your trusted partner for solar solutions, power backup systems, and battery management across India.
+</p>
+<div className="mt-3 flex items-center gap-2">
+  <Icon icon="fa-solid:certificate" className="text-primary shrink-0" width={12} />
+  <span className="text-white/50 text-xs">
+    GST: <span className="text-white/70 font-medium tracking-wide">36ABGCS0416A1ZX</span>
+  </span>
+</div>
           </div>
 
           {/* Quick Links */}

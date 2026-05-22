@@ -1,8 +1,8 @@
 import Blog from "@/components/Blog";
 import React from "react";
 
-import { blogsMetadata } from '@/lib/page-metadata';
-export const metadata = blogsMetadata;
+import { blogMetadata } from '@/lib/page-metadata';
+export const metadata = blogMetadata;
 
 interface PageProps {
   searchParams: { category?: string };
