@@ -107,13 +107,7 @@ function GoogleRatingBadge() {
           <svg key={i} width="13" height="13" viewBox="0 0 24 24">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
               fill={i === 5 ? 'url(#halfStar)' : i <= 4 ? '#FBBF24' : '#E5E7EB'} />
-            {i === 5 && (
-              <defs>
-                <linearGradient id="halfStar" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="80%" stopColor="#FBBF24" /><stop offset="80%" stopColor="#E5E7EB" />
-                </linearGradient>
-              </defs>
-            )}
+            {i === 5 && (<defs><linearGradient id="halfStar" x1="0" x2="1" y1="0" y2="0"><stop offset="80%" stopColor="#FBBF24" /><stop offset="80%" stopColor="#E5E7EB" /></linearGradient></defs>)}
           </svg>
         ))}
       </div>
@@ -169,18 +163,11 @@ function HeroSlideshow() {
         </motion.div>
       </AnimatePresence>
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/70 backdrop-blur-md rounded-full px-3 py-2 shadow border border-white/50">
-        <button onClick={prev} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-          <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
-        </button>
+        <button onClick={prev} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"><ChevronLeft className="w-3.5 h-3.5 text-gray-600" /></button>
         <div className="flex items-center gap-1.5">
-          {SLIDES.map((_, i) => (
-            <button key={i} onClick={() => setCurrent(i)}
-              className={`rounded-full transition-all duration-300 h-1.5 ${i === current ? 'w-5 bg-primary' : 'w-1.5 bg-gray-300 hover:bg-gray-400'}`} />
-          ))}
+          {SLIDES.map((_, i) => (<button key={i} onClick={() => setCurrent(i)} className={`rounded-full transition-all duration-300 h-1.5 ${i === current ? 'w-5 bg-primary' : 'w-1.5 bg-gray-300 hover:bg-gray-400'}`} />))}
         </div>
-        <button onClick={next} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-          <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
-        </button>
+        <button onClick={next} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"><ChevronRight className="w-3.5 h-3.5 text-gray-600" /></button>
       </div>
     </div>
   )
@@ -226,75 +213,62 @@ function TestimonialRow({ items, direction = 'left', speed = 40 }: { items: any[
   )
 }
 
-// ── Why Not Amazon comparison data ─────────────────────────────────────────────
+// ── Comparison data ────────────────────────────────────────────────────────────
 type CellValue = true | false | string
-
-interface ComparisonRow {
-  feature: string
-  online: CellValue
-  local: CellValue
-  us: CellValue
-}
+interface ComparisonRow { feature: string; online: CellValue; local: CellValue; us: CellValue }
 
 const COMPARISON_ROWS: ComparisonRow[] = [
-  { feature: 'Product Availability',                  online: true,            local: true,                   us: true },
-  { feature: 'Expert Guidance',                       online: 'Limited',       local: 'Depends on Seller',    us: 'Experienced Team' },
-  { feature: 'Proper Product Recommendation',         online: 'Limited',       local: 'Depends on Seller',    us: true },
-  { feature: 'Installation Support',                  online: 'Limited',       local: 'Depends on Seller',    us: true },
-  { feature: 'Fast Delivery',                         online: 'Depends on Location', local: 'Limited',        us: 'Same / Next Day' },
-  { feature: 'Paperless Warranty Support',            online: 'Limited',       local: 'Depends on Seller',    us: true },
-  { feature: 'Warranty Claim Assistance',             online: 'Limited',       local: 'Depends on Seller',    us: true },
-  { feature: 'After-Sales Service',                   online: 'Limited',       local: 'Limited',              us: true },
-  { feature: 'Direct Expert Support (Call/WhatsApp)', online: 'Usually Not Available', local: 'Limited',      us: true },
+  { feature: 'Product Availability',                  online: true,                    local: true,                   us: true },
+  { feature: 'Expert Guidance',                       online: 'Limited',               local: 'Depends on Seller',    us: 'Experienced Team' },
+  { feature: 'Proper Product Recommendation',         online: 'Limited',               local: 'Depends on Seller',    us: true },
+  { feature: 'Installation Support',                  online: 'Limited',               local: 'Depends on Seller',    us: true },
+  { feature: 'Fast Delivery',                         online: 'Depends on Location',   local: 'Limited',              us: 'Same / Next Day' },
+  { feature: 'Paperless Warranty Support',            online: 'Limited',               local: 'Depends on Seller',    us: true },
+  { feature: 'Warranty Claim Assistance',             online: 'Limited',               local: 'Depends on Seller',    us: true },
+  { feature: 'After-Sales Service',                   online: 'Limited',               local: 'Limited',              us: true },
+  { feature: 'Direct Expert Support (Call/WhatsApp)', online: 'Usually Not Available', local: 'Limited',              us: true },
 ]
 
 const Tick = () => (
   <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M2 7l3.5 3.5L12 3" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
   </span>
 )
-
 const Cross = () => (
   <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-red-50">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M2 2l8 8M10 2l-8 8" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/></svg>
   </span>
 )
-
 function CellContent({ value }: { value: CellValue }) {
   if (value === true)  return <Tick />
   if (value === false) return <Cross />
   return <span className="text-xs text-gray-500 font-medium">{value}</span>
 }
-
 function UsCellContent({ value }: { value: CellValue }) {
   if (value === true) return <Tick />
   return (
     <span className="inline-flex items-center gap-1.5 flex-wrap justify-center">
-      <Tick />
-      <span className="text-[11px] text-primary font-semibold whitespace-nowrap">({value})</span>
+      <Tick /><span className="text-[11px] text-primary font-semibold whitespace-nowrap">({value})</span>
     </span>
   )
 }
 
-function WhyNotAmazonSection() {
+// ── ✅ RENAMED: "Why Choose Us?" section (was "Why Not Just Buy from Amazon?") ──
+function WhyChooseUsSection() {
   return (
-    <section id="why-not-amazon" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6">
+    <section id="why-choose-us" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-
-        {/* Header */}
         <div className="sr text-center mb-8 sm:mb-12">
+          {/* ✅ Changed badge */}
           <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full mb-4">
             Why Choose Us?
           </span>
+          {/* ✅ Changed headline — professional, not "Amazon" focused */}
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
-            Why Not Just Buy from Amazon?
+            More Than Just a Product — We're Your Energy Partner
           </h2>
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto font-medium">
-            A product is just a box. We deliver expertise, installation, and long-term support — things online platforms simply cannot.
+            We go beyond selling. From the right recommendation to installation and warranty support — we're with you every step of the way.
           </p>
         </div>
 
@@ -305,19 +279,13 @@ function WhyNotAmazonSection() {
               <tr className="bg-gray-900 text-white">
                 <th className="text-left px-5 py-4 font-semibold text-sm rounded-tl-2xl">Feature</th>
                 <th className="text-center px-4 py-4 font-semibold text-sm">
-                  <span className="flex flex-col items-center gap-1">
-                    <span className="text-gray-400 text-xs">🛒</span>Online Platforms
-                  </span>
+                  <span className="flex flex-col items-center gap-1"><span className="text-gray-400 text-xs">🛒</span>Online Platforms</span>
                 </th>
                 <th className="text-center px-4 py-4 font-semibold text-sm">
-                  <span className="flex flex-col items-center gap-1">
-                    <span className="text-gray-400 text-xs">🏪</span>Local Sellers
-                  </span>
+                  <span className="flex flex-col items-center gap-1"><span className="text-gray-400 text-xs">🏪</span>Local Sellers</span>
                 </th>
                 <th className="text-center px-5 py-4 font-bold text-sm bg-primary rounded-tr-2xl">
-                  <span className="flex flex-col items-center gap-1">
-                    <span className="text-white/80 text-xs">⚡</span>Satyajan Energy
-                  </span>
+                  <span className="flex flex-col items-center gap-1"><span className="text-white/80 text-xs">⚡</span>Satyajan Energy</span>
                 </th>
               </tr>
             </thead>
@@ -334,7 +302,6 @@ function WhyNotAmazonSection() {
           </table>
         </div>
 
-        {/* Bottom CTA */}
         <div className="sr mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <a href="https://wa.me/918019179159?text=Hi, I want expert guidance before buying"
             target="_blank" rel="noopener noreferrer"
@@ -361,9 +328,9 @@ export default function HomePageClient() {
   const row2 = testimonials.slice(6)
 
   const validateContactField = (field: string, value: string) => {
-    if (field === 'name') { if (!value.trim()) return 'Name is required'; if (value.trim().length < 2) return 'Name must be at least 2 characters' }
-    if (field === 'email') { if (!value) return 'Email is required'; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return 'Enter a valid email' }
-    if (field === 'phone') { const d = value.replace(/\D/g, ''); if (!d) return 'Phone required'; if (d.length !== 10) return 'Enter 10-digit mobile'; if (!/^[6-9]/.test(d)) return 'Enter valid Indian mobile' }
+    if (field === 'name')    { if (!value.trim()) return 'Name is required'; if (value.trim().length < 2) return 'Name must be at least 2 characters' }
+    if (field === 'email')   { if (!value) return 'Email is required'; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return 'Enter a valid email' }
+    if (field === 'phone')   { const d = value.replace(/\D/g, ''); if (!d) return 'Phone required'; if (d.length !== 10) return 'Enter 10-digit mobile'; if (!/^[6-9]/.test(d)) return 'Enter valid Indian mobile' }
     if (field === 'message') { if (!value.trim()) return 'Message is required'; if (value.trim().length < 10) return 'Min 10 characters' }
     return ''
   }
@@ -416,15 +383,13 @@ export default function HomePageClient() {
   return (
     <main className="min-h-screen overflow-x-hidden">
 
-      {/* ── HERO ─────────────────────────────────────────────────────────────── */}
+      {/* ── HERO ── */}
       <section id="hero" className="relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-gray-50">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute w-[500px] h-[500px] bg-primary/5 rounded-full -top-40 -left-40 blur-3xl" />
           <div className="absolute w-[400px] h-[400px] bg-teal-400/5 rounded-full -bottom-20 -right-20 blur-3xl" />
         </div>
         <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-140px)]">
-
-          {/* LEFT */}
           <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 py-6 lg:py-8 z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-flex items-center gap-2 bg-primary/5 border border-primary/30 text-primary text-xs font-semibold px-3 py-1.5 rounded-full w-fit mb-5">
@@ -449,13 +414,9 @@ export default function HomePageClient() {
                 <Calculator className="w-4 h-4 text-primary" /> Calculate Savings
               </Link>
             </motion.div>
-
-            {/* Google Rating Badge */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.75 }} className="mb-8">
               <GoogleRatingBadge />
             </motion.div>
-
-            {/* Stat cards */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.85 }}
               className="flex items-center gap-5 sm:gap-8 pt-4 border-t border-gray-100">
               <StatCard value="1000+" label="Happy Customers" />
@@ -465,8 +426,6 @@ export default function HomePageClient() {
               <StatCard value="80%" label="Bill Savings" />
             </motion.div>
           </div>
-
-          {/* RIGHT: Slideshow */}
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
             className="relative bg-gradient-to-br from-gray-50 to-emerald-50/30 lg:border-l border-gray-100 min-h-[500px] lg:min-h-0">
             <HeroSlideshow />
@@ -535,8 +494,8 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      {/* ── WHY NOT AMAZON — replaces FAQ ─────────────────────────────────────── */}
-      <WhyNotAmazonSection />
+      {/* ✅ WHY CHOOSE US — renamed section */}
+      <WhyChooseUsSection />
 
       {/* TESTIMONIALS */}
       <section id="testimonials" className="py-10 sm:py-14 md:py-20 bg-gradient-to-b from-yellow-50/60 to-white overflow-hidden">
