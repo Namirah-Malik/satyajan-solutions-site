@@ -11,31 +11,6 @@ import WishlistButton from '@/components/WishlistButton';
 const PHONE_NUMBER    = '+918019179159';
 const WHATSAPP_NUMBER = '918019179159';
 
-// ── Auto-extract warranty from features ───────────────────────────────────────
-function extractWarranty(features: string[] = [], salientFeatures: string[] = [], category: string = ''): string {
-  const all = [...features, ...salientFeatures];
-  for (const f of all) {
-    const m = f.match(/(\d+[\s-]*(year|month|yr)s?\s*(warranty)?)/i);
-    if (m) {
-      const num  = f.match(/\d+/)?.[0] || '';
-      const unit = /month/i.test(f) ? 'Month' : 'Year';
-      return `${num} ${unit}`;
-    }
-  }
-  // ── Default warranty by category ──────────────────────────────────────────
-  const cat = category.toLowerCase();
-  if (
-    cat.includes('inverter') ||
-    cat.includes('ups')      ||
-    cat === 'combo'          ||
-    cat === 'combos'
-  ) return '3 Year';
-  if (cat.includes('lithium'))                              return '5 Year';
-  if (cat.includes('battery') && !cat.includes('lithium')) return '5 Year';
-  if (cat.includes('solar'))                               return '10 Year';
-  return '';
-}
-
 // ── Auto-extract capacity from product name ───────────────────────────────────
 function extractCapacity(name: string = ''): string {
   const kWh = name.match(/(\d+\.?\d*)\s*kWh/i);
@@ -51,66 +26,6 @@ function extractCapacity(name: string = ''): string {
   const ah  = name.match(/(\d+)\s*Ah/i);
   if (ah)  return `${ah[1]}Ah`;
   return '';
-}
-
-// ── Auto-derive Suitable For from category + name ────────────────────────────
-function deriveSuitableFor(category: string = '', name: string = ''): string {
-  const cat = category.toLowerCase();
-
-  if (cat.includes('online ups')) {
-    const kva = name.match(/(\d+\.?\d*)\s*KVA/i);
-    if (kva) {
-      const v = parseFloat(kva[1]);
-      if (v <= 1)  return 'Shop / Small Office';
-      if (v <= 3)  return 'Office / Server Room';
-      return 'Business / Industry';
-    }
-    return 'Shop / Office';
-  }
-
-  if (cat.includes('high capacity')) {
-    const kva = name.match(/(\d+\.?\d*)\s*KVA/i);
-    if (kva) {
-      const v = parseFloat(kva[1]);
-      if (v <= 2.5) return 'Shop / Office';
-      if (v <= 4)   return 'Office / Business';
-      return 'Large Business';
-    }
-    return 'Shop / Office';
-  }
-
-  if (cat.includes('solar'))   return 'Home / Business';
-  if (cat.includes('lithium')) return 'Home / EV';
-
-  if (cat.includes('inverter')) {
-    const va = name.match(/(\d+)\s*VA/i);
-    if (va) {
-      const v = parseInt(va[1]);
-      if (v <= 750)  return '1 BHK';
-      if (v <= 950)  return '1–2 BHK';
-      if (v <= 1150) return '2 BHK';
-      if (v <= 1400) return '2–3 BHK';
-      if (v <= 1700) return '3 BHK';
-      return '3 BHK / Villa';
-    }
-    return '1–2 BHK';
-  }
-
-  if (cat.includes('battery')) {
-    const ah = name.match(/(\d+)\s*Ah/i);
-    if (ah) {
-      const v = parseInt(ah[1]);
-      if (v <= 100)  return '1 BHK';
-      if (v <= 140)  return '1–2 BHK';
-      if (v <= 160)  return '2 BHK';
-      if (v <= 185)  return '2–3 BHK';
-      if (v <= 210)  return '3 BHK';
-      return '3 BHK / Villa';
-    }
-    return '1–2 BHK';
-  }
-
-  return 'Home / Office';
 }
 
 // ── Bestseller slugs ──────────────────────────────────────────────────────────
@@ -136,9 +51,7 @@ const NEW_SLUGS = new Set([
 const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
   const { name, rate, slug, images, features, category } = item;
 
-  const warranty    = item.warranty    || extractWarranty(features, (item as any).salient_features, category || '');
-  const capacity    = item.capacity    || extractCapacity(name);
-  const suitableFor = item.suitableFor || deriveSuitableFor(category, name);
+  const capacity     = item.capacity || extractCapacity(name);
   const isBestSeller = item.isBestSeller ?? BESTSELLER_SLUGS.has(slug);
   const isNew        = item.isNew        ?? NEW_SLUGS.has(slug);
 
@@ -155,14 +68,14 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
     return null;
   })();
 
-  const mainImage     = rawImage;
-  const showImage     = mainImage && !imgError;
-  const formattedRate = rate && !isNaN(Number(rate)) ? Number(rate).toLocaleString('en-IN') : null;
-  const price         = Number(rate) || 0;
-  const SKU           = slug?.trim() ? slug.toUpperCase().replace(/\s+/g, '-') : `PROD-${Date.now()}`;
+  const mainImage       = rawImage;
+  const showImage       = mainImage && !imgError;
+  const formattedRate   = rate && !isNaN(Number(rate)) ? Number(rate).toLocaleString('en-IN') : null;
+  const price           = Number(rate) || 0;
+  const SKU             = slug?.trim() ? slug.toUpperCase().replace(/\s+/g, '-') : `PROD-${Date.now()}`;
   const visibleFeatures = features?.slice(0, 3) || [];
-  const extraCount    = Math.max(0, (features?.length || 0) - 3);
-  const waPhone       = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi, I'm interested in ${name}. Please share more details.`)}`;
+  const extraCount      = Math.max(0, (features?.length || 0) - 3);
+  const waPhone         = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi, I'm interested in ${name}. Please share more details.`)}`;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -187,7 +100,6 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
         <Link href={slug ? `/products/${slug}` : '#'} className="block flex-shrink-0">
           <div className="relative w-full bg-gray-50 overflow-hidden aspect-[4/3] sm:aspect-square">
 
-            {/* Labels */}
             <div className="absolute top-2 left-2 z-20 flex flex-col gap-1">
               {isBestSeller && (
                 <span className="inline-flex items-center gap-1 bg-orange-500 text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
@@ -235,18 +147,17 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
 
             <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{name}</h3>
 
+            {capacity && (
+              <div className="bg-gray-50 border border-gray-100 rounded-lg px-2 py-1 w-fit">
+                <span className="text-[10px] text-gray-500 font-medium">{capacity}</span>
+              </div>
+            )}
+
             <div>
               {formattedRate
                 ? <span className="text-base font-extrabold text-primary">₹{formattedRate}</span>
                 : <span className="text-xs text-gray-400">Price on request</span>}
             </div>
-
-            {warranty && (
-              <div className="flex items-center gap-1 bg-green-50 border border-green-200 rounded-lg px-2 py-1">
-                <Icon icon="solar:shield-check-bold" className="text-green-600" width={12} />
-                <span className="text-[10px] font-semibold text-green-700">{warranty} Warranty</span>
-              </div>
-            )}
 
             <div className="grid grid-cols-2 gap-1.5">
               <a href={`tel:${PHONE_NUMBER}`}
@@ -285,25 +196,15 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
               </h3>
             </Link>
 
-            {/* Capacity + Suitable For */}
-            {(capacity || suitableFor) && (
-              <div className="grid grid-cols-2 gap-2">
-                {capacity && (
-                  <div className="bg-gray-50 border border-gray-100 rounded-lg p-2">
-                    <p className="text-[10px] text-gray-400 font-medium mb-0.5">Capacity</p>
-                    <p className="text-xs font-bold text-gray-800">{capacity}</p>
-                  </div>
-                )}
-                {suitableFor && (
-                  <div className="bg-gray-50 border border-gray-100 rounded-lg p-2">
-                    <p className="text-[10px] text-gray-400 font-medium mb-0.5">Suitable For</p>
-                    <p className="text-xs font-bold text-gray-800">{suitableFor}</p>
-                  </div>
-                )}
+            {/* Capacity only — no Suitable For */}
+            {capacity && (
+              <div className="bg-gray-50 border border-gray-100 rounded-lg p-2 w-fit">
+                <p className="text-[10px] text-gray-400 font-medium mb-0.5">Capacity</p>
+                <p className="text-xs font-bold text-gray-800">{capacity}</p>
               </div>
             )}
 
-            {/* Key features */}
+            {/* Key Features */}
             {visibleFeatures.length > 0 && (
               <div className="flex flex-col gap-1.5 flex-1">
                 <p className="text-xs font-semibold text-gray-700">Key Features:</p>
@@ -320,14 +221,6 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
                     +{extraCount} more features
                   </Link>
                 )}
-              </div>
-            )}
-
-            {/* Warranty */}
-            {warranty && (
-              <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                <Icon icon="solar:shield-check-bold" className="text-green-600 flex-shrink-0" width={16} />
-                <span className="text-xs font-semibold text-green-700">{warranty} Warranty</span>
               </div>
             )}
 

@@ -213,89 +213,123 @@ function TestimonialRow({ items, direction = 'left', speed = 40 }: { items: any[
   )
 }
 
-// ── Comparison data ────────────────────────────────────────────────────────────
+// ── Comparison data ─────────────────────────────────────────────────────────
 type CellValue = true | false | string
-interface ComparisonRow { feature: string; online: CellValue; local: CellValue; us: CellValue }
+interface ComparisonRow { feature: string; us: CellValue; online: CellValue; local: CellValue }
 
+// ✅ Column order: Satyajan → Online Platforms → Local Sellers
 const COMPARISON_ROWS: ComparisonRow[] = [
-  { feature: 'Product Availability',                  online: true,                    local: true,                   us: true },
-  { feature: 'Expert Guidance',                       online: 'Limited',               local: 'Depends on Seller',    us: 'Experienced Team' },
-  { feature: 'Proper Product Recommendation',         online: 'Limited',               local: 'Depends on Seller',    us: true },
-  { feature: 'Installation Support',                  online: 'Limited',               local: 'Depends on Seller',    us: true },
-  { feature: 'Fast Delivery',                         online: 'Depends on Location',   local: 'Limited',              us: 'Same / Next Day' },
-  { feature: 'Paperless Warranty Support',            online: 'Limited',               local: 'Depends on Seller',    us: true },
-  { feature: 'Warranty Claim Assistance',             online: 'Limited',               local: 'Depends on Seller',    us: true },
-  { feature: 'After-Sales Service',                   online: 'Limited',               local: 'Limited',              us: true },
-  { feature: 'Direct Expert Support (Call/WhatsApp)', online: 'Usually Not Available', local: 'Limited',              us: true },
+  { feature: 'Product Availability',                  us: true,               online: true,                    local: true },
+  { feature: 'Expert Guidance',                       us: 'Experienced Team', online: 'Limited',               local: 'Depends on Seller' },
+  { feature: 'Proper Product Recommendation',         us: true,               online: 'Limited',               local: 'Depends on Seller' },
+  { feature: 'Installation Support',                  us: true,               online: 'Limited',               local: 'Depends on Seller' },
+  { feature: 'Fast Delivery',                         us: 'Same / Next Day',  online: 'Depends on Location',   local: 'Limited' },
+  { feature: 'Paperless Warranty Support',            us: true,               online: 'Limited',               local: 'Depends on Seller' },
+  { feature: 'Warranty Claim Assistance',             us: true,               online: 'Limited',               local: 'Depends on Seller' },
+  { feature: 'After-Sales Service',                   us: true,               online: 'Limited',               local: 'Limited' },
+  { feature: 'Direct Expert Support (Call/WhatsApp)', us: true,               online: 'Usually Not Available', local: 'Limited' },
 ]
 
 const Tick = () => (
-  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-100">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded bg-emerald-100">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#10B981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
   </span>
 )
 const Cross = () => (
-  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-red-50">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/></svg>
+  <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded bg-red-50">
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/></svg>
   </span>
 )
+
 function CellContent({ value }: { value: CellValue }) {
   if (value === true)  return <Tick />
   if (value === false) return <Cross />
-  return <span className="text-xs text-gray-500 font-medium">{value}</span>
+  return <span className="text-[10px] sm:text-xs text-gray-500 font-medium leading-tight">{value}</span>
 }
+
 function UsCellContent({ value }: { value: CellValue }) {
   if (value === true) return <Tick />
   return (
-    <span className="inline-flex items-center gap-1.5 flex-wrap justify-center">
-      <Tick /><span className="text-[11px] text-primary font-semibold whitespace-nowrap">({value})</span>
+    <span className="inline-flex flex-col items-center gap-0.5">
+      <Tick />
+      <span className="text-[9px] sm:text-[11px] text-primary font-semibold text-center leading-tight">({value})</span>
     </span>
   )
 }
 
-// ── ✅ RENAMED: "Why Choose Us?" section (was "Why Not Just Buy from Amazon?") ──
 function WhyChooseUsSection() {
   return (
-    <section id="why-choose-us" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6">
+    <section id="why-choose-us" className="py-10 sm:py-14 md:py-20 px-3 sm:px-6">
       <div className="max-w-5xl mx-auto">
         <div className="sr text-center mb-8 sm:mb-12">
-          {/* ✅ Changed badge */}
           <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full mb-4">
             Why Choose Us?
           </span>
-          {/* ✅ Changed headline — professional, not "Amazon" focused */}
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
-            More Than Just a Product — We're Your Energy Partner
+            More Than Just a Product — We&apos;re Your Energy Partner
           </h2>
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto font-medium">
-            We go beyond selling. From the right recommendation to installation and warranty support — we're with you every step of the way.
+            We go beyond selling. From the right recommendation to installation and warranty support — we&apos;re with you every step of the way.
           </p>
         </div>
 
-        {/* Comparison table */}
+        {/* ✅ Responsive table: Feature | Satyajan | Online | Local */}
         <div className="sr overflow-x-auto rounded-2xl shadow-xl border border-gray-100">
-          <table className="w-full text-sm min-w-[580px]">
+          <table className="w-full text-sm" style={{ minWidth: '480px' }}>
             <thead>
               <tr className="bg-gray-900 text-white">
-                <th className="text-left px-5 py-4 font-semibold text-sm rounded-tl-2xl">Feature</th>
-                <th className="text-center px-4 py-4 font-semibold text-sm">
-                  <span className="flex flex-col items-center gap-1"><span className="text-gray-400 text-xs">🛒</span>Online Platforms</span>
+                {/* Feature column — compact */}
+                <th className="text-left px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs sm:text-sm rounded-tl-2xl w-[38%] sm:w-[36%]">
+                  Feature
                 </th>
-                <th className="text-center px-4 py-4 font-semibold text-sm">
-                  <span className="flex flex-col items-center gap-1"><span className="text-gray-400 text-xs">🏪</span>Local Sellers</span>
+                {/* ✅ Satyajan FIRST — highlighted */}
+                <th className="text-center px-2 sm:px-4 py-3 sm:py-4 font-bold text-xs sm:text-sm bg-primary w-[22%] sm:w-[21%]">
+                  <span className="flex flex-col items-center gap-0.5 sm:gap-1">
+                    <span className="text-white/80 text-[10px] sm:text-xs">⚡</span>
+                    <span className="leading-tight">Satyajan<br className="sm:hidden" /><span className="hidden sm:inline"> </span>Energy</span>
+                  </span>
                 </th>
-                <th className="text-center px-5 py-4 font-bold text-sm bg-primary rounded-tr-2xl">
-                  <span className="flex flex-col items-center gap-1"><span className="text-white/80 text-xs">⚡</span>Satyajan Energy</span>
+                {/* Online Platforms */}
+                <th className="text-center px-2 sm:px-4 py-3 sm:py-4 font-semibold text-xs sm:text-sm w-[21%]">
+                  <span className="flex flex-col items-center gap-0.5 sm:gap-1">
+                    <span className="text-gray-400 text-[10px] sm:text-xs">🛒</span>
+                    <span className="leading-tight">Online<br className="sm:hidden" /><span className="hidden sm:inline"> </span>Platforms</span>
+                  </span>
+                </th>
+                {/* Local Sellers */}
+                <th className="text-center px-2 sm:px-4 py-3 sm:py-4 font-semibold text-xs sm:text-sm rounded-tr-2xl w-[19%]">
+                  <span className="flex flex-col items-center gap-0.5 sm:gap-1">
+                    <span className="text-gray-400 text-[10px] sm:text-xs">🏪</span>
+                    <span className="leading-tight">Local<br className="sm:hidden" /><span className="hidden sm:inline"> </span>Sellers</span>
+                  </span>
                 </th>
               </tr>
             </thead>
             <tbody>
               {COMPARISON_ROWS.map((row, i) => (
                 <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}>
-                  <td className="px-5 py-3.5 font-medium text-gray-800 text-sm">{row.feature}</td>
-                  <td className="px-4 py-3.5 text-center"><CellContent value={row.online} /></td>
-                  <td className="px-4 py-3.5 text-center"><CellContent value={row.local} /></td>
-                  <td className="px-5 py-3.5 text-center bg-primary/5"><UsCellContent value={row.us} /></td>
+                  {/* Feature label */}
+                  <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 font-medium text-gray-800 text-[11px] sm:text-sm leading-snug">
+                    {row.feature}
+                  </td>
+                  {/* Satyajan — highlighted */}
+                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center bg-primary/5">
+                    <div className="flex items-center justify-center">
+                      <UsCellContent value={row.us} />
+                    </div>
+                  </td>
+                  {/* Online */}
+                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center">
+                    <div className="flex items-center justify-center">
+                      <CellContent value={row.online} />
+                    </div>
+                  </td>
+                  {/* Local */}
+                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center">
+                    <div className="flex items-center justify-center">
+                      <CellContent value={row.local} />
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -383,7 +417,7 @@ export default function HomePageClient() {
   return (
     <main className="min-h-screen overflow-x-hidden">
 
-      {/* ── HERO ── */}
+      {/* HERO */}
       <section id="hero" className="relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-gray-50">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute w-[500px] h-[500px] bg-primary/5 rounded-full -top-40 -left-40 blur-3xl" />
@@ -494,7 +528,7 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      {/* ✅ WHY CHOOSE US — renamed section */}
+      {/* WHY CHOOSE US */}
       <WhyChooseUsSection />
 
       {/* TESTIMONIALS */}
