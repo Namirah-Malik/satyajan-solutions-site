@@ -108,9 +108,30 @@ export default function ProductDetailsClient({
                 {product.name}
               </h1>
 
-              <p className="text-sm text-gray-500">
-                SKU: {product.SKU}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-gray-500">
+                  SKU: {product.SKU}
+                </p>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                  (product.stockStatus || 'In Stock') === 'In Stock'
+                    ? 'bg-green-100 text-green-700 border border-green-200'
+                    : product.stockStatus === 'Available in 5-7 Days'
+                      ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                      : 'bg-red-100 text-red-700 border border-red-200'
+                }`}>
+                  <Icon
+                    icon={
+                      (product.stockStatus || 'In Stock') === 'In Stock'
+                        ? 'ph:check-circle-fill'
+                        : product.stockStatus === 'Available in 5-7 Days'
+                          ? 'ph:clock-fill'
+                          : 'ph:x-circle-fill'
+                    }
+                    width={14}
+                  />
+                  {product.stockStatus || 'In Stock'}
+                </span>
+              </div>
 
               {/* Price */}
               <span className="text-3xl sm:text-4xl font-bold text-primary">

@@ -1,3 +1,5 @@
+export type StockStatus = 'In Stock' | 'Available in 5-7 Days' | 'Out of Stock';
+
 export interface PropertyHomes {
   name: string
   rate: number
@@ -26,4 +28,7 @@ export interface PropertyHomes {
   rating?: number
   isBestSeller?: boolean
   isNew?: boolean
+
+  // stock availability
+  stockStatus?: StockStatus
 }

@@ -49,7 +49,7 @@ const NEW_SLUGS = new Set([
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
-  const { name, rate, slug, images, features, category } = item;
+  const { name, rate, slug, images, features, category, stockStatus } = item;
 
   const capacity     = item.capacity || extractCapacity(name);
   const isBestSeller = item.isBestSeller ?? BESTSELLER_SLUGS.has(slug);
@@ -139,11 +139,22 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
           {/* ════ MOBILE (< sm) ════ */}
           <div className="flex flex-col gap-2 sm:hidden">
 
-            {category && (
-              <span className="text-[9px] font-bold text-primary uppercase tracking-wide bg-primary/10 px-2 py-0.5 rounded-full w-fit">
-                {category}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {category && (
+                <span className="text-[9px] font-bold text-primary uppercase tracking-wide bg-primary/10 px-2 py-0.5 rounded-full w-fit">
+                  {category}
+                </span>
+              )}
+              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                (stockStatus || 'In Stock') === 'In Stock'
+                  ? 'bg-green-100 text-green-700'
+                  : stockStatus === 'Available in 5-7 Days'
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-red-100 text-red-700'
+              }`}>
+                {stockStatus || 'In Stock'}
               </span>
-            )}
+            </div>
 
             <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{name}</h3>
 
@@ -186,9 +197,20 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
           {/* ════ DESKTOP (≥ sm) ════ */}
           <div className="hidden sm:flex flex-col flex-1 gap-3">
 
-            {category && (
-              <p className="text-xs font-bold text-primary uppercase tracking-wider">{category}</p>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {category && (
+                <p className="text-xs font-bold text-primary uppercase tracking-wider">{category}</p>
+              )}
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                (stockStatus || 'In Stock') === 'In Stock'
+                  ? 'bg-green-100 text-green-700'
+                  : stockStatus === 'Available in 5-7 Days'
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-red-100 text-red-700'
+              }`}>
+                {stockStatus || 'In Stock'}
+              </span>
+            </div>
 
             <Link href={slug ? `/products/${slug}` : '#'}>
               <h3 className="text-base font-bold text-gray-900 leading-snug hover:text-primary transition-colors line-clamp-2">
