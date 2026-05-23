@@ -3,53 +3,30 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  /* ── Brand colors ──────────────────────────────────────────── */
+  /* Gradient colors */
   --color-primary: #07be8a;
-  --color-primary-50: #e6faf3;
-  --color-primary-100: #c2f4e0;
-  --color-primary-200: #87e8c1;
-  --color-primary-300: #4cdca2;
-  --color-primary-400: #20cf90;
-  --color-primary-500: #07be8a;
-  --color-primary-600: #069a70;
-  --color-primary-700: #057556;
-  --color-primary-800: #04503b;
-  --color-primary-900: #022b20;
-
   --color-skyblue: #79adff;
   --color-lightskyblue: #9cc2dd;
-
   --color-dark: #172023;
-  --color-dark-soft: #1f2a2e;
 
-  /* Surface neutrals tuned to feel premium next to brand green */
-  --color-ink: #0e1518;
-  --color-muted: #6b7480;
-  --color-line: #e5e8ec;
-  --color-surface: #f7f8f9;
+  /* Shadow */
+  --shadow-3xl: 0px 4px 6px -2px #0000000D, 0px 10px 15px -3px #0000001A;
+  --shadow-auth: 0 20px 25px -5px #0000001a;
+  --shadow-dark-auth: rgba(255, 255, 255, 0.1) 0px 12px 28px 0px, rgba(255, 255, 255, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
+  --shadow-sky: 0px 0px 48px 0px rgba(129,174,197,1);
 
-  /* ── Shadows ───────────────────────────────────────────────── */
-  --shadow-3xl: 0px 4px 6px -2px rgba(0, 0, 0, 0.05), 0px 10px 15px -3px rgba(0, 0, 0, 0.10);
-  --shadow-card: 0 1px 2px rgba(15, 23, 26, 0.04), 0 8px 24px -8px rgba(15, 23, 26, 0.10);
-  --shadow-card-hover: 0 2px 4px rgba(15, 23, 26, 0.05), 0 16px 40px -12px rgba(15, 23, 26, 0.18);
-  --shadow-soft: 0 1px 2px rgba(15, 23, 26, 0.04), 0 4px 12px -4px rgba(15, 23, 26, 0.08);
-  --shadow-auth: 0 20px 25px -5px rgba(0, 0, 0, 0.10);
-  --shadow-dark-auth: rgba(255, 255, 255, 0.10) 0px 12px 28px 0px, rgba(255, 255, 255, 0.10) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
-  --shadow-sky: 0px 0px 48px 0px rgba(129, 174, 197, 1);
-  --shadow-glow: 0 12px 40px -12px rgba(7, 190, 138, 0.45);
-
-  /* ── Typography scale ──────────────────────────────────────── */
-  --text-sm: 0.875rem;
+  /* font size */
   --text-xm: 1.125rem;
+  --text-9xl: 6.5rem;
   --text-40: 2.5rem;
   --text-52: 3.25rem;
-  --text-9xl: 6.5rem;
+  --text-sm: 0.875rem;
 
-  /* ── Breakpoints ───────────────────────────────────────────── */
+  /* Breakpoint */
   --breakpoint-xs: 23.438rem;
   --breakpoint-mobile: 32.5rem;
 
-  /* ── Spacing / max-widths ──────────────────────────────────── */
+  /* breakpoint / max-w */
   --spacing-45p: 45%;
   --spacing-85p: 85%;
   --spacing-90p: 90%;
@@ -57,346 +34,126 @@
   --spacing-540: 33.75rem;
   --spacing-8xl: 87.5rem;
 
-  /* ── Animations ────────────────────────────────────────────── */
+  /* animation */
   --animate-slide: slide 20s linear infinite;
-  --animate-scroll-left: scrollLeft var(--scroll-speed, 35s) linear infinite;
-  --animate-scroll-right: scrollRight var(--scroll-speed, 30s) linear infinite;
-  --animate-marquee: marquee 30s linear infinite;
-  --animate-fade-in: fade-in 0.4s ease both;
-  --animate-gradient-x: gradient-x 4s ease infinite;
-  --animate-float-slow: float-slow 7s ease-in-out infinite;
-  --animate-float-medium: float-medium 5s ease-in-out infinite;
-  --animate-float-fast: float-fast 3s ease-in-out infinite;
-  --animate-spin-slow: spin-slow 6s linear infinite;
-}
 
-/* ────────────────────────────────────────────────────────────────
-   Base
-   ──────────────────────────────────────────────────────────────── */
+  @keyframes slide {
+    0%   { transform: translateX(0%); }
+    100% { transform: translateX(-103%); }
+  }
+}
 
 html {
   scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  color: var(--color-ink);
-  font-feature-settings: "ss01", "ss02", "cv01", "cv11";
-  text-rendering: optimizeLegibility;
-}
-
-::selection {
-  background-color: var(--color-primary);
-  color: white;
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Baseline vertical rhythm for legacy <section> usage that didn't
-   set its own padding. Newer sections use `.section` / `.section-sm` etc.
-   for finer control. */
-section { padding-block: 4rem; }
-@media (min-width: 768px) { section { padding-block: 5.5rem; } }
-
-/* ────────────────────────────────────────────────────────────────
-   Design system primitives
-   ──────────────────────────────────────────────────────────────── */
-
-/* Site container — centered with safe horizontal padding at every breakpoint */
-.site-container {
-  width: 100%;
-  max-width: var(--spacing-8xl);
-  margin-inline: auto;
-  padding-inline: 1rem;
-}
-@media (min-width: 640px) { .site-container { padding-inline: 1.5rem; } }
-@media (min-width: 1024px) { .site-container { padding-inline: 2rem; } }
-
-/* Vertical section rhythm — replaces the old global "section { py-24 }".
-   Pages opt-in by adding `.section` (or one of its sized variants) to
-   their <section> elements. */
-.section { padding-block: 3.5rem; }
-@media (min-width: 640px) { .section { padding-block: 4.5rem; } }
-@media (min-width: 1024px) { .section { padding-block: 6rem; } }
-
-.section-sm { padding-block: 2.5rem; }
-@media (min-width: 640px) { .section-sm { padding-block: 3rem; } }
-@media (min-width: 1024px) { .section-sm { padding-block: 4rem; } }
-
-.section-lg { padding-block: 4rem; }
-@media (min-width: 640px) { .section-lg { padding-block: 6rem; } }
-@media (min-width: 1024px) { .section-lg { padding-block: 8rem; } }
-
-/* Inner-page top spacing to clear the fixed header */
-.page-pt { padding-top: 6.5rem; }
-@media (min-width: 768px) { .page-pt { padding-top: 8rem; } }
-@media (min-width: 1024px) { .page-pt { padding-top: 9rem; } }
-
-/* Eyebrow label — small uppercase, tight tracking, brand accent */
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-primary);
-}
-.eyebrow::before {
-  content: '';
-  width: 1.5rem;
-  height: 1px;
-  background: currentColor;
-  display: inline-block;
-}
-
-/* Display headlines */
-.display-1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  font-weight: 700;
-  color: var(--color-dark);
-}
-.display-2 {
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-weight: 700;
-  color: var(--color-dark);
-}
-.display-3 {
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  line-height: 1.2;
-  letter-spacing: -0.015em;
-  font-weight: 700;
-  color: var(--color-dark);
-}
-
-/* Buttons — single canonical CTA system */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  line-height: 1;
-  padding: 0.75rem 1.25rem;
-  border-radius: 9999px;
-  border: 1px solid transparent;
-  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease, border-color 180ms ease;
-  white-space: nowrap;
-}
-.btn:active { transform: translateY(1px); }
-.btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-
-.btn-primary {
-  background: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 6px 20px -6px rgba(7, 190, 138, 0.45);
-}
-.btn-primary:hover {
-  background: var(--color-primary-600);
-  box-shadow: 0 10px 28px -8px rgba(7, 190, 138, 0.55);
-  transform: translateY(-1px);
-}
-
-.btn-dark {
-  background: var(--color-dark);
-  color: #fff;
-}
-.btn-dark:hover {
-  background: var(--color-dark-soft);
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--color-dark);
-  border-color: var(--color-line);
-}
-.btn-outline:hover {
-  border-color: var(--color-dark);
-  background: var(--color-dark);
-  color: #fff;
-}
-
-.btn-outline-primary {
-  background: transparent;
-  color: var(--color-primary);
-  border-color: rgba(7, 190, 138, 0.4);
-}
-.btn-outline-primary:hover {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--color-dark);
-}
-.btn-ghost:hover { background: var(--color-surface); }
-
-.btn-lg { padding: 0.95rem 1.5rem; font-size: 0.95rem; }
-.btn-sm { padding: 0.5rem 0.95rem; font-size: 0.8125rem; }
-
-/* Card primitive */
-.card-surface {
-  background: #fff;
-  border: 1px solid var(--color-line);
-  border-radius: 1.25rem;
-  box-shadow: var(--shadow-card);
-  transition: box-shadow 240ms ease, transform 240ms ease, border-color 240ms ease;
-}
-.card-surface:hover {
-  box-shadow: var(--shadow-card-hover);
-  border-color: rgba(15, 23, 26, 0.08);
-}
-
-/* Subtle frosted card (used sparingly) */
-.card-glass {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 1.25rem;
-  box-shadow: var(--shadow-soft);
-}
-
-/* Soft section background (warm neutral tone) */
-.bg-soft {
-  background: linear-gradient(180deg, #fafbfb 0%, #ffffff 100%);
-}
-.bg-soft-primary {
-  background:
-    radial-gradient(ellipse at top left, rgba(7, 190, 138, 0.06), transparent 50%),
-    linear-gradient(180deg, #ffffff 0%, #f7faf9 100%);
-}
-
-/* Section heading block (eyebrow + title + sub) */
-.section-head {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 48rem;
-}
-.section-head.center { margin-inline: auto; align-items: center; text-align: center; }
-
-/* Divider */
-.hr-soft {
-  border: 0;
-  height: 1px;
-  background: var(--color-line);
-}
-
-/* Number bullet (Studiova-style "01", "02") */
-.num-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  font-feature-settings: "tnum";
-  color: var(--color-primary);
-  letter-spacing: 0.05em;
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Blog typography
-   ──────────────────────────────────────────────────────────────── */
+section { @apply py-24 }
 
 .blog-details p, .blog-details hr { @apply mb-8; }
 .blog-details strong { @apply font-bold; }
 .blog-details ul { @apply list-none space-y-3 mb-10; }
 .blog-details ul li { @apply mb-0 relative pl-4 text-base leading-[1.2] before:absolute before:w-1 before:h-1 before:rounded-full before:bg-dark before:top-2 before:left-0; }
 .blog-details ol { @apply mb-8 list-inside list-decimal space-y-3; }
-.blog-details ol li { @apply mb-0; }
+.blog-details ol li { @apply mb-0 }
 .blog-details h1 { @apply mb-8 text-3xl font-bold text-dark sm:text-4xl md:text-[40px] md:leading-[1.28]; }
 .blog-details h2 { @apply mb-2 text-2xl font-bold text-dark sm:text-3xl md:text-[35px] md:leading-[1.28]; }
 .blog-details h3 { @apply mb-6 text-2xl text-dark sm:leading-[40px]; }
 .blog-details h4 { @apply mb-6 text-xl leading-[1.2] text-dark; }
-.blog-details hr { @apply border-white; }
-.blog-details p  { @apply text-dark text-xm leading-[1.2]; }
+.blog-details hr { @apply border-white }
+.blog-details p  { @apply text-dark text-xm leading-[1.2] }
 
-/* ────────────────────────────────────────────────────────────────
-   Scroll Reveal
-   ──────────────────────────────────────────────────────────────── */
+/* ── Scroll Reveal ─────────────────────────────────────────────────────────── */
 .sr {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.65s ease, transform 0.65s ease;
 }
 .sr-visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ────────────────────────────────────────────────────────────────
-   Animations (deduped — single source of truth)
-   ──────────────────────────────────────────────────────────────── */
-
-@keyframes slide {
-  0%   { transform: translateX(0%); }
-  100% { transform: translateX(-103%); }
+/* ── Floating particles ────────────────────────────────────────────────────── */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-24px) scale(1.05); }
 }
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-16px); }
+}
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+.animate-float-slow   { animation: float-slow   7s ease-in-out infinite; }
+.animate-float-medium { animation: float-medium 5s ease-in-out infinite; }
+.animate-float-fast   { animation: float-fast   3s ease-in-out infinite; }
 
+/* ── Marquee ───────────────────────────────────────────────────────────────── */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
+.animate-marquee       { animation: marquee 30s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
+
+/* ── Gradient text ─────────────────────────────────────────────────────────── */
+@keyframes gradient-x {
+  0%, 100% { background-size: 200% 200%; background-position: left center; }
+  50%       { background-size: 200% 200%; background-position: right center; }
+}
+.animate-gradient-x { animation: gradient-x 4s ease infinite; }
+
+/* ── Fade in ───────────────────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.4s ease both; }
+@theme {
+  --animate-scroll-left: scrollLeft var(--scroll-speed, 35s) linear infinite;
+  --animate-scroll-right: scrollRight var(--scroll-speed, 30s) linear infinite;
+}
 
 @keyframes scrollLeft {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-33.333%); }
 }
+
 @keyframes scrollRight {
   0%   { transform: translateX(-33.333%); }
   100% { transform: translateX(0); }
 }
+.animate-scroll-left,
+.animate-scroll-right {
+  animation-play-state: running;
+}
+
 .animate-scroll-left:hover,
-.animate-scroll-right:hover { animation-play-state: paused; }
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+.animate-scroll-right:hover {
+  animation-play-state: paused;
 }
-
-@keyframes gradient-x {
-  0%, 100% { background-size: 200% 200%; background-position: left center; }
-  50%       { background-size: 200% 200%; background-position: right center; }
-}
-
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50%      { transform: translateY(-24px) scale(1.05); }
-}
-@keyframes float-medium {
-  0%, 100% { transform: translateY(0px); }
-  50%      { transform: translateY(-16px); }
-}
-@keyframes float-fast {
-  0%, 100% { transform: translateY(0px); }
-  50%      { transform: translateY(-10px); }
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
+/* ── Hero Image Premium Animation ─────────────────────── */
 @keyframes hero-enter {
-  from { opacity: 0; transform: translate3d(40px, 0, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  from {
+    opacity: 0;
+    transform: translate3d(40px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
+
 @keyframes hero-float {
   0%, 100% { transform: translate3d(0, 0px, 0); }
-  50%      { transform: translate3d(0, -10px, 0); }
+  50%       { transform: translate3d(0, -10px, 0); }
 }
+
 .hero-image-float {
   animation:
     hero-enter 0.8s ease-out forwards,
@@ -404,13 +161,16 @@ section { padding-block: 4rem; }
   will-change: transform;
 }
 
-/* Reduced motion respect */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  .sr { opacity: 1 !important; transform: none !important; }
+/* ── Testimonial scroll rows ───────────────────────────── */
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333%); }
 }
+@keyframes scroll-right {
+  from { transform: translateX(-33.333%); }
+  to   { transform: translateX(0); }
+}
+.animate-scroll-left  { animation: scroll-left  var(--scroll-speed, 35s) linear infinite; }
+.animate-scroll-right { animation: scroll-right var(--scroll-speed, 30s) linear infinite; }
+.animate-scroll-left:hover,
+.animate-scroll-right:hover { animation-play-state: paused; }

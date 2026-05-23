@@ -7,9 +7,11 @@ import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
 import WishlistButton from '@/components/WishlistButton';
 
+// ── Constants ─────────────────────────────────────────────────────────────────
 const PHONE_NUMBER    = '+918019179159';
 const WHATSAPP_NUMBER = '918019179159';
 
+// ── Auto-extract capacity from product name ───────────────────────────────────
 function extractCapacity(name: string = ''): string {
   const kWh = name.match(/(\d+\.?\d*)\s*kWh/i);
   if (kWh) return `${kWh[1]} kWh`;
@@ -26,6 +28,7 @@ function extractCapacity(name: string = ''): string {
   return '';
 }
 
+// ── Bestseller slugs ──────────────────────────────────────────────────────────
 const BESTSELLER_SLUGS = new Set([
   'heavy-duty-ups-1550-vturbo-12v-advanced-digital-wave-1250-va',
   'microtek-dura-strong-m1803624tt-180ah-tall-tubular-inverter-battery-with-adc-tec',
@@ -34,6 +37,7 @@ const BESTSELLER_SLUGS = new Set([
   'microtek-luxe-wifi-1400-12v-pure-sine-wave-inverter-1100va825watt',
 ]);
 
+// ── New product slugs ─────────────────────────────────────────────────────────
 const NEW_SLUGS = new Set([
   'microtek-imerlyn-ups-1850-24v-advanced-digital-wave-inverter-1600va1275w-ups-for',
   'microtek-ups-luxe-1900-24v-pure-sine-wave-inverter-1650va1320w-ups-for-home-wish',
@@ -42,12 +46,7 @@ const NEW_SLUGS = new Set([
   'lithium-iron-100ah-battery-deep-cycle-rechargeable-battery-fast-charging-long-li',
 ]);
 
-function stockStyles(status?: string) {
-  const s = status || 'In Stock';
-  if (s === 'In Stock')              return { bg: 'bg-primary/10',  text: 'text-primary',  dot: 'bg-primary'  };
-  if (s === 'Available in 5-7 Days') return { bg: 'bg-amber-100',   text: 'text-amber-700', dot: 'bg-amber-500' };
-  return { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' };
-}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
   const { name, rate, slug, images, features, category, stockStatus } = item;
@@ -77,8 +76,6 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
   const visibleFeatures = features?.slice(0, 3) || [];
   const extraCount      = Math.max(0, (features?.length || 0) - 3);
   const waPhone         = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi, I'm interested in ${name}. Please share more details.`)}`;
-  const stock           = stockStyles(stockStatus);
-  const stockLabel      = stockStatus || 'In Stock';
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -96,43 +93,38 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
   };
 
   return (
-    <div className="w-full h-full transition-transform duration-200 hover:-translate-y-0.5">
-      <div className="card-surface overflow-hidden flex flex-col h-full">
+    <div className="w-full transition-transform duration-200 hover:-translate-y-0.5">
+      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden flex flex-col h-full shadow-sm hover:shadow-lg transition-shadow duration-200">
 
         {/* ── IMAGE ── */}
         <Link href={slug ? `/products/${slug}` : '#'} className="block flex-shrink-0">
-          <div className="relative w-full bg-surface overflow-hidden aspect-[4/3] sm:aspect-square">
-            <div className="absolute top-2.5 left-2.5 z-20 flex flex-col gap-1.5">
+          <div className="relative w-full bg-gray-50 overflow-hidden aspect-[4/3] sm:aspect-square">
+
+            <div className="absolute top-2 left-2 z-20 flex flex-col gap-1">
               {isBestSeller && (
-                <span className="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-soft">
-                  <Icon icon="ph:trophy-fill" width={10} />
-                  Bestseller
+                <span className="inline-flex items-center gap-1 bg-orange-500 text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                  🏆 Bestseller
                 </span>
               )}
               {isNew && (
-                <span className="inline-flex items-center gap-1 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-soft">
-                  <Icon icon="ph:sparkle-fill" width={10} />
-                  New
+                <span className="inline-flex items-center gap-1 bg-green-600 text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                  ✨ New
                 </span>
               )}
             </div>
 
             {showImage ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={mainImage!}
-                alt={name}
-                loading="lazy"
+              <img src={mainImage!} alt={name} loading="lazy"
                 onError={() => setImgError(true)}
-                className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-              />
+                className="w-full h-full object-contain p-4 hover:scale-105 transition-transform duration-300" />
             ) : (
-              <div className="w-full h-full bg-surface flex items-center justify-center">
-                <Icon icon="ph:lightning-fill" className="text-line" width={48} />
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <Icon icon="ph:lightning-fill" className="text-gray-300" width={48} />
               </div>
             )}
 
-            <div className="absolute top-2.5 right-2.5 z-20">
+            <div className="absolute top-2 right-2 z-20">
               <WishlistButton
                 item={{ id: String(slug || ''), name: name || '', price, image: mainImage || '/images/fallback.jpg', category: category || '', SKU }}
                 size="sm"
@@ -142,39 +134,45 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
         </Link>
 
         {/* ── CONTENT ── */}
-        <div className="flex flex-col flex-1 p-4 sm:p-5">
+        <div className="flex flex-col flex-1 p-3 sm:p-5">
 
           {/* ════ MOBILE (< sm) ════ */}
-          <div className="flex flex-col gap-2.5 sm:hidden">
+          <div className="flex flex-col gap-2 sm:hidden">
+
             <div className="flex items-center gap-1.5 flex-wrap">
               {category && (
-                <span className="text-[9px] font-bold text-primary uppercase tracking-[0.1em] bg-primary/10 px-2 py-0.5 rounded-full">
+                <span className="text-[9px] font-bold text-primary uppercase tracking-wide bg-primary/10 px-2 py-0.5 rounded-full w-fit">
                   {category}
                 </span>
               )}
-              <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full ${stock.bg} ${stock.text}`}>
-                <span className={`w-1 h-1 rounded-full ${stock.dot}`} />
-                {stockLabel}
+              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                (stockStatus || 'In Stock') === 'In Stock'
+                  ? 'bg-green-100 text-green-700'
+                  : stockStatus === 'Available in 5-7 Days'
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-red-100 text-red-700'
+              }`}>
+                {stockStatus || 'In Stock'}
               </span>
             </div>
 
-            <h3 className="text-sm font-semibold text-dark leading-snug line-clamp-2">{name}</h3>
+            <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{name}</h3>
 
             {capacity && (
-              <div className="bg-surface border border-line rounded-lg px-2 py-1 w-fit">
-                <span className="text-[10px] text-muted font-medium">{capacity}</span>
+              <div className="bg-gray-50 border border-gray-100 rounded-lg px-2 py-1 w-fit">
+                <span className="text-[10px] text-gray-500 font-medium">{capacity}</span>
               </div>
             )}
 
             <div>
               {formattedRate
-                ? <span className="text-base font-extrabold text-dark">₹{formattedRate}</span>
-                : <span className="text-xs text-muted">Price on request</span>}
+                ? <span className="text-base font-extrabold text-primary">₹{formattedRate}</span>
+                : <span className="text-xs text-gray-400">Price on request</span>}
             </div>
 
             <div className="grid grid-cols-2 gap-1.5">
               <a href={`tel:${PHONE_NUMBER}`}
-                className="flex items-center justify-center gap-1 bg-dark hover:bg-dark-soft text-white rounded-lg py-1.5 text-[10px] font-bold transition-colors">
+                className="flex items-center justify-center gap-1 bg-slate-700 hover:bg-slate-800 text-white rounded-lg py-1.5 text-[10px] font-bold transition-colors">
                 <Icon icon="solar:phone-bold" width={11} /> Call
               </a>
               <a href={waPhone} target="_blank" rel="noopener noreferrer"
@@ -183,48 +181,59 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
               </a>
             </div>
 
-            <button onClick={handleAddToCart} disabled={adding} className="w-full btn btn-primary btn-sm">
-              {adding ? <Icon icon="svg-spinners:3-dots-fade" width={14} /> : <><Icon icon="solar:cart-large-4-bold" width={14} /> Add to Cart</>}
+            <button onClick={handleAddToCart} disabled={adding}
+              className="w-full py-2 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-dark transition-colors flex items-center justify-center gap-1 disabled:opacity-50">
+              {adding
+                ? <Icon icon="svg-spinners:3-dots-fade" width={14} />
+                : <><Icon icon="solar:cart-large-4-bold" width={14} /> Add to Cart</>}
             </button>
 
-            <button onClick={handleBuyNow} className="w-full btn btn-outline-primary btn-sm">
+            <button onClick={handleBuyNow}
+              className="w-full py-1.5 border-2 border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-1">
               <Icon icon="solar:bolt-bold" width={12} /> Buy Now
             </button>
           </div>
 
           {/* ════ DESKTOP (≥ sm) ════ */}
           <div className="hidden sm:flex flex-col flex-1 gap-3">
+
             <div className="flex items-center gap-2 flex-wrap">
               {category && (
-                <p className="text-[10px] font-bold text-primary uppercase tracking-[0.15em]">{category}</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-wider">{category}</p>
               )}
-              <span className="text-line">·</span>
-              <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${stock.bg} ${stock.text}`}>
-                <span className={`w-1 h-1 rounded-full ${stock.dot}`} />
-                {stockLabel}
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                (stockStatus || 'In Stock') === 'In Stock'
+                  ? 'bg-green-100 text-green-700'
+                  : stockStatus === 'Available in 5-7 Days'
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-red-100 text-red-700'
+              }`}>
+                {stockStatus || 'In Stock'}
               </span>
             </div>
 
             <Link href={slug ? `/products/${slug}` : '#'}>
-              <h3 className="text-base font-bold text-dark leading-snug hover:text-primary transition-colors line-clamp-2">
+              <h3 className="text-base font-bold text-gray-900 leading-snug hover:text-primary transition-colors line-clamp-2">
                 {name}
               </h3>
             </Link>
 
+            {/* Capacity only — no Suitable For */}
             {capacity && (
-              <div className="bg-surface border border-line rounded-lg p-2 w-fit">
-                <p className="text-[10px] text-muted font-medium uppercase tracking-wider mb-0.5">Capacity</p>
-                <p className="text-xs font-bold text-dark">{capacity}</p>
+              <div className="bg-gray-50 border border-gray-100 rounded-lg p-2 w-fit">
+                <p className="text-[10px] text-gray-400 font-medium mb-0.5">Capacity</p>
+                <p className="text-xs font-bold text-gray-800">{capacity}</p>
               </div>
             )}
 
+            {/* Key Features */}
             {visibleFeatures.length > 0 && (
               <div className="flex flex-col gap-1.5 flex-1">
-                <p className="text-xs font-semibold text-dark/85">Key Features</p>
+                <p className="text-xs font-semibold text-gray-700">Key Features:</p>
                 <ul className="flex flex-col gap-1.5">
                   {visibleFeatures.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-dark/70">
-                      <Icon icon="ph:check-circle-fill" width={14} className="text-primary mt-0.5 flex-shrink-0" />
+                    <li key={idx} className="flex items-start gap-2 text-xs text-gray-600">
+                      <Icon icon="ph:check-circle-fill" width={13} className="text-primary mt-0.5 flex-shrink-0" />
                       <span className="line-clamp-1">{feature}</span>
                     </li>
                   ))}
@@ -239,35 +248,43 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
 
             <div className="flex-1" />
 
-            <div className="flex items-center justify-between gap-2 pt-1">
+            {/* Price */}
+            <div className="flex items-center justify-between gap-2">
               {formattedRate
-                ? <span className="text-lg font-bold text-dark tracking-tight">₹{formattedRate}</span>
-                : <span className="text-xs text-muted">Price on request</span>}
+                ? <span className="bg-gray-100 text-primary font-bold text-sm px-3 py-1.5 rounded-lg">₹{formattedRate}</span>
+                : <span className="text-xs text-gray-400">Price on request</span>}
               <Link href={slug ? `/products/${slug}` : '#'}
                 className="text-sm text-primary font-semibold hover:underline flex items-center gap-1 whitespace-nowrap">
                 Details <Icon icon="solar:arrow-right-linear" width={14} />
               </Link>
             </div>
 
+            {/* Call + WhatsApp */}
             <div className="grid grid-cols-2 gap-2">
               <a href={`tel:${PHONE_NUMBER}`}
-                className="flex items-center justify-center gap-1.5 bg-dark hover:bg-dark-soft text-white rounded-full py-2 text-xs font-bold transition-colors">
-                <Icon icon="solar:phone-bold" width={14} /> Call
+                className="flex items-center justify-center gap-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg py-2 text-xs font-bold transition-colors">
+                <Icon icon="solar:phone-bold" width={14} /> Call Us
               </a>
               <a href={waPhone} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#1fba58] text-white rounded-full py-2 text-xs font-bold transition-colors">
+                className="flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#1fba58] text-white rounded-lg py-2 text-xs font-bold transition-colors">
                 <Icon icon="ic:baseline-whatsapp" width={15} /> WhatsApp
               </a>
             </div>
 
+            {/* Add to Cart + Buy Now */}
             <div className="flex flex-col gap-2">
-              <button onClick={handleAddToCart} disabled={adding} className="btn btn-primary w-full">
-                {adding ? <><Icon icon="svg-spinners:3-dots-fade" width={18} /> Adding…</> : <><Icon icon="solar:cart-large-4-bold" width={18} /> Add to Cart</>}
+              <button onClick={handleAddToCart} disabled={adding}
+                className="w-full py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-dark transition-colors flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95">
+                {adding
+                  ? <><Icon icon="svg-spinners:3-dots-fade" width={18} /> Adding…</>
+                  : <><Icon icon="solar:cart-large-4-bold" width={18} /> Add to Cart</>}
               </button>
-              <button onClick={handleBuyNow} className="btn btn-outline-primary w-full">
+              <button onClick={handleBuyNow}
+                className="w-full py-2.5 border-2 border-primary text-primary rounded-lg font-semibold text-sm hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-2 active:scale-95">
                 <Icon icon="solar:bolt-bold" width={16} /> Buy Now
               </button>
             </div>
+
           </div>
         </div>
       </div>
