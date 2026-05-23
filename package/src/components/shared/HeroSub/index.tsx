@@ -5,31 +5,36 @@ interface HeroSubProps {
   title:       string;
   description: string;
   badge:       string;
-  compact?:    boolean; // ✅ reduces bottom padding when true (e.g. products page)
+  compact?:    boolean;
 }
 
 const HeroSub: FC<HeroSubProps> = ({ title, description, badge, compact = false }) => {
   return (
-    <section
-      className={`text-center bg-cover !pt-40 relative overflow-x-hidden ${
-        compact ? 'pb-4' : 'pb-20'
-      }`}
-    >
-      <div className="flex gap-2.5 items-center justify-center">
-        <span>
-          <Icon
-            icon="ph:house-simple-fill"
-            width={20}
-            height={20}
-            className="text-primary"
-          />
-        </span>
-        <p className="text-base font-semibold text-dark/75">{badge}</p>
+    <section className={`relative overflow-hidden bg-soft-primary ${compact ? 'pb-6 sm:pb-8' : 'pb-14 sm:pb-20'} page-pt`}>
+      {/* subtle decorative background */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-[420px] h-[420px] rounded-full bg-primary/8 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] rounded-full bg-primary/5 blur-3xl" />
       </div>
-      <h2 className="text-dark text-52 relative font-bold">{title}</h2>
-      <p className="text-lg text-dark/50 font-normal w-full mx-auto">
-        {description}
-      </p>
+
+      <div className="site-container relative">
+        <div className="max-w-3xl mx-auto text-center flex flex-col items-center gap-5">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 border border-primary/20 shadow-soft backdrop-blur-sm text-xs sm:text-sm font-semibold text-primary uppercase tracking-[0.18em]">
+            <Icon icon="ph:sparkle-fill" width={14} />
+            {badge}
+          </span>
+
+          <h1 className="display-1 text-balance">
+            {title}
+          </h1>
+
+          {description && (
+            <p className="text-base sm:text-lg text-muted leading-relaxed max-w-2xl mx-auto">
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
     </section>
   );
 };

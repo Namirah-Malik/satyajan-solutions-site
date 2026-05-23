@@ -1,45 +1,43 @@
-import Image from "next/image";
+import Link from "next/link";
 import { Metadata } from "next";
-import { Icon } from "@iconify/react/dist/iconify.js"
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export const metadata: Metadata = {
-  title: "404 Page | Property ",
+  title: "Page not found",
+  description: "The page you’re looking for could not be found.",
 };
 
 const ErrorPage = () => {
   return (
-    <>
-      <section className="flex justify-center pb-0!">
-        <Image
-          src="/images/404.png"
-          alt="404"
-          width={490}
-          height={450}
-          unoptimized={true}
-        />
-      </section>
-      <section className="text-center bg-cover relative overflow-x-hidden" >
-        <div className='flex gap-2.5 items-center justify-center'>
-          <span>
-            <Icon
-              icon={'ph:house-simple-fill'}
-              width={20}
-              height={20}
-              className='text-primary'
-            />
-          </span>
-          <p className='text-base font-semibold text-dark/75'>
+    <main className="min-h-screen page-pt pb-20 bg-soft-primary">
+      <div className="site-container">
+        <div className="max-w-2xl mx-auto text-center flex flex-col items-center gap-6 py-10 sm:py-16">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-primary/20 shadow-soft text-xs sm:text-sm font-semibold text-primary uppercase tracking-[0.18em]">
+            <Icon icon="ph:warning-fill" width={14} />
             Error 404
+          </span>
+
+          <h1 className="display-1 text-balance">
+            We couldn&apos;t find that page.
+          </h1>
+
+          <p className="text-base sm:text-lg text-muted max-w-xl">
+            The page you&apos;re looking for may have been moved, deleted, or never existed. Let&apos;s get you back on track.
           </p>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-2">
+            <Link href="/" className="btn btn-primary btn-lg">
+              <Icon icon="ph:house-fill" width={16} />
+              Back to home
+            </Link>
+            <Link href="/products" className="btn btn-outline btn-lg">
+              Browse products
+              <Icon icon="ph:arrow-right-bold" width={14} />
+            </Link>
+          </div>
         </div>
-        <h2 className="text-dark text-52 relative font-bold " >
-          Lost? Let’s Help You Find Home.
-        </h2>
-        <p className="text-lg text-dark/50 font-normal w-full mx-auto">
-          Looks like you’ve hit a dead end — but don’t worry, we’ll help you get back on track
-        </p>
-      </section>
-    </>
+      </div>
+    </main>
   );
 };
 
