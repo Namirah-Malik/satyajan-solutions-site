@@ -17,14 +17,13 @@ function inr(n: number) {
   }).format(n);
 }
 
-// Indicative EMI plans shown to customer — actual EMI is processed by PhonePe
 const EMI_PLANS = [
-  { months: 3,  label: '3 months',  rate: 0,    tag: 'No Cost' },
-  { months: 6,  label: '6 months',  rate: 0,    tag: 'No Cost' },
-  { months: 9,  label: '9 months',  rate: 12,   tag: '' },
-  { months: 12, label: '12 months', rate: 12,   tag: 'Popular' },
-  { months: 18, label: '18 months', rate: 14,   tag: '' },
-  { months: 24, label: '24 months', rate: 15,   tag: '' },
+  { months: 3,  label: '3 months',  rate: 0,  tag: 'No Cost' },
+  { months: 6,  label: '6 months',  rate: 0,  tag: 'No Cost' },
+  { months: 9,  label: '9 months',  rate: 12, tag: '' },
+  { months: 12, label: '12 months', rate: 12, tag: 'Popular' },
+  { months: 18, label: '18 months', rate: 14, tag: '' },
+  { months: 24, label: '24 months', rate: 15, tag: '' },
 ];
 
 function calcIndicativeEmi(principal: number, annualRate: number, months: number): number {
@@ -36,10 +35,32 @@ function calcIndicativeEmi(principal: number, annualRate: number, months: number
 type PaymentTab = 'online' | 'emi' | 'cod';
 
 interface FieldErrors {
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
+  name: string; phone: string; email: string; address: string;
+}
+
+// ── Trust badges — sidebar only, coloured ────────────────────────────────────
+const TRUST_ITEMS = [
+  { icon: 'ph:receipt-fill',      label: 'GST Included',         iconClass: 'text-emerald-600', bgClass: 'bg-emerald-50',  borderClass: 'border-emerald-200' },
+  { icon: 'ph:wrench-fill',       label: 'Installation Support', iconClass: 'text-blue-600',    bgClass: 'bg-blue-50',     borderClass: 'border-blue-200'    },
+  { icon: 'ph:shield-check-fill', label: 'Paperless Warranty',   iconClass: 'text-purple-600',  bgClass: 'bg-purple-50',   borderClass: 'border-purple-200'  },
+  { icon: 'ph:truck-fill',        label: '2–5 Days Delivery',    iconClass: 'text-orange-500',  bgClass: 'bg-orange-50',   borderClass: 'border-orange-200'  },
+];
+
+// ── Shown once — in sidebar Order Summary only ───────────────────────────────
+function TrustBadges() {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {TRUST_ITEMS.map((b) => (
+        <div
+          key={b.label}
+          className={`flex items-center gap-2 px-2.5 py-2 rounded-xl border ${b.bgClass} ${b.borderClass}`}
+        >
+          <Icon icon={b.icon} className={`${b.iconClass} flex-shrink-0`} width={14} />
+          <span className="text-[11px] font-semibold text-gray-700 leading-tight">{b.label}</span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function CartClient() {
@@ -48,7 +69,6 @@ export default function CartClient() {
   const isBuyNow     = searchParams.get('mode') === 'buynow';
 
   const { cartItems, updateQuantity, removeFromCart, getSubtotal, getTotalSavings } = useCart();
-
   const [buyNowItem, setBuyNowItem] = useState<any>(null);
 
   useEffect(() => {
@@ -72,7 +92,7 @@ export default function CartClient() {
   const [customerEmail,   setCustomerEmail]   = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [paymentTab,      setPaymentTab]      = useState<PaymentTab>('online');
-  const [selectedEmi,     setSelectedEmi]     = useState(EMI_PLANS[1]); // default 6 months
+  const [selectedEmi,     setSelectedEmi]     = useState(EMI_PLANS[1]);
   const [errors,          setErrors]          = useState<FieldErrors>({ name: '', phone: '', email: '', address: '' });
   const [touched,         setTouched]         = useState({ name: false, phone: false, email: false, address: false });
 
@@ -84,17 +104,12 @@ export default function CartClient() {
   const couponAmt       = couponDiscount;
   const baseTotal       = subtotal - couponAmt;
 
-  // Pay Now: 10% off
   const onlineDiscountAmt = Math.round((baseTotal * ONLINE_DISCOUNT_PCT) / 100);
   const totalOnline       = baseTotal - onlineDiscountAmt;
-
-  // EMI: full price, no discount (bank absorbs cost)
-  const totalEmi = baseTotal;
-  const emiMonthly = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
-
-  // COD: 5% off
-  const codDiscountAmt = Math.round((baseTotal * COD_DISCOUNT_PCT) / 100);
-  const totalCod       = baseTotal - codDiscountAmt;
+  const totalEmi          = baseTotal;
+  const emiMonthly        = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
+  const codDiscountAmt    = Math.round((baseTotal * COD_DISCOUNT_PCT) / 100);
+  const totalCod          = baseTotal - codDiscountAmt;
 
   const totalAmount =
     paymentTab === 'online' ? totalOnline :
@@ -222,7 +237,7 @@ export default function CartClient() {
     <section className="!pt-44 pb-20 bg-white min-h-screen">
       <div className="container mx-auto max-w-8xl px-5 2xl:px-0">
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-3xl font-bold text-dark">{isBuyNow ? '⚡ Buy Now' : 'Shopping Cart'}</h1>
           {isBuyNow && <span className="text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">Express Checkout</span>}
@@ -247,13 +262,20 @@ export default function CartClient() {
                   <p className="text-xs text-primary font-semibold">Express checkout — only this item will be ordered. Your cart remains unchanged.</p>
                 </div>
               )}
+
               {activeItems.map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row gap-4 pb-6 mb-6 border-b border-gray-100 last:border-b-0 last:pb-0 last:mb-0">
-                  <Link href={`/products/${item.id}`} className="w-full sm:w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 hover:opacity-90 transition-opacity">
+
+                  {/* Image only — no badges here */}
+                  <Link href={`/products/${item.id}`}
+                    className="w-full sm:w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 hover:opacity-90 transition-opacity block">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.image || '/images/fallback.jpg'} alt={item.name} className="w-full h-full object-contain p-2"
+                    <img src={item.image || '/images/fallback.jpg'} alt={item.name}
+                      className="w-full h-full object-contain p-2"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/images/fallback.jpg'; }} />
                   </Link>
+
+                  {/* Item details */}
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-dark mb-0.5">{item.name}</h3>
                     <p className="text-xs text-gray-400 mb-3">SKU: {item.SKU}</p>
@@ -287,14 +309,14 @@ export default function CartClient() {
             <div className="bg-white border border-gray-200 rounded-2xl p-6 sticky top-24 space-y-5">
               <h2 className="text-xl font-bold text-dark">Order Summary</h2>
 
-              
+              {/* ✅ Trust badges — coloured, standout, only here */}
+              <TrustBadges />
 
-              {/* ── 3 Payment Method Tabs ── */}
+              {/* 3 Payment Method Tabs */}
               <div>
                 <p className="text-sm font-bold text-gray-800 mb-2">How would you like to pay?</p>
                 <div className="grid grid-cols-3 gap-1.5 p-1 bg-gray-100 rounded-2xl">
 
-                  {/* Tab 1: Pay Now */}
                   <button onClick={() => setPaymentTab('online')}
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'online' ? 'bg-[#5f259f] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:credit-card-fill" width={15} />
@@ -304,15 +326,12 @@ export default function CartClient() {
                     </span>
                   </button>
 
-                  {/* Tab 2: EMI */}
                   <button onClick={() => setPaymentTab('emi')}
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:calendar-check-fill" width={15} />
                     EMI
-                    
                   </button>
 
-                  {/* Tab 3: COD */}
                   <button onClick={() => setPaymentTab('cod')}
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'cod' ? 'bg-[#25D366] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="mdi:cash" width={15} />
@@ -323,9 +342,6 @@ export default function CartClient() {
                   </button>
                 </div>
 
-                {/* ── Tab Info Banners ── */}
-
-                {/* Pay Now banner */}
                 {paymentTab === 'online' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-purple-50 border border-purple-100">
                     <Icon icon="ph:lightning-fill" width={15} className="text-purple-600 flex-shrink-0 mt-0.5" />
@@ -336,7 +352,6 @@ export default function CartClient() {
                   </div>
                 )}
 
-                {/* EMI banner */}
                 {paymentTab === 'emi' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-blue-50 border border-blue-100">
                     <Icon icon="ph:bank-fill" width={15} className="text-blue-600 flex-shrink-0 mt-0.5" />
@@ -347,7 +362,6 @@ export default function CartClient() {
                   </div>
                 )}
 
-                {/* COD banner */}
                 {paymentTab === 'cod' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-green-50 border border-green-100">
                     <Icon icon="ph:truck-fill" width={15} className="text-green-600 flex-shrink-0 mt-0.5" />
@@ -359,7 +373,7 @@ export default function CartClient() {
                 )}
               </div>
 
-              {/* ── EMI Plan Selector (only for EMI tab) ── */}
+              {/* EMI Plan Selector */}
               {paymentTab === 'emi' && (
                 <div className="border border-blue-100 rounded-2xl p-4 bg-blue-50/40">
                   <p className="text-xs font-bold text-gray-700 mb-3">Select EMI Duration</p>
@@ -368,18 +382,17 @@ export default function CartClient() {
                       const monthly = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
                       const isSelected = selectedEmi.months === plan.months;
                       return (
-                        <button
-                          key={plan.months}
-                          onClick={() => setSelectedEmi(plan)}
-                          className={`relative rounded-xl p-2.5 text-left border-2 transition-all ${isSelected ? 'border-blue-500 bg-blue-600 text-white' : 'border-gray-200 bg-white hover:border-blue-300'}`}
-                        >
+                        <button key={plan.months} onClick={() => setSelectedEmi(plan)}
+                          className={`relative rounded-xl p-2.5 text-left border-2 transition-all ${isSelected ? 'border-blue-500 bg-blue-600 text-white' : 'border-gray-200 bg-white hover:border-blue-300'}`}>
                           {plan.tag && (
                             <span className={`absolute -top-2 -right-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${plan.tag === 'No Cost' ? 'bg-green-500 text-white' : 'bg-orange-400 text-white'}`}>
                               {plan.tag}
                             </span>
                           )}
                           <p className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-gray-800'}`}>{plan.label}</p>
-                          <p className={`text-base font-black ${isSelected ? 'text-yellow-300' : 'text-blue-600'}`}>{inr(monthly)}<span className={`text-[10px] font-normal ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>/mo</span></p>
+                          <p className={`text-base font-black ${isSelected ? 'text-yellow-300' : 'text-blue-600'}`}>
+                            {inr(monthly)}<span className={`text-[10px] font-normal ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>/mo</span>
+                          </p>
                           <p className={`text-[10px] ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>{plan.rate === 0 ? 'Zero interest' : `${plan.rate}% p.a.`}</p>
                         </button>
                       );
@@ -394,7 +407,7 @@ export default function CartClient() {
                 </div>
               )}
 
-              {/* ── Price Breakdown ── */}
+              {/* Price Breakdown */}
               <div className="space-y-2 text-sm border-t border-gray-100 pt-4">
                 <div className="flex justify-between">
                   <span className="text-gray-500">MRP Total</span>
@@ -412,36 +425,28 @@ export default function CartClient() {
                     <span className="text-green-600 font-medium">− ₹{couponAmt.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-
-                {/* Pay Now discount row */}
                 {paymentTab === 'online' && (
                   <div className="flex justify-between">
                     <span className="text-purple-600 font-semibold">Online Discount ({ONLINE_DISCOUNT_PCT}%)</span>
                     <span className="text-purple-600 font-semibold">− ₹{onlineDiscountAmt.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-
-                {/* EMI row — show monthly breakdown */}
                 {paymentTab === 'emi' && (
                   <div className="flex justify-between">
                     <span className="text-blue-600 font-semibold">EMI ({selectedEmi.months} months)</span>
                     <span className="text-blue-600 font-semibold">{inr(emiMonthly)}/mo</span>
                   </div>
                 )}
-
-                {/* COD discount row */}
                 {paymentTab === 'cod' && (
                   <div className="flex justify-between">
                     <span className="text-green-600 font-semibold">COD Discount ({COD_DISCOUNT_PCT}%)</span>
                     <span className="text-green-600 font-semibold">− ₹{codDiscountAmt.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-
                 <div className="flex justify-between">
                   <span className="text-gray-500">Delivery</span>
                   <span className="text-green-600 font-medium">FREE</span>
                 </div>
-
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-base font-black">
                     <span>{paymentTab === 'emi' ? 'Total (billed via EMI)' : 'Total Payable'}</span>
@@ -451,8 +456,6 @@ export default function CartClient() {
                     <p className="text-[11px] text-blue-500 text-right mt-1">≈ {inr(emiMonthly)}/month × {selectedEmi.months} months</p>
                   )}
                 </div>
-
-                {/* Savings tag — only for Pay Now and COD */}
                 {paymentTab !== 'emi' && (totalSavings + couponAmt + (paymentTab === 'online' ? onlineDiscountAmt : codDiscountAmt)) > 0 && (
                   <div className="bg-green-50 rounded-xl px-3 py-2">
                     <p className="text-xs font-bold text-green-700">
@@ -462,14 +465,13 @@ export default function CartClient() {
                 )}
               </div>
 
-              {/* ── Customer Details ── */}
+              {/* Customer Details */}
               <div className="border-t border-gray-100 pt-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-gray-900">Delivery Details</h3>
                   <span className="text-[11px] text-red-500 font-semibold bg-red-50 px-2 py-0.5 rounded-full">All fields required</span>
                 </div>
 
-                {/* Name */}
                 <div>
                   <label htmlFor="customer-name" className="block text-xs font-semibold text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
                   <div className="relative">
@@ -483,7 +485,6 @@ export default function CartClient() {
                   {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.name}</p>}
                 </div>
 
-                {/* Phone */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number <span className="text-red-500">*</span></label>
                   <div className={`flex items-center border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/30 transition-colors ${errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
@@ -498,7 +499,6 @@ export default function CartClient() {
                   {errors.phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.phone}</p>}
                 </div>
 
-                {/* Email */}
                 <div>
                   <label htmlFor="customer-email" className="block text-xs font-semibold text-gray-700 mb-1">
                     Email Address <span className="text-red-500">*</span>
@@ -515,7 +515,6 @@ export default function CartClient() {
                   {errors.email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.email}</p>}
                 </div>
 
-                {/* Address */}
                 <div>
                   <label htmlFor="customer-address" className="block text-xs font-semibold text-gray-700 mb-1">Delivery Address <span className="text-red-500">*</span></label>
                   <div className="relative">
@@ -545,10 +544,8 @@ export default function CartClient() {
                 })()}
               </div>
 
-              {/* ── Payment Action Buttons ── */}
+              {/* Payment Action Buttons */}
               <div className="border-t border-gray-100 pt-4 space-y-3">
-
-                {/* PAY NOW */}
                 {paymentTab === 'online' && (
                   <>
                     <PhonePeButton
@@ -569,7 +566,6 @@ export default function CartClient() {
                   </>
                 )}
 
-                {/* EMI via PhonePe */}
                 {paymentTab === 'emi' && (
                   <>
                     <PhonePeButton
@@ -597,7 +593,6 @@ export default function CartClient() {
                   </>
                 )}
 
-                {/* COD */}
                 {paymentTab === 'cod' && (
                   <>
                     <button onClick={handleCodCheckout}
@@ -624,6 +619,7 @@ export default function CartClient() {
                   100% secure & encrypted
                 </p>
               </div>
+
             </div>
           </div>
         </div>

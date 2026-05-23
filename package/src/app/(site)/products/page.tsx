@@ -4,7 +4,7 @@ import ProductsClient from './ProductsClient';
 
 const BASE = 'https://satyajan.com';
 
-// ── Per-category metadata with canonical ─────────────────────────────────────
+// ── Per-category metadata ─────────────────────────────────────────────────────
 const categoryMeta: Record<string, { title: string; description: string }> = {
   'Inverter': {
     title:       'Buy Microtek Inverter in Hyderabad | Best Price & EMI | Satyajan Energy Solutions',
@@ -42,59 +42,37 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { category } = await searchParams;
 
-  // ✅ Category page canonical
   if (category && categoryMeta[category]) {
     const { title, description } = categoryMeta[category];
     const url = `${BASE}/products?category=${encodeURIComponent(category)}`;
     return {
-      title,
-      description,
+      title, description,
       alternates: { canonical: url },
       openGraph: {
-        type:        'website',
-        url,
-        title,
-        description,
-        siteName:    'Satyajan Energy Solutions',
-        images: [{
-          url:    `${BASE}/images/og-default.jpg`,
-          width:  1200,
-          height: 630,
-          alt:    `${category} products — Satyajan Energy Solutions`,
-        }],
+        type: 'website', url, title, description,
+        siteName: 'Satyajan Energy Solutions',
+        images: [{ url: `${BASE}/images/og-default.jpg`, width: 1200, height: 630, alt: `${category} products — Satyajan Energy Solutions` }],
       },
-      twitter: {
-        card:        'summary_large_image',
-        title,
-        description,
-        images:      [`${BASE}/images/og-default.jpg`],
-      },
+      twitter: { card: 'summary_large_image', title, description, images: [`${BASE}/images/og-default.jpg`] },
     };
   }
 
-  // ✅ All products page canonical
   return {
     title:       'Buy Microtek Inverter, Battery & Solar in Hyderabad | Satyajan Energy Solutions',
     description: 'Shop 101+ Microtek products — inverters, batteries, solar panels, online UPS & lithium batteries. Best price in Hyderabad. Free delivery. Easy EMI. Call +91 8019179159.',
     alternates: { canonical: `${BASE}/products` },
     openGraph: {
-      type:        'website',
-      url:         `${BASE}/products`,
-      title:       'Buy Microtek Inverter, Battery & Solar in Hyderabad | Satyajan Energy Solutions',
+      type: 'website', url: `${BASE}/products`,
+      title: 'Buy Microtek Inverter, Battery & Solar in Hyderabad | Satyajan Energy Solutions',
       description: 'Shop 101+ Microtek products in Hyderabad — inverters, batteries, solar, UPS. Best price, free delivery, easy EMI.',
-      siteName:    'Satyajan Energy Solutions',
-      images: [{
-        url:    `${BASE}/images/og-default.jpg`,
-        width:  1200,
-        height: 630,
-        alt:    'Microtek Products — Satyajan Energy Solutions Hyderabad',
-      }],
+      siteName: 'Satyajan Energy Solutions',
+      images: [{ url: `${BASE}/images/og-default.jpg`, width: 1200, height: 630, alt: 'Microtek Products — Satyajan Energy Solutions Hyderabad' }],
     },
     twitter: {
-      card:        'summary_large_image',
-      title:       'Buy Microtek Inverter, Battery & Solar | Satyajan Energy Solutions',
+      card: 'summary_large_image',
+      title: 'Buy Microtek Inverter, Battery & Solar | Satyajan Energy Solutions',
       description: '101+ Microtek products — inverters, batteries, solar, UPS. Best price in Hyderabad.',
-      images:      [`${BASE}/images/og-default.jpg`],
+      images: [`${BASE}/images/og-default.jpg`],
     },
   };
 }
@@ -117,10 +95,12 @@ const Page = async ({
 
   return (
     <>
+      {/* ✅ compact reduces pb-20 → pb-4, closing the gap to the category bar */}
       <HeroSub
         title={heroTitle}
         description={heroDescription}
         badge="Products"
+        compact
       />
       <ProductsClient />
     </>
