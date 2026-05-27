@@ -88,7 +88,7 @@ export const products = [
   {
     id: 6,
     name: "Lithium Batteries",
-    category: "lithium",
+        category: "Lithium Products",
     image: "/images/hero/lithium battery.png",
     description:
       "Advanced lithium-ion batteries with longer life, faster charging, and maintenance-free operation.",

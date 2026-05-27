@@ -12,8 +12,31 @@ interface ProductCacheEntry { products: PropertyHomes[]; ts: number; }
 declare global { interface Window { __productCache?: ProductCacheEntry; } }
 const CACHE_TTL = 5 * 60 * 1000;
 
-// ── Sort — only 2 options ─────────────────────────────────────────────────────
-type SortOption = 'price-asc' | 'price-desc';
+// ── Sort options — Bestseller is default ──────────────────────────────────────
+type SortOption = 'bestseller' | 'price-asc' | 'price-desc';
+
+// ── Bestseller scoring — matches Amazon order data (same patterns as Card.tsx) ─
+const BESTSELLER_PATTERNS: string[] = [
+  'i lithium 1500',
+  'heavy duty 1550 advanced',
+  'super power ups 900',
+  'super power ups 1100',
+  'luxe wifi.*1400',
+  'msmf 7.2',
+  'super power 1100 advanced digital',
+];
+
+function getBestsellerScore(name: string): number {
+  const lower = name.toLowerCase();
+  for (let i = 0; i < BESTSELLER_PATTERNS.length; i++) {
+    const p = BESTSELLER_PATTERNS[i];
+    const matched = p.includes('.*')
+      ? (() => { try { return new RegExp(p, 'i').test(lower); } catch { return false; } })()
+      : lower.includes(p);
+    if (matched) return BESTSELLER_PATTERNS.length - i; // higher score = better rank
+  }
+  return 0;
+}
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
 const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
@@ -105,8 +128,14 @@ function sortCategories(all: string[]): string[] {
   ];
 }
 
-// ── Simple Sort Button ────────────────────────────────────────────────────────
-function SortButton({ sort, onChange }: { sort: SortOption; onChange: (v: SortOption) => void }) {
+// ── Sort + Filter Controls ────────────────────────────────────────────────────
+function SortFilterBar({
+  sort, onSort,
+  inStockOnly, onInStockToggle,
+}: {
+  sort: SortOption; onSort: (v: SortOption) => void;
+  inStockOnly: boolean; onInStockToggle: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -118,47 +147,91 @@ function SortButton({ sort, onChange }: { sort: SortOption; onChange: (v: SortOp
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const isLowHigh = sort === 'price-asc';
+  const sortLabel: Record<SortOption, string> = {
+    bestseller: 'Best Sellers',
+    'price-asc': 'Price: Low to High',
+    'price-desc': 'Price: High to Low',
+  };
+  const sortIcon: Record<SortOption, string> = {
+    bestseller: 'ph:trophy-fill',
+    'price-asc': 'ph:sort-ascending-fill',
+    'price-desc': 'ph:sort-descending-fill',
+  };
 
   return (
-    <div ref={ref} className="relative flex-shrink-0">
+    <div className="flex items-center gap-2 flex-shrink-0">
+
+      {/* In Stock Only toggle */}
       <button
-        onClick={() => setOpen(p => !p)}
-        className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold border bg-white border-gray-200 text-gray-700 hover:border-primary hover:text-primary transition-all shadow-sm whitespace-nowrap"
+        onClick={onInStockToggle}
+        className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold border transition-all shadow-sm whitespace-nowrap ${
+          inStockOnly
+            ? 'bg-emerald-500 text-white border-emerald-500'
+            : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-400 hover:text-emerald-600'
+        }`}
       >
-        <Icon icon={isLowHigh ? 'ph:sort-ascending-fill' : 'ph:sort-descending-fill'} width={15} className="text-primary" />
-        <span className="hidden sm:inline">{isLowHigh ? 'Price: Low to High' : 'Price: High to Low'}</span>
-        <span className="sm:hidden">Sort</span>
-        <Icon icon={open ? 'ph:caret-up-bold' : 'ph:caret-down-bold'} width={11} className="text-gray-400" />
+        <span className={`w-1.5 h-1.5 rounded-full inline-block flex-shrink-0 ${inStockOnly ? 'bg-white' : 'bg-emerald-500'}`} />
+        <span className="hidden sm:inline">In Stock</span>
+        <span className="sm:hidden">Stock</span>
       </button>
 
-      {open && (
-        <>
-          <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden min-w-[190px]">
-            <button
-              onClick={() => { onChange('price-asc'); setOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
-                sort === 'price-asc' ? 'bg-primary/5 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Icon icon="ph:sort-ascending-fill" width={15} className={sort === 'price-asc' ? 'text-primary' : 'text-gray-400'} />
-              Price: Low to High
-              {sort === 'price-asc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
-            </button>
-            <button
-              onClick={() => { onChange('price-desc'); setOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 ${
-                sort === 'price-desc' ? 'bg-primary/5 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Icon icon="ph:sort-descending-fill" width={15} className={sort === 'price-desc' ? 'text-primary' : 'text-gray-400'} />
-              Price: High to Low
-              {sort === 'price-desc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
-            </button>
-          </div>
-        </>
-      )}
+      {/* Sort dropdown */}
+      <div ref={ref} className="relative">
+        <button
+          onClick={() => setOpen(p => !p)}
+          className="flex items-center gap-1.5 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-sm font-bold border bg-white border-gray-200 text-gray-700 hover:border-primary hover:text-primary transition-all shadow-sm whitespace-nowrap"
+        >
+          <Icon icon={sortIcon[sort]} width={14} className="text-primary" />
+          <span className="hidden sm:inline">{sortLabel[sort]}</span>
+          <span className="sm:hidden">Sort</span>
+          <Icon icon={open ? 'ph:caret-up-bold' : 'ph:caret-down-bold'} width={10} className="text-gray-400" />
+        </button>
+
+        {open && (
+          <>
+            <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
+            <div className="absolute right-0 top-full mt-2 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden min-w-[200px]">
+
+              {/* Bestseller */}
+              <button
+                onClick={() => { onSort('bestseller'); setOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
+                  sort === 'bestseller' ? 'bg-amber-50 text-amber-700 font-bold' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Icon icon="ph:trophy-fill" width={14} className={sort === 'bestseller' ? 'text-amber-500' : 'text-gray-400'} />
+                Best Sellers
+                {sort === 'bestseller' && <Icon icon="ph:check-bold" width={12} className="text-amber-500 ml-auto" />}
+              </button>
+
+              {/* Price asc */}
+              <button
+                onClick={() => { onSort('price-asc'); setOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 ${
+                  sort === 'price-asc' ? 'bg-primary/5 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Icon icon="ph:sort-ascending-fill" width={14} className={sort === 'price-asc' ? 'text-primary' : 'text-gray-400'} />
+                Price: Low to High
+                {sort === 'price-asc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
+              </button>
+
+              {/* Price desc */}
+              <button
+                onClick={() => { onSort('price-desc'); setOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 ${
+                  sort === 'price-desc' ? 'bg-primary/5 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Icon icon="ph:sort-descending-fill" width={14} className={sort === 'price-desc' ? 'text-primary' : 'text-gray-400'} />
+                Price: High to Low
+                {sort === 'price-desc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
+              </button>
+
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -169,11 +242,12 @@ const ProductsContent = () => {
   const urlCategory  = searchParams.get('category') || '';
   const urlSearch    = searchParams.get('search')   || '';
 
-  const [products,   setProducts]   = useState<PropertyHomes[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [filter,     setFilter]     = useState<string>('all');
-  const [sort,       setSort]       = useState<SortOption>('price-asc');
+  const [products,     setProducts]     = useState<PropertyHomes[]>([]);
+  const [categories,   setCategories]   = useState<string[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [filter,       setFilter]       = useState<string>('all');
+  const [sort,         setSort]         = useState<SortOption>('bestseller'); // ✅ default
+  const [inStockOnly,  setInStockOnly]  = useState(false);
 
   useEffect(() => {
     if (urlCategory) setFilter(urlCategory);
@@ -218,16 +292,34 @@ const ProductsContent = () => {
 
   const filtered = useMemo(() => {
     let list = filter === 'all' ? [...products] : products.filter(p => p.category === filter);
-    if (sort === 'price-asc')  list = list.sort((a, b) => (Number(a.rate) || 0) - (Number(b.rate) || 0));
-    if (sort === 'price-desc') list = list.sort((a, b) => (Number(b.rate) || 0) - (Number(a.rate) || 0));
+
+    // In Stock Only filter
+    if (inStockOnly) {
+      list = list.filter(p => (p as any).inStock !== false);
+    }
+
+    // Sort
+    if (sort === 'bestseller') {
+      list = list.sort((a, b) => {
+        const sa = getBestsellerScore(a.name || '');
+        const sb = getBestsellerScore(b.name || '');
+        if (sb !== sa) return sb - sa;                          // bestsellers first
+        return (Number(a.rate) || 0) - (Number(b.rate) || 0);  // then price asc
+      });
+    } else if (sort === 'price-asc') {
+      list = list.sort((a, b) => (Number(a.rate) || 0) - (Number(b.rate) || 0));
+    } else {
+      list = list.sort((a, b) => (Number(b.rate) || 0) - (Number(a.rate) || 0));
+    }
+
     return list;
-  }, [products, filter, sort]);
+  }, [products, filter, sort, inStockOnly]);
 
   return (
     <main className="min-h-screen">
       <section className="px-3 sm:px-4 max-w-7xl mx-auto pb-12">
 
-        {/* Category chips + Sort button */}
+        {/* Category chips + Sort/Filter controls */}
         <GlassCard className="p-3 sm:p-4 mb-6 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-3">
 
@@ -250,12 +342,17 @@ const ProductsContent = () => {
               )}
             </div>
 
-            {!loading && <SortButton sort={sort} onChange={setSort} />}
+            {!loading && (
+              <SortFilterBar
+                sort={sort} onSort={setSort}
+                inStockOnly={inStockOnly} onInStockToggle={() => setInStockOnly(p => !p)}
+              />
+            )}
           </div>
         </GlassCard>
 
         {/* Results heading */}
-        <div className="mb-5 sm:mb-6 flex items-center justify-between gap-4">
+        <div className="mb-5 sm:mb-6 flex items-center justify-between gap-4 flex-wrap">
           {loading ? (
             <div className="space-y-2">
               <div className="h-7 sm:h-8 bg-gray-100 rounded-full w-40 sm:w-48 animate-pulse" />
@@ -266,14 +363,24 @@ const ProductsContent = () => {
               <h2 className="text-lg sm:text-3xl font-extrabold text-gray-900 mb-1 tracking-tight">
                 {filter === 'all' ? 'All Products' : filter}
               </h2>
-              <p className="text-xs sm:text-base text-gray-500 font-medium">
+              <p className="text-xs sm:text-base text-gray-500 font-medium flex items-center gap-2 flex-wrap">
                 {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
+                {sort === 'bestseller' && (
+                  <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                    <Icon icon="ph:trophy-fill" width={10} /> Sorted by Best Sellers
+                  </span>
+                )}
+                {inStockOnly && (
+                  <span className="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                    ● In Stock Only
+                  </span>
+                )}
               </p>
             </div>
           )}
 
-          {!loading && filter !== 'all' && (
-            <button onClick={() => setFilter('all')}
+          {!loading && (filter !== 'all' || inStockOnly) && (
+            <button onClick={() => { setFilter('all'); setInStockOnly(false); }}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-500 bg-red-50 border border-red-200 rounded-full hover:bg-red-100 transition-colors flex-shrink-0">
               <Icon icon="ph:x-bold" width={11} /> Clear
             </button>
@@ -288,7 +395,7 @@ const ProductsContent = () => {
             <div className="flex flex-col items-center gap-4">
               <Icon icon="ph:magnifying-glass" width={48} className="text-gray-300" />
               <p className="text-gray-500 text-base sm:text-lg font-semibold">No products found</p>
-              <button onClick={() => setFilter('all')}
+              <button onClick={() => { setFilter('all'); setInStockOnly(false); }}
                 className="mt-2 px-5 py-2 bg-primary text-white rounded-full text-sm font-semibold hover:bg-dark transition-colors">
                 Show all products
               </button>

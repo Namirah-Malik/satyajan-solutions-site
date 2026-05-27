@@ -8,15 +8,13 @@ const WHATSAPP_NUMBER = '918019179159';
 const DEFAULT_MESSAGE = 'Hi! I need help with energy services at Satyajan.';
 
 export default function FloatingWhatsApp() {
-  const [visible, setVisible]   = useState(false);
-  const [pulse,   setPulse]     = useState(true);
-  const [tooltip, setTooltip]   = useState(true);
+  const [visible, setVisible] = useState(false);
+  const [pulse,   setPulse]   = useState(true);
+  const [tooltip, setTooltip] = useState(true);
 
-  // Show after 2 seconds, hide tooltip after 5 seconds
   useEffect(() => {
     const show    = setTimeout(() => setVisible(true), 2000);
     const hideTip = setTimeout(() => setTooltip(false), 7000);
-    // Re-pulse every 10 seconds to grab attention
     const pulseInterval = setInterval(() => {
       setPulse(false);
       setTimeout(() => setPulse(true), 300);
@@ -33,7 +31,8 @@ export default function FloatingWhatsApp() {
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-2">
+    // ✅ bottom-24 on mobile (above nav bar ~70px) → bottom-6 on sm+
+    <div className="fixed bottom-24 sm:bottom-6 right-4 sm:right-6 z-[9999] flex flex-col items-end gap-2">
 
       {/* Tooltip bubble */}
       {tooltip && (
@@ -56,13 +55,12 @@ export default function FloatingWhatsApp() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"
-        className="relative flex items-center justify-center w-14 h-14 bg-[#25D366] hover:bg-[#1fba58] rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
+        className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-[#25D366] hover:bg-[#1fba58] rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
       >
-        {/* Pulse ring */}
         {pulse && (
           <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-40" />
         )}
-        <Icon icon="mdi:whatsapp" className="text-white" width={30} />
+        <Icon icon="mdi:whatsapp" className="text-white" width={26} />
       </a>
     </div>
   );

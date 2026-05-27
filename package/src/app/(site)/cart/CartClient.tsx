@@ -3,7 +3,7 @@
 import { useCart } from '@/context/CartContext';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PhonePeButton from '@/components/PhonePeButton';
 
@@ -35,10 +35,28 @@ function calcIndicativeEmi(principal: number, annualRate: number, months: number
 type PaymentTab = 'online' | 'emi' | 'cod';
 
 interface FieldErrors {
-  name: string; phone: string; email: string; address: string;
+  name: string; phone: string; email: string; address: string; pincode: string;
 }
 
-// ── Trust badges — sidebar only, coloured ────────────────────────────────────
+interface PincodeData {
+  state: string;
+  city: string;
+  district: string;
+  loaded: boolean;
+  manual: boolean; // true if user selected state manually
+}
+
+const INDIAN_STATES = [
+  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh',
+  'Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka',
+  'Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram',
+  'Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu',
+  'Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal',
+  'Andaman & Nicobar Islands','Chandigarh','Dadra & Nagar Haveli',
+  'Daman & Diu','Delhi','Jammu & Kashmir','Ladakh','Lakshadweep','Puducherry',
+];
+
+// ── Trust badges ──────────────────────────────────────────────────────────────
 const TRUST_ITEMS = [
   { icon: 'ph:receipt-fill',      label: 'GST Included',         iconClass: 'text-emerald-600', bgClass: 'bg-emerald-50',  borderClass: 'border-emerald-200' },
   { icon: 'ph:wrench-fill',       label: 'Installation Support', iconClass: 'text-blue-600',    bgClass: 'bg-blue-50',     borderClass: 'border-blue-200'    },
@@ -46,15 +64,11 @@ const TRUST_ITEMS = [
   { icon: 'ph:truck-fill',        label: '2–5 Days Delivery',    iconClass: 'text-orange-500',  bgClass: 'bg-orange-50',   borderClass: 'border-orange-200'  },
 ];
 
-// ── Shown once — in sidebar Order Summary only ───────────────────────────────
 function TrustBadges() {
   return (
     <div className="grid grid-cols-2 gap-2">
       {TRUST_ITEMS.map((b) => (
-        <div
-          key={b.label}
-          className={`flex items-center gap-2 px-2.5 py-2 rounded-xl border ${b.bgClass} ${b.borderClass}`}
-        >
+        <div key={b.label} className={`flex items-center gap-2 px-2.5 py-2 rounded-xl border ${b.bgClass} ${b.borderClass}`}>
           <Icon icon={b.icon} className={`${b.iconClass} flex-shrink-0`} width={14} />
           <span className="text-[11px] font-semibold text-gray-700 leading-tight">{b.label}</span>
         </div>
@@ -91,10 +105,74 @@ export default function CartClient() {
   const [customerPhone,   setCustomerPhone]   = useState('');
   const [customerEmail,   setCustomerEmail]   = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
+  const [customerPincode, setCustomerPincode] = useState('');
+  const [pincodeData,     setPincodeData]     = useState<PincodeData | null>(null);
+  const [pincodeLoading,  setPincodeLoading]  = useState(false);
+  const [pincodeError,    setPincodeError]    = useState('');
+  const [showManualState, setShowManualState] = useState(false);
+  const [manualState,     setManualState]     = useState('');
   const [paymentTab,      setPaymentTab]      = useState<PaymentTab>('online');
   const [selectedEmi,     setSelectedEmi]     = useState(EMI_PLANS[1]);
-  const [errors,          setErrors]          = useState<FieldErrors>({ name: '', phone: '', email: '', address: '' });
-  const [touched,         setTouched]         = useState({ name: false, phone: false, email: false, address: false });
+  const [errors,          setErrors]          = useState<FieldErrors>({ name: '', phone: '', email: '', address: '', pincode: '' });
+  const [touched,         setTouched]         = useState({ name: false, phone: false, email: false, address: false, pincode: false });
+
+  // Effective state — from API or manual
+  const effectiveState = pincodeData?.state || manualState || '';
+  const isOutsideTelangana = effectiveState && effectiveState.toLowerCase() !== 'telangana';
+
+  // ── Pincode lookup via internal API route ─────────────────────────────────
+  const fetchPincode = useCallback(async (pin: string) => {
+    if (pin.length !== 6) {
+      setPincodeData(null);
+      setPincodeError('');
+      setShowManualState(false);
+      setManualState('');
+      return;
+    }
+
+    setPincodeLoading(true);
+    setPincodeError('');
+    setShowManualState(false);
+
+    try {
+      const res = await fetch(`/api/pincode?pin=${pin}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.state) {
+          setPincodeData({ state: data.state, city: data.city || '', district: data.district || '', loaded: true, manual: false });
+          setPincodeError('');
+          setShowManualState(false);
+          setManualState('');
+          setPincodeLoading(false);
+          return;
+        }
+      }
+    } catch {}
+
+    // API failed — show manual state selector
+    setPincodeData(null);
+    setPincodeError('');
+    setShowManualState(true);
+    setPincodeLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (customerPincode.length === 6) {
+      fetchPincode(customerPincode);
+    } else {
+      setPincodeData(null);
+      setPincodeError('');
+      setShowManualState(false);
+      setManualState('');
+    }
+  }, [customerPincode, fetchPincode]);
+
+  // When user picks state manually, create a pincodeData-like object
+  useEffect(() => {
+    if (manualState) {
+      setPincodeData({ state: manualState, city: '', district: '', loaded: true, manual: true });
+    }
+  }, [manualState]);
 
   // ── Totals ────────────────────────────────────────────────────────────────
   const subtotal        = isBuyNow && buyNowItem ? buyNowItem.price * (buyNowItem.quantity || 1) : getSubtotal();
@@ -135,6 +213,11 @@ export default function CartClient() {
       case 'phone':   { const d = value.replace(/\D/g, ''); return (!d || d.length !== 10 || !/^[6-9]/.test(d)) ? 'Enter a valid 10-digit mobile number' : ''; }
       case 'email':   return (!value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) ? 'Enter a valid email address' : '';
       case 'address': return (!value.trim() || value.trim().length < 10) ? 'Enter your full delivery address (min 10 characters)' : '';
+      case 'pincode': {
+        if (!value.trim() || value.replace(/\D/g,'').length !== 6) return 'Enter a valid 6-digit pincode';
+        if (showManualState && !manualState) return 'Please select your state below';
+        return '';
+      }
       default: return '';
     }
   };
@@ -150,16 +233,22 @@ export default function CartClient() {
       phone:   validateField('phone',   customerPhone),
       email:   validateField('email',   customerEmail),
       address: validateField('address', customerAddress),
+      pincode: validateField('pincode', customerPincode),
     };
     setErrors(newErrors);
-    setTouched({ name: true, phone: true, email: true, address: true });
+    setTouched({ name: true, phone: true, email: true, address: true, pincode: true });
     if (Object.values(newErrors).some(Boolean)) {
       setTimeout(() => document.getElementById('customer-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
       return false;
     }
+    const cityPart = pincodeData?.city ? `, ${pincodeData.city}` : '';
+    const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
     try {
       sessionStorage.setItem('pendingOrder', JSON.stringify({
-        customerName, customerPhone: `+91${customerPhone}`, customerEmail, customerAddress,
+        customerName,
+        customerPhone: `+91${customerPhone}`,
+        customerEmail,
+        customerAddress: fullAddress,
         amount: paymentTab === 'online' ? totalOnline : totalEmi,
         discount: paymentTab === 'online' ? onlineDiscountAmt : 0,
         items: activeItems.map(i => ({ name: i.name, SKU: i.SKU || '', price: i.price, quantity: i.quantity, image: i.image || '' })),
@@ -171,6 +260,9 @@ export default function CartClient() {
   // ── COD / WhatsApp checkout ───────────────────────────────────────────────
   const handleCodCheckout = async () => {
     if (!validateForm()) return;
+
+    const cityPart = pincodeData?.city ? `, ${pincodeData.city}` : '';
+    const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
 
     const itemLines = activeItems
       .map((item, i) => `${i + 1}. *${item.name}*\n   SKU: ${item.SKU}\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`)
@@ -185,13 +277,14 @@ export default function CartClient() {
       productDiscount > 0 ? `   Product Discount: -${inr(productDiscount)}` : '',
       couponAmt > 0       ? `   Coupon (${appliedCoupon}): -${inr(couponAmt)}` : '',
       `   COD Discount (${COD_DISCOUNT_PCT}%): -${inr(codDiscountAmt)}`,
-      `   Delivery: FREE`,
+      `   Delivery: ${isOutsideTelangana ? 'Actual logistics charges applicable' : 'FREE'}`,
       `   *Total (Cash on Delivery): ${inr(totalCod)}*`,
       '━━━━━━━━━━━━━━━━━━━━━━━',
       `👤 ${customerName}`,
       `📞 +91${customerPhone}`,
       `📧 ${customerEmail}`,
-      `📍 ${customerAddress}`,
+      `📍 ${fullAddress}`,
+      isOutsideTelangana ? `\n⚠️ *Note: Outside Telangana — logistics charges will be communicated separately.*` : '',
       '\n🙏 Please confirm availability & delivery. Thank you!',
     ].filter(Boolean).join('\n');
 
@@ -203,7 +296,10 @@ export default function CartClient() {
         body: JSON.stringify({
           orderId: `SAT-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
           method: 'cod', status: 'COD_PLACED',
-          customerName, customerPhone: `+91${customerPhone}`, customerEmail, customerAddress,
+          customerName,
+          customerPhone: `+91${customerPhone}`,
+          customerEmail,
+          customerAddress: fullAddress,
           amount: totalCod,
           items: activeItems.map(i => ({ name: i.name, SKU: i.SKU || '', price: i.price, quantity: i.quantity })),
         }),
@@ -237,7 +333,6 @@ export default function CartClient() {
     <section className="!pt-44 pb-20 bg-white min-h-screen">
       <div className="container mx-auto max-w-8xl px-5 2xl:px-0">
 
-        {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-3xl font-bold text-dark">{isBuyNow ? '⚡ Buy Now' : 'Shopping Cart'}</h1>
           {isBuyNow && <span className="text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">Express Checkout</span>}
@@ -265,8 +360,6 @@ export default function CartClient() {
 
               {activeItems.map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row gap-4 pb-6 mb-6 border-b border-gray-100 last:border-b-0 last:pb-0 last:mb-0">
-
-                  {/* Image only — no badges here */}
                   <Link href={`/products/${item.id}`}
                     className="w-full sm:w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 hover:opacity-90 transition-opacity block">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -274,8 +367,6 @@ export default function CartClient() {
                       className="w-full h-full object-contain p-2"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/images/fallback.jpg'; }} />
                   </Link>
-
-                  {/* Item details */}
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-dark mb-0.5">{item.name}</h3>
                     <p className="text-xs text-gray-400 mb-3">SKU: {item.SKU}</p>
@@ -309,14 +400,12 @@ export default function CartClient() {
             <div className="bg-white border border-gray-200 rounded-2xl p-6 sticky top-24 space-y-5">
               <h2 className="text-xl font-bold text-dark">Order Summary</h2>
 
-              {/* ✅ Trust badges — coloured, standout, only here */}
               <TrustBadges />
 
-              {/* 3 Payment Method Tabs */}
+              {/* Payment Method Tabs */}
               <div>
                 <p className="text-sm font-bold text-gray-800 mb-2">How would you like to pay?</p>
                 <div className="grid grid-cols-3 gap-1.5 p-1 bg-gray-100 rounded-2xl">
-
                   <button onClick={() => setPaymentTab('online')}
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'online' ? 'bg-[#5f259f] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:credit-card-fill" width={15} />
@@ -325,13 +414,11 @@ export default function CartClient() {
                       {ONLINE_DISCOUNT_PCT}% OFF
                     </span>
                   </button>
-
                   <button onClick={() => setPaymentTab('emi')}
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:calendar-check-fill" width={15} />
                     EMI
                   </button>
-
                   <button onClick={() => setPaymentTab('cod')}
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'cod' ? 'bg-[#25D366] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="mdi:cash" width={15} />
@@ -351,7 +438,6 @@ export default function CartClient() {
                     </div>
                   </div>
                 )}
-
                 {paymentTab === 'emi' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-blue-50 border border-blue-100">
                     <Icon icon="ph:bank-fill" width={15} className="text-blue-600 flex-shrink-0 mt-0.5" />
@@ -361,7 +447,6 @@ export default function CartClient() {
                     </div>
                   </div>
                 )}
-
                 {paymentTab === 'cod' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-green-50 border border-green-100">
                     <Icon icon="ph:truck-fill" width={15} className="text-green-600 flex-shrink-0 mt-0.5" />
@@ -445,7 +530,9 @@ export default function CartClient() {
                 )}
                 <div className="flex justify-between">
                   <span className="text-gray-500">Delivery</span>
-                  <span className="text-green-600 font-medium">FREE</span>
+                  <span className={isOutsideTelangana ? 'text-amber-600 font-semibold' : 'text-green-600 font-medium'}>
+                    {isOutsideTelangana ? 'Charges apply' : effectiveState ? 'FREE 🎉' : 'FREE'}
+                  </span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-base font-black">
@@ -465,13 +552,14 @@ export default function CartClient() {
                 )}
               </div>
 
-              {/* Customer Details */}
+              {/* ── Customer Details ── */}
               <div className="border-t border-gray-100 pt-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-gray-900">Delivery Details</h3>
                   <span className="text-[11px] text-red-500 font-semibold bg-red-50 px-2 py-0.5 rounded-full">All fields required</span>
                 </div>
 
+                {/* Name */}
                 <div>
                   <label htmlFor="customer-name" className="block text-xs font-semibold text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
                   <div className="relative">
@@ -485,6 +573,7 @@ export default function CartClient() {
                   {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.name}</p>}
                 </div>
 
+                {/* Phone */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number <span className="text-red-500">*</span></label>
                   <div className={`flex items-center border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/30 transition-colors ${errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
@@ -499,6 +588,7 @@ export default function CartClient() {
                   {errors.phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.phone}</p>}
                 </div>
 
+                {/* Email */}
                 <div>
                   <label htmlFor="customer-email" className="block text-xs font-semibold text-gray-700 mb-1">
                     Email Address <span className="text-red-500">*</span>
@@ -515,25 +605,129 @@ export default function CartClient() {
                   {errors.email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.email}</p>}
                 </div>
 
+                {/* ── Pincode with auto-detect + manual fallback ── */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Pincode <span className="text-red-500">*</span>
+                    <span className="text-gray-400 font-normal ml-1">(auto-detects state)</span>
+                  </label>
+                  <div className="relative">
+                    <Icon icon="ph:map-pin-fill" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width={13} />
+                    <input
+                      type="text" inputMode="numeric" maxLength={6}
+                      value={customerPincode}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setCustomerPincode(v);
+                        if (touched.pincode) setErrors(p => ({ ...p, pincode: validateField('pincode', v) }));
+                      }}
+                      onBlur={(e) => handleBlur('pincode', e.target.value)}
+                      placeholder="e.g. 500007"
+                      className={`w-full pl-8 pr-10 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors
+                        ${errors.pincode ? 'border-red-400 bg-red-50'
+                          : pincodeData?.loaded ? 'border-green-400 bg-green-50/30'
+                          : 'border-gray-300'}`}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {pincodeLoading && <Icon icon="svg-spinners:3-dots-fade" className="text-gray-400" width={16} />}
+                      {!pincodeLoading && pincodeData?.loaded && <Icon icon="ph:check-circle-fill" className="text-green-500" width={16} />}
+                    </div>
+                  </div>
+
+                  {errors.pincode && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.pincode}</p>}
+
+                  {/* ── Auto-detected state result ── */}
+                  {pincodeData?.loaded && !pincodeData.manual && (
+                    <div className={`mt-2 p-3 rounded-xl border flex items-start gap-2 ${isOutsideTelangana ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                      <Icon
+                        icon={isOutsideTelangana ? 'ph:warning-fill' : 'ph:check-circle-fill'}
+                        className={isOutsideTelangana ? 'text-amber-500 flex-shrink-0 mt-0.5' : 'text-green-500 flex-shrink-0 mt-0.5'}
+                        width={14}
+                      />
+                      <div>
+                        <p className={`text-[11px] font-bold mb-1 ${isOutsideTelangana ? 'text-amber-800' : 'text-green-800'}`}>
+                          📍 {[pincodeData.city, pincodeData.state].filter(Boolean).join(', ')}
+                        </p>
+                        {!isOutsideTelangana && (
+                          <p className="text-[11px] text-green-700">✅ Free delivery to your location.</p>
+                        )}
+                        {isOutsideTelangana && (
+                          <p className="text-[11px] text-amber-800 leading-relaxed">
+                            <strong>Delivery Information:</strong> To ensure your products arrive safely, all orders are shipped directly from our central warehouse in Hyderabad. While we cover local shipping within Telangana, deliveries to other states will incur actual logistics charges payable by the customer. We appreciate your support and understanding!
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Manual state selector (shown when API can't detect) ── */}
+                  {showManualState && customerPincode.length === 6 && (
+                    <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
+                      <p className="text-[11px] text-gray-600 font-medium flex items-center gap-1.5">
+                        <Icon icon="ph:info-fill" width={12} className="text-gray-400" />
+                        Could not auto-detect. Please select your state:
+                      </p>
+                      <div className="relative">
+                        <select
+                          value={manualState}
+                          onChange={(e) => setManualState(e.target.value)}
+                          className="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none"
+                        >
+                          <option value="">Select your state</option>
+                          {INDIAN_STATES.map(s => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                        <Icon icon="ph:caret-down-bold" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width={11} />
+                      </div>
+
+                      {/* Show delivery message after manual state selected */}
+                      {manualState && (
+                        <div className={`p-2.5 rounded-lg border flex items-start gap-2 ${isOutsideTelangana ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                          <Icon
+                            icon={isOutsideTelangana ? 'ph:warning-fill' : 'ph:check-circle-fill'}
+                            className={isOutsideTelangana ? 'text-amber-500 flex-shrink-0 mt-0.5' : 'text-green-500 flex-shrink-0 mt-0.5'}
+                            width={13}
+                          />
+                          <div>
+                            {!isOutsideTelangana && (
+                              <p className="text-[11px] text-green-700 font-medium">✅ Free delivery to {manualState}.</p>
+                            )}
+                            {isOutsideTelangana && (
+                              <p className="text-[11px] text-amber-800 leading-relaxed">
+                                <strong>Delivery Information:</strong> To ensure your products arrive safely, all orders are shipped directly from our central warehouse in Hyderabad. While we cover local shipping within Telangana, deliveries to other states will incur actual logistics charges payable by the customer. We appreciate your support and understanding!
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Address */}
                 <div>
                   <label htmlFor="customer-address" className="block text-xs font-semibold text-gray-700 mb-1">Delivery Address <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <Icon icon="ph:map-pin-fill" className="absolute left-3 top-3 text-gray-400" width={13} />
+                    <Icon icon="ph:house-fill" className="absolute left-3 top-3 text-gray-400" width={13} />
                     <textarea id="customer-address" value={customerAddress} rows={3}
                       onChange={(e) => { setCustomerAddress(e.target.value); if (touched.address) setErrors(p => ({ ...p, address: validateField('address', e.target.value) })); }}
                       onBlur={(e) => handleBlur('address', e.target.value)}
-                      placeholder="House/Flat No., Street, Area, City, Pincode"
+                      placeholder="House/Flat No., Street, Area, City"
                       className={`w-full pl-8 pr-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none ${errors.address ? 'border-red-400 bg-red-50' : 'border-gray-300'}`} />
                   </div>
                   {errors.address && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.address}</p>}
                 </div>
 
+                {/* Completion indicator */}
                 {(() => {
                   const filled = [customerName, customerPhone, customerEmail, customerAddress].filter(v => v.trim().length > 2).length;
-                  return filled < 4 ? (
+                  const pincodeOk = customerPincode.length === 6 && pincodeData?.loaded && !pincodeError;
+                  const total = filled + (pincodeOk ? 1 : 0);
+                  return total < 5 ? (
                     <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
                       <Icon icon="ph:warning-fill" width={14} className="text-amber-500 flex-shrink-0" />
-                      <p className="text-xs text-amber-700 font-medium">Fill all {4 - filled} remaining field{4 - filled !== 1 ? 's' : ''} to proceed</p>
+                      <p className="text-xs text-amber-700 font-medium">Fill all {5 - total} remaining field{5 - total !== 1 ? 's' : ''} to proceed</p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 p-2.5 bg-green-50 border border-green-200 rounded-xl">
@@ -544,7 +738,7 @@ export default function CartClient() {
                 })()}
               </div>
 
-              {/* Payment Action Buttons */}
+              {/* ── Payment Action Buttons ── */}
               <div className="border-t border-gray-100 pt-4 space-y-3">
                 {paymentTab === 'online' && (
                   <>

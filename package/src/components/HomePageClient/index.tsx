@@ -213,11 +213,10 @@ function TestimonialRow({ items, direction = 'left', speed = 40 }: { items: any[
   )
 }
 
-// ── Comparison data ─────────────────────────────────────────────────────────
+// ── Comparison data ───────────────────────────────────────────────────────────
 type CellValue = true | false | string
 interface ComparisonRow { feature: string; us: CellValue; online: CellValue; local: CellValue }
 
-// ✅ Column order: Satyajan → Online Platforms → Local Sellers
 const COMPARISON_ROWS: ComparisonRow[] = [
   { feature: 'Product Availability',                  us: true,               online: true,                    local: true },
   { feature: 'Expert Guidance',                       us: 'Experienced Team', online: 'Limited',               local: 'Depends on Seller' },
@@ -273,30 +272,23 @@ function WhyChooseUsSection() {
           </p>
         </div>
 
-        {/* ✅ Responsive table: Feature | Satyajan | Online | Local */}
         <div className="sr overflow-x-auto rounded-2xl shadow-xl border border-gray-100">
           <table className="w-full text-sm" style={{ minWidth: '480px' }}>
             <thead>
               <tr className="bg-gray-900 text-white">
-                {/* Feature column — compact */}
-                <th className="text-left px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs sm:text-sm rounded-tl-2xl w-[38%] sm:w-[36%]">
-                  Feature
-                </th>
-                {/* ✅ Satyajan FIRST — highlighted */}
+                <th className="text-left px-3 sm:px-4 py-3 sm:py-4 font-semibold text-xs sm:text-sm rounded-tl-2xl w-[38%] sm:w-[36%]">Feature</th>
                 <th className="text-center px-2 sm:px-4 py-3 sm:py-4 font-bold text-xs sm:text-sm bg-primary w-[22%] sm:w-[21%]">
                   <span className="flex flex-col items-center gap-0.5 sm:gap-1">
                     <span className="text-white/80 text-[10px] sm:text-xs">⚡</span>
                     <span className="leading-tight">Satyajan<br className="sm:hidden" /><span className="hidden sm:inline"> </span>Energy</span>
                   </span>
                 </th>
-                {/* Online Platforms */}
                 <th className="text-center px-2 sm:px-4 py-3 sm:py-4 font-semibold text-xs sm:text-sm w-[21%]">
                   <span className="flex flex-col items-center gap-0.5 sm:gap-1">
                     <span className="text-gray-400 text-[10px] sm:text-xs">🛒</span>
                     <span className="leading-tight">Online<br className="sm:hidden" /><span className="hidden sm:inline"> </span>Platforms</span>
                   </span>
                 </th>
-                {/* Local Sellers */}
                 <th className="text-center px-2 sm:px-4 py-3 sm:py-4 font-semibold text-xs sm:text-sm rounded-tr-2xl w-[19%]">
                   <span className="flex flex-col items-center gap-0.5 sm:gap-1">
                     <span className="text-gray-400 text-[10px] sm:text-xs">🏪</span>
@@ -308,28 +300,10 @@ function WhyChooseUsSection() {
             <tbody>
               {COMPARISON_ROWS.map((row, i) => (
                 <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}>
-                  {/* Feature label */}
-                  <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 font-medium text-gray-800 text-[11px] sm:text-sm leading-snug">
-                    {row.feature}
-                  </td>
-                  {/* Satyajan — highlighted */}
-                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center bg-primary/5">
-                    <div className="flex items-center justify-center">
-                      <UsCellContent value={row.us} />
-                    </div>
-                  </td>
-                  {/* Online */}
-                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center">
-                    <div className="flex items-center justify-center">
-                      <CellContent value={row.online} />
-                    </div>
-                  </td>
-                  {/* Local */}
-                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center">
-                    <div className="flex items-center justify-center">
-                      <CellContent value={row.local} />
-                    </div>
-                  </td>
+                  <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 font-medium text-gray-800 text-[11px] sm:text-sm leading-snug">{row.feature}</td>
+                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center bg-primary/5"><div className="flex items-center justify-center"><UsCellContent value={row.us} /></div></td>
+                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center"><div className="flex items-center justify-center"><CellContent value={row.online} /></div></td>
+                  <td className="px-2 sm:px-4 py-2.5 sm:py-3.5 text-center"><div className="flex items-center justify-center"><CellContent value={row.local} /></div></td>
                 </tr>
               ))}
             </tbody>
@@ -417,7 +391,7 @@ export default function HomePageClient() {
   return (
     <main className="min-h-screen overflow-x-hidden">
 
-      {/* HERO */}
+      {/* ── HERO ── */}
       <section id="hero" className="relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-gray-50">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute w-[500px] h-[500px] bg-primary/5 rounded-full -top-40 -left-40 blur-3xl" />
@@ -425,32 +399,50 @@ export default function HomePageClient() {
         </div>
         <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-140px)]">
           <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 py-6 lg:py-8 z-10">
+
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-flex items-center gap-2 bg-primary/5 border border-primary/30 text-primary text-xs font-semibold px-3 py-1.5 rounded-full w-fit mb-5">
               <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />Authorized Microtek Partner
             </motion.div>
+
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.35 }}
               className="text-3xl sm:text-4xl lg:text-[3.25rem] font-extrabold leading-[1.12] tracking-tight text-gray-900 mb-5">
               Power Your Future with{' '}<span className="text-primary">Clean Solar Energy</span>
             </motion.h1>
+
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}
               className="max-w-md text-[15px] text-gray-500 leading-relaxed mb-7">
               Save up to 80% on electricity bills. 30-year warranty. Easy EMI options. Join 1000+ satisfied customers across India.
             </motion.p>
+
+            {/* ── CTA Buttons ── */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.65 }}
-              className="flex flex-col sm:flex-row gap-3 mb-8">
+              className="flex flex-col sm:flex-row gap-3 mb-4">
               <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                 className="inline-flex items-center justify-center gap-2 bg-primary text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-primary/90 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-sm">
                 Book Free Consultation <ArrowRight className="w-4 h-4" />
               </button>
               <Link href="/solar-calculator"
                 className="inline-flex items-center justify-center gap-2 border border-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-lg hover:bg-gray-50 hover:shadow-md active:scale-95 transition-all text-sm bg-white">
-                <Calculator className="w-4 h-4 text-primary" /> Calculate Savings
+                <Calculator className="w-4 h-4 text-primary" /> Solar Calculator
               </Link>
             </motion.div>
+
+            {/* ✅ Inverter Calculator button — separate row, styled to stand out */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.72 }}
+              className="mb-6">
+              <Link href="/inverter-calculator"
+                className="inline-flex items-center gap-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-semibold px-5 py-2.5 rounded-lg transition-all text-sm group">
+                <Icon icon="ph:calculator-fill" width={16} className="text-amber-600" />
+                Not sure which inverter to buy?
+                <span className="font-bold text-amber-700 group-hover:underline">Use Load Calculator →</span>
+              </Link>
+            </motion.div>
+
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.75 }} className="mb-8">
               <GoogleRatingBadge />
             </motion.div>
+
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.85 }}
               className="flex items-center gap-5 sm:gap-8 pt-4 border-t border-gray-100">
               <StatCard value="1000+" label="Happy Customers" />
@@ -460,6 +452,7 @@ export default function HomePageClient() {
               <StatCard value="80%" label="Bill Savings" />
             </motion.div>
           </div>
+
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
             className="relative bg-gradient-to-br from-gray-50 to-emerald-50/30 lg:border-l border-gray-100 min-h-[500px] lg:min-h-0">
             <HeroSlideshow />
