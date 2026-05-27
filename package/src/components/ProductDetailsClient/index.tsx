@@ -27,7 +27,6 @@ function parseWarranty(features: string[], salient: string[]): { label: string; 
   const all = [...(salient || []), ...(features || [])];
   for (const f of all) {
     if (!/warranty/i.test(f)) continue;
-    // Battery style: "60 months warranty (36 months flat + 24 months pro-rata)"
     const proRata = f.match(/(\d+)\s*months?\s*(?:warranty)?[:\s-]*\(?(\d+)\s*months?\s*flat\s*\+\s*(\d+)\s*months?\s*pro[- ]?rata\)?/i);
     if (proRata) {
       return {
@@ -35,10 +34,8 @@ function parseWarranty(features: string[], salient: string[]): { label: string; 
         detail: `${proRata[2]} months flat + ${proRata[3]} months pro-rata`,
       };
     }
-    // Inverter style: "3 Years Warranty" or "2-Year Warranty"
     const yr = f.match(/(\d+)[- ]?[Yy]ear[s]?\s*[Ww]arranty/);
     if (yr) return { label: `${yr[1]}-Year Warranty`, detail: '' };
-    // Fallback
     const mo = f.match(/(\d+)\s*[Mm]onths?\s*[Ww]arranty/);
     if (mo) return { label: `${mo[1]}-Month Warranty`, detail: '' };
   }
@@ -47,8 +44,8 @@ function parseWarranty(features: string[], salient: string[]): { label: string; 
 
 // ── Pincode delivery estimator ────────────────────────────────────────────────
 function PincodeChecker() {
-  const [pin,      setPin]      = useState('');
-  const [result,   setResult]   = useState<null | { days: string; city: string; ok: boolean }>(null);
+  const [pin, setPin] = useState('');
+  const [result, setResult] = useState<null | { days: string; city: string; ok: boolean }>(null);
   const [checking, setChecking] = useState(false);
 
   const check = () => {
@@ -113,12 +110,12 @@ function PincodeChecker() {
 
 // ── What You Get from Satyajan ────────────────────────────────────────────────
 const SATYAJAN_PROMISES = [
-  { icon: 'ph:truck-fill',          color: 'text-blue-600',   bg: 'bg-blue-50',    border: 'border-blue-200',   label: 'Free Delivery',            sub: 'Across Hyderabad & Telangana' },
-  { icon: 'ph:wrench-fill',         color: 'text-emerald-600',bg: 'bg-emerald-50', border: 'border-emerald-200',label: 'Expert Installation',       sub: 'By certified technicians' },
-  { icon: 'ph:shield-check-fill',   color: 'text-purple-600', bg: 'bg-purple-50',  border: 'border-purple-200', label: 'Paperless Warranty',         sub: 'Digital warranty registration' },
-  { icon: 'ph:receipt-fill',        color: 'text-orange-600', bg: 'bg-orange-50',  border: 'border-orange-200', label: 'GST Invoice Included',       sub: 'Official tax invoice' },
-  { icon: 'ic:baseline-whatsapp',   color: 'text-green-600',  bg: 'bg-green-50',   border: 'border-green-200',  label: 'Direct WhatsApp Support',    sub: '+91 8019179159' },
-  { icon: 'ph:medal-fill',          color: 'text-amber-600',  bg: 'bg-amber-50',   border: 'border-amber-200',  label: 'Authorized Microtek Dealer', sub: 'Genuine products guaranteed' },
+  { icon: 'ph:truck-fill', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', label: 'Free Delivery', sub: 'Across Hyderabad & Telangana' },
+  { icon: 'ph:wrench-fill', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', label: 'Expert Installation', sub: 'By certified technicians' },
+  { icon: 'ph:shield-check-fill', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200', label: 'Paperless Warranty', sub: 'Digital warranty registration' },
+  { icon: 'ph:receipt-fill', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200', label: 'GST Invoice Included', sub: 'Official tax invoice' },
+  { icon: 'ic:baseline-whatsapp', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', label: 'Direct WhatsApp Support', sub: '+91 8019179159' },
+  { icon: 'ph:medal-fill', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', label: 'Authorized Microtek Dealer', sub: 'Genuine products guaranteed' },
 ];
 
 function WhatYouGet() {
@@ -177,8 +174,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
   };
 
   const tags: string[] = Array.isArray(product.tags) ? product.tags : [];
-
-  // Parse warranty
   const warrantyInfo = parseWarranty(product.features || [], product.salient_features || []);
 
   return (
@@ -186,7 +181,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
       <main className="min-h-screen pt-20 sm:pt-28 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-          {/* Breadcrumb */}
           <Breadcrumb
             items={[
               { label: 'Home', href: '/' },
@@ -197,18 +191,13 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
           />
 
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 items-start">
-
-            {/* ── LEFT: Image ── */}
             <div className="w-full sm:w-[45%] flex-shrink-0 sm:sticky sm:top-28">
               <div className="rounded-2xl border border-gray-200 bg-white shadow p-4">
                 <ProductGallery images={images} name={product.name} />
               </div>
             </div>
 
-            {/* ── RIGHT: Info ── */}
             <div className="flex-1 flex flex-col gap-4">
-
-              {/* Category + blog banner */}
               <div className="flex items-center gap-3 flex-wrap">
                 {product.category && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/20">
@@ -218,14 +207,12 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 <BlogEducationBanner category={product.categorySlug || product.category} />
               </div>
 
-              {/* Title */}
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                 {product.name}
               </h1>
 
               <p className="text-sm text-gray-500">SKU: {product.SKU}</p>
 
-              {/* Price + tax note */}
               <div>
                 <span className="text-3xl sm:text-4xl font-bold text-primary">{formattedPrice}</span>
                 {price > 0 && (
@@ -233,16 +220,12 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 )}
               </div>
 
-              {/* ✅ Warranty */}
               {warrantyInfo && <WarrantyBadge label={warrantyInfo.label} detail={warrantyInfo.detail} />}
 
-              {/* EMI */}
               {price > 0 && <EMICalculator price={price} />}
 
-              {/* ✅ Pincode delivery checker */}
               <PincodeChecker />
 
-              {/* Description */}
               {product.description && (
                 <div className="border border-gray-200 rounded-xl p-5 bg-gray-50">
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">About This Product</p>
@@ -250,7 +233,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
-              {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleAddToCart}
@@ -269,10 +251,8 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </Link>
               </div>
 
-              {/* ✅ What you get from Satyajan */}
               <WhatYouGet />
 
-              {/* Spec summary row */}
               {product.data && Array.isArray(product.data) && product.data.some((i: any) => i?.labal) && (
                 <div className="border border-gray-200 rounded-xl overflow-hidden">
                   <div className="grid grid-cols-3 divide-x divide-gray-200">
@@ -289,7 +269,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
-              {/* Key Highlights */}
               {Array.isArray(product.salient_features) && product.salient_features.length > 0 && (
                 <div>
                   <h3 className="text-base font-bold text-gray-900 mb-3">Key Highlights</h3>
@@ -304,7 +283,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
-              {/* Product Features */}
               {Array.isArray(product.features) && product.features.length > 0 && (
                 <div className="border border-gray-200 rounded-xl p-5 bg-blue-50/40">
                   <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
@@ -322,7 +300,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
-              {/* Specifications */}
               {Array.isArray(product.specifications) && product.specifications.length > 0 && (
                 <div>
                   <h3 className="text-base font-bold text-gray-900 mb-3">Specifications</h3>
@@ -341,7 +318,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
-              {/* Tags */}
               {tags.length > 0 && (
                 <div className="pt-2">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Tags</p>
@@ -356,7 +332,6 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
-              {/* Category link */}
               {product.category && (
                 <div className="pt-2 border-t border-gray-100">
                   <p className="text-sm text-gray-500">
