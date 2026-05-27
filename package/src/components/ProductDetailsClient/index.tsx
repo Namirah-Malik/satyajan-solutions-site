@@ -30,7 +30,7 @@ function parseWarranty(features: string[], salient: string[]): { label: string; 
     const proRata = f.match(/(\d+)\s*months?\s*(?:warranty)?[:\s-]*\(?(\d+)\s*months?\s*flat\s*\+\s*(\d+)\s*months?\s*pro[- ]?rata\)?/i);
     if (proRata) {
       return {
-        label: `${proRata[1]}-Month Warranty`,
+        label:  `${proRata[1]}-Month Warranty`,
         detail: `${proRata[2]} months flat + ${proRata[3]} months pro-rata`,
       };
     }
@@ -44,8 +44,8 @@ function parseWarranty(features: string[], salient: string[]): { label: string; 
 
 // ── Pincode delivery estimator ────────────────────────────────────────────────
 function PincodeChecker() {
-  const [pin, setPin] = useState('');
-  const [result, setResult] = useState<null | { days: string; city: string; ok: boolean }>(null);
+  const [pin,      setPin]      = useState('');
+  const [result,   setResult]   = useState<null | { days: string; city: string; ok: boolean }>(null);
   const [checking, setChecking] = useState(false);
 
   const check = () => {
@@ -59,7 +59,7 @@ function PincodeChecker() {
       let days = ''; let city = ''; let ok = true;
       if (/^500/.test(p) || /^501/.test(p) || /^502/.test(p)) {
         days = '1–3 business days'; city = 'Hyderabad / Secunderabad';
-      } else if (/^50/.test(p) || /^503/.test(p) || /^504/.test(p) || /^505/.test(p) || /^506/.test(p) || /^507/.test(p) || /^508/.test(p)) {
+      } else if (/^50[3-8]/.test(p)) {
         days = '2–4 business days'; city = 'Telangana';
       } else if (/^5/.test(p)) {
         days = '3–5 business days'; city = 'South India';
@@ -80,7 +80,8 @@ function PincodeChecker() {
       <div className="flex gap-2">
         <input
           type="tel" inputMode="numeric" maxLength={6}
-          value={pin} onChange={e => { setPin(e.target.value.replace(/\D/g, '').slice(0, 6)); setResult(null); }}
+          value={pin}
+          onChange={e => { setPin(e.target.value.replace(/\D/g, '').slice(0, 6)); setResult(null); }}
           onKeyDown={e => e.key === 'Enter' && check()}
           placeholder="Enter 6-digit pincode"
           className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
@@ -94,7 +95,9 @@ function PincodeChecker() {
       </div>
       {result && (
         <div className={`mt-2.5 flex items-start gap-2 px-3 py-2.5 rounded-xl text-xs font-medium ${
-          result.ok ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-red-50 border border-red-200 text-red-700'
+          result.ok
+            ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+            : 'bg-red-50 border border-red-200 text-red-700'
         }`}>
           <Icon icon={result.ok ? 'ph:truck-fill' : 'ph:warning-circle-fill'} width={14} className="flex-shrink-0 mt-0.5" />
           <span>
@@ -110,12 +113,12 @@ function PincodeChecker() {
 
 // ── What You Get from Satyajan ────────────────────────────────────────────────
 const SATYAJAN_PROMISES = [
-  { icon: 'ph:truck-fill', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', label: 'Free Delivery', sub: 'Across Hyderabad & Telangana' },
-  { icon: 'ph:wrench-fill', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', label: 'Expert Installation', sub: 'By certified technicians' },
-  { icon: 'ph:shield-check-fill', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200', label: 'Paperless Warranty', sub: 'Digital warranty registration' },
-  { icon: 'ph:receipt-fill', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200', label: 'GST Invoice Included', sub: 'Official tax invoice' },
-  { icon: 'ic:baseline-whatsapp', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', label: 'Direct WhatsApp Support', sub: '+91 8019179159' },
-  { icon: 'ph:medal-fill', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', label: 'Authorized Microtek Dealer', sub: 'Genuine products guaranteed' },
+  { icon: 'ph:truck-fill',         color: 'text-blue-600',    bg: 'bg-blue-50',    border: 'border-blue-200',    label: 'Free Delivery',             sub: 'Across Hyderabad & Telangana' },
+  { icon: 'ph:wrench-fill',        color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', label: 'Expert Installation',        sub: 'By certified technicians' },
+  { icon: 'ph:shield-check-fill',  color: 'text-purple-600',  bg: 'bg-purple-50',  border: 'border-purple-200',  label: 'Paperless Warranty',         sub: 'Digital warranty registration' },
+  { icon: 'ph:receipt-fill',       color: 'text-orange-600',  bg: 'bg-orange-50',  border: 'border-orange-200',  label: 'GST Invoice Included',       sub: 'Official tax invoice' },
+  { icon: 'ic:baseline-whatsapp',  color: 'text-green-600',   bg: 'bg-green-50',   border: 'border-green-200',   label: 'Direct WhatsApp Support',    sub: '+91 8019179159' },
+  { icon: 'ph:medal-fill',         color: 'text-amber-600',   bg: 'bg-amber-50',   border: 'border-amber-200',   label: 'Authorized Microtek Dealer', sub: 'Genuine products guaranteed' },
 ];
 
 function WhatYouGet() {
@@ -149,11 +152,28 @@ function WarrantyBadge({ label, detail }: { label: string; detail: string }) {
       <Icon icon="ph:shield-check-fill" className="text-emerald-600 flex-shrink-0" width={20} />
       <div>
         <p className="text-sm font-bold text-emerald-800">{label}</p>
-        {detail && (
-          <p className="text-xs text-emerald-600 mt-0.5">{detail}</p>
-        )}
+        {detail && <p className="text-xs text-emerald-600 mt-0.5">{detail}</p>}
       </div>
     </div>
+  );
+}
+
+// ── Stock status badge ────────────────────────────────────────────────────────
+function StockBadge({ status }: { status: string }) {
+  const isInStock    = status === 'In Stock';
+  const isDelayed    = status === 'Available in 5-7 Days';
+  const colorClass   = isInStock  ? 'bg-green-100 text-green-700 border-green-200'
+                     : isDelayed  ? 'bg-amber-100 text-amber-700 border-amber-200'
+                     :              'bg-red-100 text-red-700 border-red-200';
+  const iconName     = isInStock  ? 'ph:check-circle-fill'
+                     : isDelayed  ? 'ph:clock-fill'
+                     :              'ph:x-circle-fill';
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${colorClass}`}>
+      <Icon icon={iconName} width={14} />
+      {status}
+    </span>
   );
 }
 
@@ -164,17 +184,24 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
   const { addToCart } = useCart();
   const [adding, setAdding] = useState(false);
 
-  const price = typeof product.price === 'number' ? product.price : Number(product.price) || 0;
+  const price     = typeof product.price === 'number' ? product.price : Number(product.price) || 0;
   const mainImage = images?.[0]?.src || '/images/fallback.jpg';
 
   const handleAddToCart = () => {
     setAdding(true);
-    addToCart({ id: product.id || product.SKU, name: product.name, SKU: product.SKU || `SKU-${product.id}`, price, image: mainImage });
+    addToCart({
+      id:    product.id || product.SKU,
+      name:  product.name,
+      SKU:   product.SKU || `SKU-${product.id}`,
+      price,
+      image: mainImage,
+    });
     setTimeout(() => setAdding(false), 500);
   };
 
-  const tags: string[] = Array.isArray(product.tags) ? product.tags : [];
-  const warrantyInfo = parseWarranty(product.features || [], product.salient_features || []);
+  const tags:         string[] = Array.isArray(product.tags) ? product.tags : [];
+  const warrantyInfo           = parseWarranty(product.features || [], product.salient_features || []);
+  const stockStatus: string    = product.stockStatus || 'In Stock';
 
   return (
     <>
@@ -183,21 +210,26 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
 
           <Breadcrumb
             items={[
-              { label: 'Home', href: '/' },
-              { label: 'Products', href: '/products' },
+              { label: 'Home',       href: '/' },
+              { label: 'Products',   href: '/products' },
               { label: product.category, href: `/products?category=${encodeURIComponent(product.category)}` },
               { label: product.name, href: `/products/${product.slug}` },
             ]}
           />
 
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 items-start">
+
+            {/* ── LEFT: Gallery ── */}
             <div className="w-full sm:w-[45%] flex-shrink-0 sm:sticky sm:top-28">
               <div className="rounded-2xl border border-gray-200 bg-white shadow p-4">
                 <ProductGallery images={images} name={product.name} />
               </div>
             </div>
 
+            {/* ── RIGHT: Info ── */}
             <div className="flex-1 flex flex-col gap-4">
+
+              {/* Category badge + blog banner */}
               <div className="flex items-center gap-3 flex-wrap">
                 {product.category && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/20">
@@ -207,12 +239,18 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 <BlogEducationBanner category={product.categorySlug || product.category} />
               </div>
 
+              {/* Title */}
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                 {product.name}
               </h1>
 
-              <p className="text-sm text-gray-500">SKU: {product.SKU}</p>
+              {/* SKU + Stock status */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <p className="text-sm text-gray-500">SKU: {product.SKU}</p>
+                <StockBadge status={stockStatus} />
+              </div>
 
+              {/* Price + tax note */}
               <div>
                 <span className="text-3xl sm:text-4xl font-bold text-primary">{formattedPrice}</span>
                 {price > 0 && (
@@ -220,12 +258,18 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 )}
               </div>
 
-              {warrantyInfo && <WarrantyBadge label={warrantyInfo.label} detail={warrantyInfo.detail} />}
+              {/* Warranty badge */}
+              {warrantyInfo && (
+                <WarrantyBadge label={warrantyInfo.label} detail={warrantyInfo.detail} />
+              )}
 
+              {/* EMI */}
               {price > 0 && <EMICalculator price={price} />}
 
+              {/* Pincode checker */}
               <PincodeChecker />
 
+              {/* Description */}
               {product.description && (
                 <div className="border border-gray-200 rounded-xl p-5 bg-gray-50">
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">About This Product</p>
@@ -233,6 +277,7 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
+              {/* CTA buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleAddToCart}
@@ -244,15 +289,18 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                     : <><Icon icon="solar:cart-large-4-bold" width={20} /> Add to Cart</>}
                 </button>
                 <Link
-                  href="https://wa.me/918019179159" target="_blank" rel="noopener noreferrer"
+                  href="https://wa.me/918019179159"
+                  target="_blank" rel="noopener noreferrer"
                   className="flex-1 border-2 border-primary text-primary px-6 py-3 rounded-full font-semibold hover:bg-primary hover:text-white transition-colors text-center text-sm sm:text-base"
                 >
                   Inquire Now
                 </Link>
               </div>
 
+              {/* What you get */}
               <WhatYouGet />
 
+              {/* Spec summary row */}
               {product.data && Array.isArray(product.data) && product.data.some((i: any) => i?.labal) && (
                 <div className="border border-gray-200 rounded-xl overflow-hidden">
                   <div className="grid grid-cols-3 divide-x divide-gray-200">
@@ -269,6 +317,7 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
+              {/* Key Highlights */}
               {Array.isArray(product.salient_features) && product.salient_features.length > 0 && (
                 <div>
                   <h3 className="text-base font-bold text-gray-900 mb-3">Key Highlights</h3>
@@ -283,6 +332,7 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
+              {/* Product Features */}
               {Array.isArray(product.features) && product.features.length > 0 && (
                 <div className="border border-gray-200 rounded-xl p-5 bg-blue-50/40">
                   <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
@@ -300,6 +350,7 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
+              {/* Specifications */}
               {Array.isArray(product.specifications) && product.specifications.length > 0 && (
                 <div>
                   <h3 className="text-base font-bold text-gray-900 mb-3">Specifications</h3>
@@ -318,13 +369,17 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
+              {/* Tags */}
               {tags.length > 0 && (
                 <div className="pt-2">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Tags</p>
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag: string, i: number) => (
-                      <Link key={i} href={`/products?search=${encodeURIComponent(tag)}`}
-                        className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors border border-gray-200">
+                      <Link
+                        key={i}
+                        href={`/products?search=${encodeURIComponent(tag)}`}
+                        className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors border border-gray-200"
+                      >
                         {tag}
                       </Link>
                     ))}
@@ -332,11 +387,15 @@ export default function ProductDetailsClient({ product, images, formattedPrice, 
                 </div>
               )}
 
+              {/* Category link */}
               {product.category && (
                 <div className="pt-2 border-t border-gray-100">
                   <p className="text-sm text-gray-500">
                     Category:{' '}
-                    <Link href={`/products?category=${encodeURIComponent(product.category)}`} className="text-primary font-semibold hover:underline">
+                    <Link
+                      href={`/products?category=${encodeURIComponent(product.category)}`}
+                      className="text-primary font-semibold hover:underline"
+                    >
                       {product.category}
                     </Link>
                   </p>
