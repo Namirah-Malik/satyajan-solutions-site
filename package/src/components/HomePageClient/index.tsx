@@ -112,8 +112,8 @@ function GoogleRatingBadge() {
         ))}
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-sm font-extrabold text-gray-900">4.8</span>
-        <span className="text-xs text-gray-500 font-medium">· 150+ Reviews</span>
+        <span className="text-sm font-extrabold text-gray-900">4.9</span>
+        <span className="text-xs text-gray-500 font-medium">· 200+ Reviews</span>
       </div>
       <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
     </a>

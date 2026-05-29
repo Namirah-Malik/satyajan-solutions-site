@@ -15,33 +15,30 @@ interface Appliance {
 }
 
 const APPLIANCES: Appliance[] = [
-  // Essential
   { id: 'fan',          name: 'Ceiling Fan',           icon: 'ph:fan-fill',              watts: 75,   default: 3, category: 'essential' },
   { id: 'light_led',    name: 'LED Light',              icon: 'ph:lightbulb-fill',        watts: 10,   default: 6, category: 'essential' },
   { id: 'light_cfl',    name: 'CFL / Tubelight',        icon: 'ph:lamp-fill',             watts: 25,   default: 0, category: 'essential' },
   { id: 'phone',        name: 'Mobile Charger',         icon: 'ph:device-mobile-fill',    watts: 10,   default: 2, category: 'essential' },
   { id: 'wifi',         name: 'Wi-Fi Router',           icon: 'ph:wifi-high-fill',        watts: 15,   default: 1, category: 'essential' },
-  // Comfort
-  { id: 'tv',           name: 'LED TV (32–43″)',         icon: 'ph:television-fill',       watts: 80,   default: 1, category: 'comfort' },
-  { id: 'laptop',       name: 'Laptop',                 icon: 'ph:laptop-fill',           watts: 65,   default: 0, category: 'comfort' },
-  { id: 'fridge_small', name: 'Refrigerator (Small)',   icon: 'ph:thermometer-cold-fill', watts: 150,  default: 0, category: 'comfort' },
-  { id: 'fridge',       name: 'Refrigerator (Double)',  icon: 'ph:thermometer-cold-fill', watts: 250,  default: 1, category: 'comfort' },
-  { id: 'mixer',        name: 'Mixer / Grinder',        icon: 'ph:spiral-fill',           watts: 500,  default: 0, category: 'comfort' },
-  { id: 'cooler',       name: 'Desert Cooler',          icon: 'ph:wind-fill',             watts: 200,  default: 0, category: 'comfort' },
-  // Heavy
-  { id: 'ac_1t',        name: 'AC (1 Ton)',             icon: 'ph:snowflake-fill',        watts: 1200, default: 0, category: 'heavy' },
-  { id: 'ac_15t',       name: 'AC (1.5 Ton)',           icon: 'ph:snowflake-fill',        watts: 1800, default: 0, category: 'heavy' },
-  { id: 'geyser',       name: 'Geyser / Water Heater',  icon: 'ph:flame-fill',            watts: 2000, default: 0, category: 'heavy' },
-  { id: 'washing',      name: 'Washing Machine',        icon: 'ph:washing-machine-fill',  watts: 500,  default: 0, category: 'heavy' },
-  { id: 'pump',         name: 'Water Pump (0.5 HP)',    icon: 'ph:wave-fill',             watts: 400,  default: 0, category: 'heavy' },
+  { id: 'tv',           name: 'LED TV (32–43″)',         icon: 'ph:television-fill',       watts: 80,   default: 1, category: 'comfort'   },
+  { id: 'laptop',       name: 'Laptop',                 icon: 'ph:laptop-fill',           watts: 65,   default: 0, category: 'comfort'   },
+  { id: 'fridge_small', name: 'Refrigerator (Small)',   icon: 'ph:thermometer-cold-fill', watts: 150,  default: 0, category: 'comfort'   },
+  { id: 'fridge',       name: 'Refrigerator (Double)',  icon: 'ph:thermometer-cold-fill', watts: 250,  default: 1, category: 'comfort'   },
+  { id: 'mixer',        name: 'Mixer / Grinder',        icon: 'ph:spiral-fill',           watts: 500,  default: 0, category: 'comfort'   },
+  { id: 'cooler',       name: 'Desert Cooler',          icon: 'ph:wind-fill',             watts: 200,  default: 0, category: 'comfort'   },
+  { id: 'ac_1t',        name: 'AC (1 Ton)',             icon: 'ph:snowflake-fill',        watts: 1200, default: 0, category: 'heavy'     },
+  { id: 'ac_15t',       name: 'AC (1.5 Ton)',           icon: 'ph:snowflake-fill',        watts: 1800, default: 0, category: 'heavy'     },
+  { id: 'geyser',       name: 'Geyser / Water Heater',  icon: 'ph:flame-fill',            watts: 2000, default: 0, category: 'heavy'     },
+  { id: 'washing',      name: 'Washing Machine',        icon: 'ph:washing-machine-fill',  watts: 500,  default: 0, category: 'heavy'     },
+  { id: 'pump',         name: 'Water Pump (0.5 HP)',    icon: 'ph:wave-fill',             watts: 400,  default: 0, category: 'heavy'     },
 ];
 
 const BACKUP_OPTIONS = [
-  { hours: 2,  label: '2 hrs',  note: 'Short outages'    },
-  { hours: 4,  label: '4 hrs',  note: 'Half-day backup'  },
-  { hours: 6,  label: '6 hrs',  note: 'Full-day backup'  },
-  { hours: 8,  label: '8 hrs',  note: 'Night + day'      },
-  { hours: 10, label: '10+ hrs',note: 'Extended backup'  },
+  { hours: 2,  label: '2 hrs',   note: 'Short outages'   },
+  { hours: 4,  label: '4 hrs',   note: 'Half-day backup' },
+  { hours: 6,  label: '6 hrs',   note: 'Full-day backup' },
+  { hours: 8,  label: '8 hrs',   note: 'Night + day'     },
+  { hours: 10, label: '10+ hrs', note: 'Extended backup' },
 ];
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -61,44 +58,110 @@ const CATEGORY_TEXT: Record<string, string> = {
 };
 
 // ── Recommendation engine ─────────────────────────────────────────────────────
+// INVERTER: based purely on peak load (watts) — not affected by backup hours
+// BATTERY:  based on energy needed (watt-hours) — directly affected by backup hours
+// Formula:
+//   effectiveWatts = totalWatts × 1.2          (20% safety buffer)
+//   inverterVA     = effectiveWatts / 0.8       (power factor 0.8)
+//   totalWh        = effectiveWatts × backupHours
+//   batteryAh      = totalWh / (voltage × batteryEfficiency × DoD)
+//                  = totalWh / (V × 0.85 × 0.80)
+//
+// Example — 450W load, 12V system:
+//   2h → rawAh = (540×2)/(12×0.68) = 1080/8.16 = 132 → 150Ah
+//   4h → rawAh = (540×4)/(12×0.68) = 2160/8.16 = 265 → 2×150Ah
+//   6h → rawAh = (540×6)/(12×0.68) = 3240/8.16 = 397 → 2×200Ah
+// This is why different hours MUST give different results.
+
+function snapUp(val: number, steps: number[]): number {
+  return steps.find(s => s >= val) ?? steps[steps.length - 1];
+}
+
 function getRecommendation(totalWatts: number, backupHours: number) {
-  const effectiveWatts = Math.round(totalWatts * 1.2); // 20% buffer
-  const totalWh        = Math.round(effectiveWatts * backupHours);
+  // ── 1. Inverter (load-based only, not hours) ──────────────────────────────
+  const effectiveWatts = Math.round(totalWatts * 1.2);
+  const rawVA          = Math.ceil(effectiveWatts / 0.8);
+  const vaSteps        = [600,700,800,850,900,950,1000,1100,1150,1250,
+                          1300,1500,1600,1650,2000,2200,2500,2800,3000,
+                          3500,4000,5000,6000,7000,8000];
+  const inverterVA     = snapUp(rawVA, vaSteps);
 
-  // Inverter VA (power factor 0.8)
-  const rawVA   = Math.ceil(effectiveWatts / 0.8);
-  const vaSteps = [600,700,800,850,900,950,1000,1100,1150,1250,1300,
-                   1500,1600,1650,2000,2200,2500,2800,3000,3500,4000,5000,6000,7000,8000];
-  const inverterVA = vaSteps.find(v => v >= rawVA) || 8000;
+  // ── 2. System voltage ─────────────────────────────────────────────────────
+  // 12V  → ≤ 2000VA
+  // 24V  → 2000–3500VA
+  // 48V  → > 3500VA
+  const voltage = inverterVA > 3500 ? 48 : inverterVA > 2000 ? 24 : 12;
 
-  // Voltage & battery
-  let voltage = 12;
-  if (inverterVA > 3500) voltage = 48;
-  else if (inverterVA > 2000) voltage = 24;
+  // ── 3. Battery (energy-based — scales with hours) ─────────────────────────
+  // totalWh = energy the battery must supply
+  // batteryEfficiency = 0.85 (charge/discharge losses)
+  // DoD = 0.80 (80% depth of discharge — don't drain fully)
+  // Ah   = Wh / (V × η × DoD)
+  const totalWh  = Math.round(effectiveWatts * backupHours);
+  const rawAh    = Math.ceil(totalWh / (voltage * 0.85 * 0.80));
 
-  const rawAh   = Math.ceil(totalWh / (voltage * 0.8 * 0.8));
-  const ahSteps = [100,130,150,170,180,200,220,250,300];
-  const batteryAh = ahSteps.find(a => a >= rawAh) || 250;
+  // For high-Ah requirements, we recommend multiple batteries
+  // Standard sizes: 100, 130, 150, 180, 200, 220, 250 Ah (single battery max ~250Ah)
+  const singleAhSteps = [100, 130, 150, 180, 200, 220, 250];
 
-  const batteryType = inverterVA <= 2000 ? 'Tall Tubular' : 'Tall Tubular / Lithium';
+  let batteryAh: number;
+  let batteryCount = 1;
+  let batteryNote  = '';
 
+  if (rawAh <= 250) {
+    // Fits in one battery
+    batteryAh    = snapUp(rawAh, singleAhSteps);
+    batteryCount = 1;
+  } else if (rawAh <= 500) {
+    // Two batteries in parallel
+    batteryAh    = snapUp(Math.ceil(rawAh / 2), singleAhSteps);
+    batteryCount = 2;
+    batteryNote  = '2 batteries in parallel';
+  } else {
+    // Three or more — recommend Lithium
+    batteryAh    = snapUp(Math.ceil(rawAh / 2), singleAhSteps);
+    batteryCount = 2;
+    batteryNote  = 'Consider Lithium LiFePO4 for this load';
+  }
+
+  // ── 4. Battery type ────────────────────────────────────────────────────────
+  const isHighLoad  = totalWatts > 1500 || inverterVA > 2000;
+  const batteryType = isHighLoad ? 'Tall Tubular / Lithium' : 'Tall Tubular';
+
+  // ── 5. Category & URL ─────────────────────────────────────────────────────
   let category   = 'Inverter';
   let productUrl = '/products?category=Inverter';
   if (inverterVA > 3500) { category = 'High Capacity UPS'; productUrl = '/products?category=High+Capacity+UPS'; }
 
+  // ── 6. Labels ─────────────────────────────────────────────────────────────
   const inverterLabel = `~${inverterVA}VA Inverter`;
-  const batteryLabel  = `${batteryAh}Ah ${batteryType} Battery`;
+  const batteryLabel  = batteryCount > 1
+    ? `${batteryCount} × ${batteryAh}Ah ${batteryType} Batteries`
+    : `${batteryAh}Ah ${batteryType} Battery`;
 
+  // ── 7. Advisory note ──────────────────────────────────────────────────────
   let note = '';
-  if (totalWatts > 3000)     note = 'Heavy load detected. Consider a High Capacity Jumbo UPS for best performance.';
-  else if (batteryAh > 180)  note = 'For longer backup, a Lithium LiFePO4 battery gives 3500+ cycles and faster charging.';
-  else if (totalWatts < 250) note = 'Light load — a basic inverter with a 130Ah battery will be cost-effective.';
+  if (totalWatts > 3000)        note = 'Very heavy load. A High Capacity Jumbo UPS will handle this better.';
+  else if (batteryCount > 1)    note = `This backup needs ${batteryNote}. Lithium LiFePO4 is a compact, long-life alternative (3500+ cycles).`;
+  else if (batteryAh >= 200)    note = 'For this load + duration, a Lithium LiFePO4 battery gives 3500+ cycles, faster charging, and longer life.';
+  else if (totalWatts < 250)    note = 'Light load — a basic inverter with a 130Ah battery will be cost-effective.';
+  else if (backupHours >= 8)    note = 'For 8+ hours backup, consider an extra battery or upgrading to Lithium LiFePO4 for reliable long-duration use.';
 
-  return { totalWatts, totalWh, inverterVA, batteryAh, batteryType, category, inverterLabel, batteryLabel, productUrl, note };
-}
-
-function inr(n: number) {
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+  return {
+    totalWatts,
+    totalWh,
+    effectiveWatts,
+    inverterVA,
+    batteryAh,
+    batteryCount,
+    batteryType,
+    voltage,
+    category,
+    inverterLabel,
+    batteryLabel,
+    productUrl,
+    note,
+  };
 }
 
 const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
@@ -141,7 +204,7 @@ export default function LoadCalculatorClient() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
 
-      {/* ── Intro ── */}
+      {/* Intro */}
       <div className="text-center mb-8 sm:mb-12 pt-2">
         <p className="text-sm sm:text-base text-gray-500 max-w-2xl mx-auto font-medium leading-relaxed">
           Select the appliances you use at home and how many hours of backup you need.
@@ -151,10 +214,9 @@ export default function LoadCalculatorClient() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
 
-        {/* ── LEFT: Appliance selector + backup hours ── */}
+        {/* ── LEFT: Appliances + backup hours ── */}
         <div className="lg:col-span-3 space-y-5">
 
-          {/* Appliance groups */}
           {(['essential', 'comfort', 'heavy'] as const).map(cat => (
             <div key={cat} className={`rounded-2xl border p-4 sm:p-5 ${CATEGORY_STYLES[cat]}`}>
               <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${CATEGORY_TEXT[cat]}`}>
@@ -175,7 +237,6 @@ export default function LoadCalculatorClient() {
                           <p className="text-[10px] text-gray-400">{app.watts}W each</p>
                         </div>
                       </div>
-                      {/* Qty stepper */}
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <button onClick={() => setQty(app.id, -1)}
                           className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-gray-600 text-base transition-colors">
@@ -223,7 +284,7 @@ export default function LoadCalculatorClient() {
             </div>
           </GlassCard>
 
-          {/* Calculate CTA */}
+          {/* Calculate button */}
           <button
             onClick={() => setCalculated(true)}
             disabled={totalWatts === 0}
@@ -236,18 +297,17 @@ export default function LoadCalculatorClient() {
           </button>
         </div>
 
-        {/* ── RIGHT: Single sticky wrapper for ALL sidebar content ── */}
+        {/* ── RIGHT: Sticky sidebar ── */}
         <div className="lg:col-span-2">
           <div className="lg:sticky lg:top-24 space-y-4">
 
-            {/* 1. Live Load Meter */}
+            {/* Live Load Meter */}
             <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-5 shadow-sm">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
                 Live Load Meter
               </p>
 
-              {/* Watt meter bar */}
               <div className="mb-4">
                 <div className="flex justify-between items-baseline mb-2">
                   <span className="text-xs text-gray-500 font-medium">Total Load</span>
@@ -267,12 +327,12 @@ export default function LoadCalculatorClient() {
                   />
                 </div>
                 <div className="flex justify-between text-[9px] text-gray-300 mt-1 font-medium">
-                  <span>0W</span><span>1000W</span><span>2000W</span><span>3000W</span><span>4000W+</span>
+                  <span>0W</span><span>1kW</span><span>2kW</span><span>3kW</span><span>4kW+</span>
                 </div>
               </div>
 
-              {/* Active appliances list */}
-              <div className="space-y-1 mb-3 max-h-52 overflow-y-auto pr-1">
+              {/* Active appliances */}
+              <div className="space-y-1 mb-3 max-h-48 overflow-y-auto pr-1">
                 {activeAppliances.map(a => (
                   <div key={a.id} className="flex items-center justify-between text-xs py-0.5">
                     <span className="text-gray-600 flex items-center gap-1.5 truncate">
@@ -292,20 +352,24 @@ export default function LoadCalculatorClient() {
               </div>
 
               {totalWatts > 0 && (
-                <div className="border-t border-gray-100 pt-3 space-y-1">
+                <div className="border-t border-gray-100 pt-3 space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">With 20% buffer</span>
-                    <span className="font-bold text-gray-700">{Math.round(totalWatts * 1.2).toLocaleString('en-IN')}W</span>
+                    <span className="text-gray-500">Load with 20% buffer</span>
+                    <span className="font-bold text-gray-700">{rec.effectiveWatts.toLocaleString('en-IN')}W</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-500">Energy needed ({backupHours}h backup)</span>
                     <span className="font-bold text-primary">{rec.totalWh.toLocaleString('en-IN')} Wh</span>
                   </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Battery system voltage</span>
+                    <span className="font-bold text-gray-700">{rec.voltage}V</span>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* 2. Recommendation Card (inside the same sticky container) */}
+            {/* Result card */}
             {calculated && totalWatts > 0 && (
               <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-emerald-50 p-4 sm:p-5 shadow-lg">
                 <div className="flex items-center gap-2 mb-4">
@@ -314,7 +378,9 @@ export default function LoadCalculatorClient() {
                   </div>
                   <div>
                     <p className="text-sm font-extrabold text-gray-900">Your Recommendation</p>
-                    <p className="text-[10px] text-gray-400">Based on {activeAppliances.length} appliances, {backupHours}h backup</p>
+                    <p className="text-[10px] text-gray-400">
+                      {activeAppliances.length} appliance{activeAppliances.length !== 1 ? 's' : ''} · {totalWatts}W · {backupHours}h backup
+                    </p>
                   </div>
                 </div>
 
@@ -327,7 +393,9 @@ export default function LoadCalculatorClient() {
                     <div>
                       <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Inverter</p>
                       <p className="text-sm font-black text-gray-900">{rec.inverterLabel}</p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">For {rec.totalWatts}W load + 20% safety buffer</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        For {rec.totalWatts}W load (+20% buffer = {rec.effectiveWatts}W)
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -341,25 +409,26 @@ export default function LoadCalculatorClient() {
                     <div>
                       <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Battery</p>
                       <p className="text-sm font-black text-gray-900">{rec.batteryLabel}</p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">Provides ~{backupHours} hours backup at your load</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {rec.totalWh.toLocaleString('en-IN')} Wh needed · {rec.voltage}V system · {backupHours}h backup
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Summary box */}
+                {/* Summary sentence */}
                 <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 mb-3">
                   <p className="text-xs font-semibold text-primary leading-relaxed">
-                    💡 Based on your load of{" "}
-                    {activeAppliances.map(a => `${quantities[a.id]}× ${a.name}`).slice(0, 3).join(", ")}
-                    {activeAppliances.length > 3 ? ` + ${activeAppliances.length - 3} more` : ""}
-                    , you need approximately a{" "}
-                    <strong>{rec.inverterLabel}</strong> with a{" "}
-                    <strong>{rec.batteryLabel}</strong> for{" "}
-                    {backupHours} hours of backup.
+                    💡 Based on your load of{' '}
+                    {activeAppliances.slice(0, 3).map(a => `${quantities[a.id]}× ${a.name}`).join(', ')}
+                    {activeAppliances.length > 3 ? ` + ${activeAppliances.length - 3} more` : ''}
+                    , you need approximately a{' '}
+                    <strong>{rec.inverterLabel}</strong> with a{' '}
+                    <strong>{rec.batteryLabel}</strong> for {backupHours} hours of backup.
                   </p>
                 </div>
 
-                {/* Note */}
+                {/* Advisory note */}
                 {rec.note && (
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-3">
                     <p className="text-[11px] text-amber-700 font-medium flex items-start gap-1.5">
@@ -369,36 +438,23 @@ export default function LoadCalculatorClient() {
                   </div>
                 )}
 
-                {/* CTA Buttons */}
+                {/* CTAs */}
                 <div className="flex flex-col gap-2">
-                  <Link
-                    href={rec.productUrl}
-                    className="w-full py-2.5 bg-primary text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-dark transition-colors shadow-md"
-                  >
+                  <Link href={rec.productUrl}
+                    className="w-full py-2.5 bg-primary text-white rounded-xl font-bold text-sm
+                               flex items-center justify-center gap-2 hover:bg-dark transition-colors shadow-md">
                     <Icon icon="ph:shopping-bag-fill" width={16} />
                     Browse Matching Products
                   </Link>
                   <a
                     href={`https://wa.me/918019179159?text=${encodeURIComponent(
-`Hi! I used the Load Calculator on your website.
-
-My appliances:
-
- ${activeAppliances.map(a => `• ${quantities[a.id]}× ${a.name} (${a.watts * (quantities[a.id] || 0)}W)`).join('\n')}
-
-Total Load: ${rec.totalWatts}W
-Backup needed: ${backupHours} hours
-
-Recommendation:
-✅ ${rec.inverterLabel}
-🔋 ${rec.batteryLabel}
-
-Please help me find the right product and pricing.`
+                      `Hi! I used the Load Calculator on your website.\n\nMy appliances:\n${
+                        activeAppliances.map(a => `• ${quantities[a.id]}× ${a.name} (${a.watts * (quantities[a.id] || 0)}W)`).join('\n')
+                      }\n\nTotal Load: ${rec.totalWatts}W\nBackup needed: ${backupHours} hours\nEnergy required: ${rec.totalWh} Wh\n\nRecommendation:\n✅ ${rec.inverterLabel}\n🔋 ${rec.batteryLabel}\n\nPlease help me find the right product and pricing.`
                     )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 bg-[#25D366] hover:bg-[#1fba58] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors"
-                  >
+                    target="_blank" rel="noopener noreferrer"
+                    className="w-full py-2.5 bg-[#25D366] hover:bg-[#1fba58] text-white rounded-xl font-bold text-sm
+                               flex items-center justify-center gap-2 transition-colors">
                     <Icon icon="mdi:whatsapp" width={16} />
                     Get Expert Help on WhatsApp
                   </a>
@@ -406,7 +462,7 @@ Please help me find the right product and pricing.`
               </div>
             )}
 
-            {/* 3. Empty-state prompt (inside the same sticky container) */}
+            {/* Prompt */}
             {!calculated && totalWatts > 0 && (
               <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-5 text-center">
                 <Icon icon="ph:arrow-up-fill" className="text-primary mx-auto mb-2 animate-bounce" width={24} />
@@ -416,18 +472,17 @@ Please help me find the right product and pricing.`
 
           </div>
         </div>
-
       </div>
 
-      {/* ── How it works ── */}
+      {/* How it works */}
       <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { icon: 'ph:sliders-horizontal-fill', color: 'text-blue-600',    bg: 'bg-blue-50',    step: '1', title: 'Select Appliances',      desc: 'Choose each device you run during a power cut and set the quantity.' },
-          { icon: 'ph:clock-countdown-fill',    color: 'text-purple-600',  bg: 'bg-purple-50',  step: '2', title: 'Set Backup Duration',    desc: 'Tell us how many hours of backup you need from your inverter system.' },
-          { icon: 'ph:check-circle-fill',       color: 'text-emerald-600', bg: 'bg-emerald-50', step: '3', title: 'Get Your Recommendation', desc: 'We instantly calculate the right inverter VA and battery Ah for your home.' },
+          { icon: 'ph:sliders-horizontal-fill', color: 'text-blue-600',    bg: 'bg-blue-50',    step: '1', title: 'Select Appliances',       desc: 'Choose each device you run during a power cut and set the quantity.' },
+          { icon: 'ph:clock-countdown-fill',    color: 'text-purple-600',  bg: 'bg-purple-50',  step: '2', title: 'Set Backup Duration',     desc: 'Tell us how many hours of backup you need. More hours = bigger battery.' },
+          { icon: 'ph:check-circle-fill',       color: 'text-emerald-600', bg: 'bg-emerald-50', step: '3', title: 'Get Your Recommendation', desc: 'We calculate the exact inverter VA and battery Ah — different for every load and duration.' },
         ].map(s => (
           <div key={s.step} className={`flex items-start gap-3 ${s.bg} rounded-2xl p-4 border border-white/60`}>
-            <div className={`w-9 h-9 rounded-xl bg-white/80 flex items-center justify-center flex-shrink-0 shadow-sm`}>
+            <div className="w-9 h-9 rounded-xl bg-white/80 flex items-center justify-center flex-shrink-0 shadow-sm">
               <Icon icon={s.icon} className={s.color} width={18} />
             </div>
             <div>
@@ -438,7 +493,7 @@ Please help me find the right product and pricing.`
         ))}
       </div>
 
-      {/* ── Bottom CTA ── */}
+      {/* Bottom CTA */}
       <div className="mt-10 rounded-3xl bg-gradient-to-r from-primary to-emerald-500 p-6 sm:p-8 text-center shadow-xl">
         <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-2">Still confused? Talk to our experts.</h3>
         <p className="text-white/80 text-sm mb-5 font-medium">

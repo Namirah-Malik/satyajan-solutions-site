@@ -265,9 +265,9 @@ const PropertyCard: React.FC<{ item: PropertyHomes }> = ({ item }) => {
                       ₹{Math.round(price / 0.9).toLocaleString('en-IN')}
                     </span>
                   )}
-                  <span className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
-                    ₹<span className={isOffer ? 'text-red-500' : 'text-primary'}>{formattedRate}</span>
-                  </span>
+                 <span className="text-lg sm:text-xl font-black text-emerald-600 tracking-tight">
+  ₹{formattedRate}
+</span>
                   {isOffer && (
                     <span className="text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-md">Save 10%</span>
                   )}

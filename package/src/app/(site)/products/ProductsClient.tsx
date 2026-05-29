@@ -12,10 +12,8 @@ interface ProductCacheEntry { products: PropertyHomes[]; ts: number; }
 declare global { interface Window { __productCache?: ProductCacheEntry; } }
 const CACHE_TTL = 5 * 60 * 1000;
 
-// ── Sort options — Bestseller is default ──────────────────────────────────────
 type SortOption = 'bestseller' | 'price-asc' | 'price-desc';
 
-// ── Bestseller scoring — matches Amazon order data (same patterns as Card.tsx) ─
 const BESTSELLER_PATTERNS: string[] = [
   'i lithium 1500',
   'heavy duty 1550 advanced',
@@ -33,12 +31,11 @@ function getBestsellerScore(name: string): number {
     const matched = p.includes('.*')
       ? (() => { try { return new RegExp(p, 'i').test(lower); } catch { return false; } })()
       : lower.includes(p);
-    if (matched) return BESTSELLER_PATTERNS.length - i; // higher score = better rank
+    if (matched) return BESTSELLER_PATTERNS.length - i;
   }
   return 0;
 }
 
-// ── UI helpers ────────────────────────────────────────────────────────────────
 const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
   <div className={`bg-white/40 backdrop-blur-lg rounded-3xl shadow-xl border border-white/30 transition-all duration-300 hover:shadow-2xl ${className}`}>{children}</div>
 );
@@ -46,11 +43,11 @@ const GlassCard = ({ children, className = '' }: { children: React.ReactNode; cl
 const SkeletonCard = () => (
   <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden animate-pulse">
     <div className="aspect-square bg-gray-100" />
-    <div className="p-3 sm:p-5 space-y-3">
+    <div className="p-4 space-y-3">
       <div className="h-4 bg-gray-100 rounded-full w-3/4" />
       <div className="h-3 bg-gray-100 rounded-full w-full" />
       <div className="h-3 bg-gray-100 rounded-full w-5/6" />
-      <div className="h-8 bg-gray-100 rounded-full w-full mt-4" />
+      <div className="h-9 bg-gray-100 rounded-full w-full mt-4" />
     </div>
   </div>
 );
@@ -61,7 +58,6 @@ const SkeletonGrid = () => (
   </div>
 );
 
-// ── Image URL helper ──────────────────────────────────────────────────────────
 function getDirectImageUrl(img: any): string {
   if (!img) return '';
   let src = typeof img === 'string' ? img : img.src ?? img.url ?? img.image ?? '';
@@ -97,7 +93,6 @@ function normalizeProduct(raw: any): PropertyHomes {
   return { ...raw, slug, rate, images, name, category: raw.category || '', description: raw.description || '' };
 }
 
-// ── Category helpers ──────────────────────────────────────────────────────────
 const CATEGORY_MAP: Record<string, string[]> = {
   solar:    ['Solar', 'Solar Inverter', 'Solar Battery'],
   inverter: ['Inverter', 'Solar Inverter'],
@@ -128,7 +123,6 @@ function sortCategories(all: string[]): string[] {
   ];
 }
 
-// ── Sort + Filter Controls ────────────────────────────────────────────────────
 function SortFilterBar({
   sort, onSort,
   inStockOnly, onInStockToggle,
@@ -148,20 +142,20 @@ function SortFilterBar({
   }, []);
 
   const sortLabel: Record<SortOption, string> = {
-    bestseller: 'Best Sellers',
-    'price-asc': 'Price: Low to High',
-    'price-desc': 'Price: High to Low',
+    bestseller:   'Best Sellers',
+    'price-asc':  'Price: Low → High',
+    'price-desc': 'Price: High → Low',
   };
   const sortIcon: Record<SortOption, string> = {
-    bestseller: 'ph:trophy-fill',
-    'price-asc': 'ph:sort-ascending-fill',
+    bestseller:   'ph:trophy-fill',
+    'price-asc':  'ph:sort-ascending-fill',
     'price-desc': 'ph:sort-descending-fill',
   };
 
   return (
     <div className="flex items-center gap-2 flex-shrink-0">
 
-      {/* In Stock Only toggle */}
+      {/* In Stock toggle */}
       <button
         onClick={onInStockToggle}
         className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold border transition-all shadow-sm whitespace-nowrap ${
@@ -191,8 +185,6 @@ function SortFilterBar({
           <>
             <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
             <div className="absolute right-0 top-full mt-2 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden min-w-[200px]">
-
-              {/* Bestseller */}
               <button
                 onClick={() => { onSort('bestseller'); setOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
@@ -203,8 +195,6 @@ function SortFilterBar({
                 Best Sellers
                 {sort === 'bestseller' && <Icon icon="ph:check-bold" width={12} className="text-amber-500 ml-auto" />}
               </button>
-
-              {/* Price asc */}
               <button
                 onClick={() => { onSort('price-asc'); setOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 ${
@@ -215,8 +205,6 @@ function SortFilterBar({
                 Price: Low to High
                 {sort === 'price-asc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
               </button>
-
-              {/* Price desc */}
               <button
                 onClick={() => { onSort('price-desc'); setOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 ${
@@ -227,7 +215,6 @@ function SortFilterBar({
                 Price: High to Low
                 {sort === 'price-desc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
               </button>
-
             </div>
           </>
         )}
@@ -236,18 +223,17 @@ function SortFilterBar({
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
 const ProductsContent = () => {
   const searchParams = useSearchParams();
   const urlCategory  = searchParams.get('category') || '';
   const urlSearch    = searchParams.get('search')   || '';
 
-  const [products,     setProducts]     = useState<PropertyHomes[]>([]);
-  const [categories,   setCategories]   = useState<string[]>([]);
-  const [loading,      setLoading]      = useState(true);
-  const [filter,       setFilter]       = useState<string>('all');
-  const [sort,         setSort]         = useState<SortOption>('bestseller'); // ✅ default
-  const [inStockOnly,  setInStockOnly]  = useState(false);
+  const [products,    setProducts]    = useState<PropertyHomes[]>([]);
+  const [categories,  setCategories]  = useState<string[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [filter,      setFilter]      = useState<string>('all');
+  const [sort,        setSort]        = useState<SortOption>('bestseller');
+  const [inStockOnly, setInStockOnly] = useState(false);
 
   useEffect(() => {
     if (urlCategory) setFilter(urlCategory);
@@ -292,26 +278,19 @@ const ProductsContent = () => {
 
   const filtered = useMemo(() => {
     let list = filter === 'all' ? [...products] : products.filter(p => p.category === filter);
-
-    // In Stock Only filter
-    if (inStockOnly) {
-      list = list.filter(p => (p as any).inStock !== false);
-    }
-
-    // Sort
+    if (inStockOnly) list = list.filter(p => (p as any).inStock !== false);
     if (sort === 'bestseller') {
       list = list.sort((a, b) => {
         const sa = getBestsellerScore(a.name || '');
         const sb = getBestsellerScore(b.name || '');
-        if (sb !== sa) return sb - sa;                          // bestsellers first
-        return (Number(a.rate) || 0) - (Number(b.rate) || 0);  // then price asc
+        if (sb !== sa) return sb - sa;
+        return (Number(a.rate) || 0) - (Number(b.rate) || 0);
       });
     } else if (sort === 'price-asc') {
       list = list.sort((a, b) => (Number(a.rate) || 0) - (Number(b.rate) || 0));
     } else {
       list = list.sort((a, b) => (Number(b.rate) || 0) - (Number(a.rate) || 0));
     }
-
     return list;
   }, [products, filter, sort, inStockOnly]);
 
@@ -319,10 +298,9 @@ const ProductsContent = () => {
     <main className="min-h-screen">
       <section className="px-3 sm:px-4 max-w-7xl mx-auto pb-12">
 
-        {/* Category chips + Sort/Filter controls */}
-        <GlassCard className="p-3 sm:p-4 mb-6 sm:mb-8">
+        {/* Category chips + Sort/Filter */}
+        <GlassCard className="p-3 sm:p-4 mb-5 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-3">
-
             <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none snap-x flex-1 min-w-0">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
@@ -341,7 +319,6 @@ const ProductsContent = () => {
                 ))
               )}
             </div>
-
             {!loading && (
               <SortFilterBar
                 sort={sort} onSort={setSort}
@@ -352,7 +329,7 @@ const ProductsContent = () => {
         </GlassCard>
 
         {/* Results heading */}
-        <div className="mb-5 sm:mb-6 flex items-center justify-between gap-4 flex-wrap">
+        <div className="mb-4 sm:mb-6 flex items-center justify-between gap-4 flex-wrap">
           {loading ? (
             <div className="space-y-2">
               <div className="h-7 sm:h-8 bg-gray-100 rounded-full w-40 sm:w-48 animate-pulse" />
@@ -367,7 +344,7 @@ const ProductsContent = () => {
                 {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
                 {sort === 'bestseller' && (
                   <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                    <Icon icon="ph:trophy-fill" width={10} /> Sorted by Best Sellers
+                    <Icon icon="ph:trophy-fill" width={10} /> Best Sellers
                   </span>
                 )}
                 {inStockOnly && (
@@ -387,7 +364,7 @@ const ProductsContent = () => {
           )}
         </div>
 
-        {/* Product Grid */}
+        {/* ✅ Product Grid — 1 col on mobile, 2 on tablet, 3 on desktop */}
         {loading ? (
           <SkeletonGrid />
         ) : filtered.length === 0 ? (
@@ -402,7 +379,7 @@ const ProductsContent = () => {
             </div>
           </GlassCard>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {filtered.map((item, idx) => (
               <PropertyCard key={item.slug || idx} item={item} />
             ))}
