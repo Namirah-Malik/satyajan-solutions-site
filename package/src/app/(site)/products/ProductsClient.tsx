@@ -2,11 +2,11 @@
 
 import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import CallMeBackModal from '@/components/CallMeBackModal';
+import CallMeBackModal   from '@/components/CallMeBackModal';
 import { useScrollModal } from '@/hooks/useScrollModal';
-import PropertyCard from '@/components/Home/Product/Card/Card';
+import PropertyCard      from '@/components/Home/Product/Card/Card';
 import type { PropertyHomes } from '@/types/properyHomes';
-import { Icon } from '@iconify/react';
+import { Icon }          from '@iconify/react';
 
 interface ProductCacheEntry { products: PropertyHomes[]; ts: number; }
 declare global { interface Window { __productCache?: ProductCacheEntry; } }
@@ -15,12 +15,8 @@ const CACHE_TTL = 5 * 60 * 1000;
 type SortOption = 'bestseller' | 'price-asc' | 'price-desc';
 
 const BESTSELLER_PATTERNS: string[] = [
-  'i lithium 1500',
-  'heavy duty 1550 advanced',
-  'super power ups 900',
-  'super power ups 1100',
-  'luxe wifi.*1400',
-  'msmf 7.2',
+  'i lithium 1500', 'heavy duty 1550 advanced', 'super power ups 900',
+  'super power ups 1100', 'luxe wifi.*1400', 'msmf 7.2',
   'super power 1100 advanced digital',
 ];
 
@@ -36,9 +32,45 @@ function getBestsellerScore(name: string): number {
   return 0;
 }
 
-const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <div className={`bg-white/40 backdrop-blur-lg rounded-3xl shadow-xl border border-white/30 transition-all duration-300 hover:shadow-2xl ${className}`}>{children}</div>
-);
+const PREFERRED_ORDER = [
+  'Combo','Inverter','Battery','ONLINE UPS','Solar',
+  'New Lithium Battery','High Capacity UPS','Solar Inverter','Solar Battery',
+];
+function sortCategories(all: string[]): string[] {
+  return [
+    ...PREFERRED_ORDER.filter(c => all.includes(c)),
+    ...all.filter(c => !PREFERRED_ORDER.includes(c)).sort(),
+  ];
+}
+
+function normalizeProduct(raw: any): PropertyHomes {
+  const rawImages: any[] = Array.isArray(raw.images) ? raw.images : [];
+  const images = rawImages
+    .map((img: any) => {
+      const src = typeof img === 'string' ? img : (img?.src || img?.url || '');
+      return src && typeof src === 'string' && src.trim() ? { src: src.trim() } : null;
+    })
+    .filter(Boolean) as { src: string }[];
+
+  const slug = raw.slug || raw.id || '';
+  const rate = raw.rate ?? raw.price ?? 0;
+  const name = (raw.name || '')
+    .replace(/\s*wishlist\s*shareicon\s*/gi, '')
+    .replace(/\s*shareicon\s*/gi, '')
+    .replace(/\s*wishlist\s*/gi, '')
+    .trim();
+
+  return {
+    ...raw,
+    slug,
+    rate,
+    images,
+    name,
+    category:    raw.category    || '',
+    description: raw.description || '',
+    stockStatus: raw.stockStatus || 'In Stock',
+  };
+}
 
 const SkeletonCard = () => (
   <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden animate-pulse">
@@ -58,74 +90,14 @@ const SkeletonGrid = () => (
   </div>
 );
 
-function getDirectImageUrl(img: any): string {
-  if (!img) return '';
-  let src = typeof img === 'string' ? img : img.src ?? img.url ?? img.image ?? '';
-  if (!src) return '';
-  if (src.includes('/api/image-proxy?url=')) {
-    try { src = decodeURIComponent(src.split('/api/image-proxy?url=')[1].split('&')[0]); } catch { return ''; }
-  }
-  if (src.includes('/_next/image')) {
-    try {
-      const u = new URL(src.startsWith('http') ? src : `https://x.com${src}`);
-      const inner = u.searchParams.get('url');
-      if (inner) src = decodeURIComponent(inner); else return '';
-    } catch { return ''; }
-  }
-  if (src.startsWith('//'))    src = `https:${src}`;
-  if (src.startsWith('/http')) src = src.replace(/^\//, '');
-  if (!src.startsWith('http://') && !src.startsWith('https://')) return '';
-  return src;
-}
-
-function normalizeProduct(raw: any): PropertyHomes {
-  const rawImages: any[] = Array.isArray(raw.images) ? raw.images : [];
-  const images = rawImages
-    .map((img: any) => { const src = getDirectImageUrl(img); return src ? { src } : null; })
-    .filter(Boolean) as { src: string }[];
-  const slug = raw.slug || raw.id || '';
-  const rate = raw.rate ?? raw.price ?? 0;
-  const name = (raw.name || '')
-    .replace(/\s*wishlist\s*shareicon\s*/gi, '')
-    .replace(/\s*shareicon\s*/gi, '')
-    .replace(/\s*wishlist\s*/gi, '')
-    .trim();
-  return { ...raw, slug, rate, images, name, category: raw.category || '', description: raw.description || '' };
-}
-
-const CATEGORY_MAP: Record<string, string[]> = {
-  solar:    ['Solar', 'Solar Inverter', 'Solar Battery'],
-  inverter: ['Inverter', 'Solar Inverter'],
-  battery:  ['Battery', 'New Lithium Battery', 'Solar Battery'],
-  lithium:  ['New Lithium Battery'],
-  ups:      ['ONLINE UPS', 'High Capacity UPS'],
-  online:   ['ONLINE UPS'],
-  jumbo:    ['High Capacity UPS'],
-  combo:    ['Combos'], combos: ['Combos'],
-};
-const PREFERRED_ORDER = [
-  'Combo','Inverter','Battery','ONLINE UPS','Solar',
-  'New Lithium Battery','High Capacity UPS','Solar Inverter','Solar Battery',
-];
-
-function resolveCategories(q: string): string[] {
-  const lower = q.toLowerCase().trim();
-  if (!lower) return [];
-  if (CATEGORY_MAP[lower]) return CATEGORY_MAP[lower];
-  return Object.entries(CATEGORY_MAP)
-    .filter(([k]) => k.includes(lower) || lower.includes(k))
-    .flatMap(([, c]) => c);
-}
-function sortCategories(all: string[]): string[] {
-  return [
-    ...PREFERRED_ORDER.filter(c => all.includes(c)),
-    ...all.filter(c => !PREFERRED_ORDER.includes(c)).sort(),
-  ];
-}
+const GlassCard = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-white/40 backdrop-blur-lg rounded-3xl shadow-xl border border-white/30 transition-all duration-300 hover:shadow-2xl ${className}`}>
+    {children}
+  </div>
+);
 
 function SortFilterBar({
-  sort, onSort,
-  inStockOnly, onInStockToggle,
+  sort, onSort, inStockOnly, onInStockToggle,
 }: {
   sort: SortOption; onSort: (v: SortOption) => void;
   inStockOnly: boolean; onInStockToggle: () => void;
@@ -154,8 +126,6 @@ function SortFilterBar({
 
   return (
     <div className="flex items-center gap-2 flex-shrink-0">
-
-      {/* In Stock toggle */}
       <button
         onClick={onInStockToggle}
         className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold border transition-all shadow-sm whitespace-nowrap ${
@@ -169,7 +139,6 @@ function SortFilterBar({
         <span className="sm:hidden">Stock</span>
       </button>
 
-      {/* Sort dropdown */}
       <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(p => !p)}
@@ -185,36 +154,18 @@ function SortFilterBar({
           <>
             <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
             <div className="absolute right-0 top-full mt-2 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden min-w-[200px]">
-              <button
-                onClick={() => { onSort('bestseller'); setOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
-                  sort === 'bestseller' ? 'bg-amber-50 text-amber-700 font-bold' : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Icon icon="ph:trophy-fill" width={14} className={sort === 'bestseller' ? 'text-amber-500' : 'text-gray-400'} />
-                Best Sellers
-                {sort === 'bestseller' && <Icon icon="ph:check-bold" width={12} className="text-amber-500 ml-auto" />}
-              </button>
-              <button
-                onClick={() => { onSort('price-asc'); setOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 ${
-                  sort === 'price-asc' ? 'bg-primary/5 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Icon icon="ph:sort-ascending-fill" width={14} className={sort === 'price-asc' ? 'text-primary' : 'text-gray-400'} />
-                Price: Low to High
-                {sort === 'price-asc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
-              </button>
-              <button
-                onClick={() => { onSort('price-desc'); setOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 ${
-                  sort === 'price-desc' ? 'bg-primary/5 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Icon icon="ph:sort-descending-fill" width={14} className={sort === 'price-desc' ? 'text-primary' : 'text-gray-400'} />
-                Price: High to Low
-                {sort === 'price-desc' && <Icon icon="ph:check-bold" width={12} className="text-primary ml-auto" />}
-              </button>
+              {(['bestseller','price-asc','price-desc'] as SortOption[]).map(opt => (
+                <button key={opt}
+                  onClick={() => { onSort(opt); setOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-t border-gray-100 first:border-t-0 ${
+                    sort === opt ? 'bg-amber-50 text-amber-700 font-bold' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon icon={sortIcon[opt]} width={14} className={sort === opt ? 'text-amber-500' : 'text-gray-400'} />
+                  {sortLabel[opt]}
+                  {sort === opt && <Icon icon="ph:check-bold" width={12} className="text-amber-500 ml-auto" />}
+                </button>
+              ))}
             </div>
           </>
         )}
@@ -237,59 +188,72 @@ const ProductsContent = () => {
 
   useEffect(() => {
     if (urlCategory) setFilter(urlCategory);
-    else if (urlSearch) {
-      const cats = resolveCategories(urlSearch);
-      setFilter(cats.length === 1 ? cats[0] : 'all');
-    } else setFilter('all');
+    else             setFilter('all');
   }, [urlCategory, urlSearch]);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
-      if (window.__productCache && Date.now() - window.__productCache.ts < CACHE_TTL) {
+      if (
+        typeof window !== 'undefined' &&
+        window.__productCache &&
+        Date.now() - window.__productCache.ts < CACHE_TTL
+      ) {
         const cached = window.__productCache.products;
         if (!cancelled) {
           setProducts(cached);
-          setCategories(sortCategories([...new Set<string>(
-            cached.map(p => p.category).filter((c): c is string => typeof c === 'string' && c.length > 0)
-          )]));
+          setCategories(sortCategories([
+            ...new Set<string>(
+              cached.map(p => p.category).filter((c): c is string => typeof c === 'string' && c.length > 0)
+            ),
+          ]));
           setLoading(false);
         }
         return;
       }
       try {
         const res  = await fetch('/api/products');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const norm = (data.products || []).map(normalizeProduct);
-        window.__productCache = { products: norm, ts: Date.now() };
+        if (typeof window !== 'undefined') {
+          window.__productCache = { products: norm, ts: Date.now() };
+        }
         if (!cancelled) {
           setProducts(norm);
-          setCategories(sortCategories([...new Set<string>(
-            norm.map((p: any) => p.category).filter((c: any): c is string => typeof c === 'string' && c.length > 0)
-          )]));
+          setCategories(sortCategories([
+            ...new Set<string>(
+              norm.map((p: any) => p.category).filter((c: any): c is string => typeof c === 'string' && c.length > 0)
+            ),
+          ]));
         }
-      } catch (e) { console.error(e); }
-      finally { if (!cancelled) setLoading(false); }
+      } catch (e) {
+        console.error('[ProductsClient] fetch error:', e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
     load();
     return () => { cancelled = true; };
   }, []);
 
   const filtered = useMemo(() => {
-    let list = filter === 'all' ? [...products] : products.filter(p => p.category === filter);
-    if (inStockOnly) list = list.filter(p => (p as any).inStock !== false);
+    let list = filter === 'all'
+      ? [...products]
+      : products.filter(p => p.category === filter);
+    if (inStockOnly) {
+      list = list.filter(p => (p as any).stockStatus !== 'Out of Stock');
+    }
     if (sort === 'bestseller') {
-      list = list.sort((a, b) => {
-        const sa = getBestsellerScore(a.name || '');
-        const sb = getBestsellerScore(b.name || '');
-        if (sb !== sa) return sb - sa;
-        return (Number(a.rate) || 0) - (Number(b.rate) || 0);
+      list.sort((a, b) => {
+        const diff = getBestsellerScore(b.name || '') - getBestsellerScore(a.name || '');
+        return diff !== 0 ? diff : (Number(a.rate) || 0) - (Number(b.rate) || 0);
       });
     } else if (sort === 'price-asc') {
-      list = list.sort((a, b) => (Number(a.rate) || 0) - (Number(b.rate) || 0));
+      list.sort((a, b) => (Number(a.rate) || 0) - (Number(b.rate) || 0));
     } else {
-      list = list.sort((a, b) => (Number(b.rate) || 0) - (Number(a.rate) || 0));
+      list.sort((a, b) => (Number(b.rate) || 0) - (Number(a.rate) || 0));
     }
     return list;
   }, [products, filter, sort, inStockOnly]);
@@ -344,7 +308,7 @@ const ProductsContent = () => {
                 {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
                 {sort === 'bestseller' && (
                   <span className="inline-flex items-center gap-1 text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                    <Icon icon="ph:trophy-fill" width={10} /> Best Sellers
+                    <Icon icon="ph:trophy-fill" width={10} /> Best Sellers first
                   </span>
                 )}
                 {inStockOnly && (
@@ -355,16 +319,17 @@ const ProductsContent = () => {
               </p>
             </div>
           )}
-
           {!loading && (filter !== 'all' || inStockOnly) && (
-            <button onClick={() => { setFilter('all'); setInStockOnly(false); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-500 bg-red-50 border border-red-200 rounded-full hover:bg-red-100 transition-colors flex-shrink-0">
+            <button
+              onClick={() => { setFilter('all'); setInStockOnly(false); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-500 bg-red-50 border border-red-200 rounded-full hover:bg-red-100 transition-colors flex-shrink-0"
+            >
               <Icon icon="ph:x-bold" width={11} /> Clear
             </button>
           )}
         </div>
 
-        {/* ✅ Product Grid — 1 col on mobile, 2 on tablet, 3 on desktop */}
+        {/* Product Grid */}
         {loading ? (
           <SkeletonGrid />
         ) : filtered.length === 0 ? (
@@ -372,8 +337,10 @@ const ProductsContent = () => {
             <div className="flex flex-col items-center gap-4">
               <Icon icon="ph:magnifying-glass" width={48} className="text-gray-300" />
               <p className="text-gray-500 text-base sm:text-lg font-semibold">No products found</p>
-              <button onClick={() => { setFilter('all'); setInStockOnly(false); }}
-                className="mt-2 px-5 py-2 bg-primary text-white rounded-full text-sm font-semibold hover:bg-dark transition-colors">
+              <button
+                onClick={() => { setFilter('all'); setInStockOnly(false); }}
+                className="mt-2 px-5 py-2 bg-primary text-white rounded-full text-sm font-semibold hover:bg-dark transition-colors"
+              >
                 Show all products
               </button>
             </div>

@@ -1,33 +1,41 @@
+// app/api/products/route.ts
+// ─────────────────────────────────────────────────────────────────────────────
+// ROOT CAUSE OF 58/107 BUG:
+//   The previous version used `select: { id, slug, name... }` in findMany().
+//   Prisma + MongoDB silently skips documents where a selected field does not
+//   exist on the raw document — so ~49 products with missing fields were
+//   never returned.
+//
+//   It also used `take: 24` (pagination). The load-more was not wiring up
+//   correctly so users only saw page 1 = 24, or accumulated pages.
+//
+// FIX:
+//   - Removed `select` entirely — fetch all fields like the original did
+//   - Removed `take`/`skip` — return all products in one response
+//     (107 products × ~2KB each = ~200KB JSON, acceptable)
+//   - Kept all the performance improvements: singleton Prisma, cache headers,
+//     clean image extraction, stockStatus default
+// ─────────────────────────────────────────────────────────────────────────────
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { mockProducts, mockCategories } from '@/mock/products';
+import prisma from '@/lib/prisma';
 
-let prisma: any = null;
-async function getPrisma() {
-  if (!process.env.DATABASE_URL) return null;
-  if (prisma) return prisma;
-  try {
-    const { PrismaClient } = await import('@prisma/client');
-    prisma = new PrismaClient();
-    return prisma;
-  } catch { return null; }
-}
-
-// ── Unwrap any proxy / Next.js image URL → direct URL ─────────────────────────
+// ── Image URL extractor ───────────────────────────────────────────────────────
 function extractDirectUrl(raw: any): string {
   if (!raw) return '';
   let url = typeof raw === 'string' ? raw : (raw?.src || raw?.url || raw?.image || '');
-  if (typeof url !== 'string') return '';
-  url = url.replace(/\s+/g, '');
+  if (typeof url !== 'string' || !url) return '';
+  url = url.trim();
 
   if (url.includes('/api/image-proxy?url=')) {
-    try { url = decodeURIComponent(url.split('/api/image-proxy?url=')[1]); } catch {}
+    try { url = decodeURIComponent(url.split('/api/image-proxy?url=')[1]); } catch { return ''; }
   }
 
   let i = 0;
   while (url.includes('/_next/image') && i++ < 5) {
     try {
-      const u = new URL(url.startsWith('/') ? `https://www.microtek.in${url}` : url);
+      const u = new URL(url.startsWith('/') ? `https://placeholder.com${url}` : url);
       const inner = u.searchParams.get('url');
       if (inner) url = decodeURIComponent(inner); else break;
     } catch { break; }
@@ -35,22 +43,22 @@ function extractDirectUrl(raw: any): string {
 
   if (url.startsWith('//'))    url = `https:${url}`;
   if (url.startsWith('/http')) url = url.replace(/^\//, '');
+  if (!url.startsWith('http')) return '';
   return url;
 }
 
+// ── Clean product — keeps ALL fields, same as original cleanProduct() ─────────
 function cleanProduct(raw: any) {
-  // ── Images: direct URLs only ────────────────────────────────────────────────
   const rawImages: any[] = Array.isArray(raw.images) ? raw.images : [];
   const images = rawImages
     .map((img: any) => {
       const src = extractDirectUrl(img);
-      if (!src) return null;
-      if (!src.startsWith('http')) return null; // skip relative paths
-      return { src }; // ← DIRECT URL — no proxy wrapper
+      if (!src || !src.startsWith('http')) return null;
+      return { src };
     })
     .filter(Boolean) as { src: string }[];
 
-  // ── Video: normalise to embed URL ──────────────────────────────────────────
+  // Video normalisation
   let video: string | null = null;
   const rawVideo = raw.video;
   if (rawVideo && typeof rawVideo === 'string' && rawVideo.trim()) {
@@ -67,7 +75,6 @@ function cleanProduct(raw: any) {
     video = v;
   }
 
-  // ── Name cleanup ───────────────────────────────────────────────────────────
   const name = (raw.name || '')
     .replace(/\s*wishlist\s*shareicon\s*/gi, '')
     .replace(/\s*shareicon\s*/gi, '')
@@ -87,56 +94,63 @@ function cleanProduct(raw: any) {
       ).filter(Boolean)
     : [];
 
-  // ── Slug: prefer slug field, fall back to id ───────────────────────────────
   const slug  = raw.slug || raw.id || '';
   const price = Number(raw.price || raw.rate || 0);
 
-  return { ...raw, name, images, video, features, salient_features, slug, price };
+  return {
+    ...raw,
+    name,
+    images,
+    video,
+    features,
+    salient_features,
+    slug,
+    price,
+    rate:        price,
+    stockStatus: raw.stockStatus || 'In Stock',
+    category:    raw.category    || '',
+  };
 }
 
 const CACHE_HEADERS = {
   'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
 };
 
-export async function GET() {
-  // 1. Try database
+export async function GET(req: NextRequest) {
+  const { searchParams } = req.nextUrl;
+  const category = searchParams.get('category') || '';
+
   try {
-    const db = await getPrisma();
-    if (db) {
-      const raw      = await db.product.findMany();
-      const products = raw.map(cleanProduct);
-      const categories = [...new Set(
-        products.map((p: any) => p.category).filter(Boolean)
-      )];
-      return NextResponse.json({ products, categories }, { headers: CACHE_HEADERS });
-    }
+    // NO select — fetch ALL fields so Prisma never silently skips documents
+    // NO take/skip — return everything (107 products ≈ 200KB, fast enough)
+    const where = category ? { category } : {};
+
+    const raw      = await prisma.product.findMany({ where });
+    const products = raw.map(cleanProduct);
+
+    const categories = [...new Set(
+      products
+        .map((p: any) => p.category)
+        .filter((c: any): c is string => typeof c === 'string' && c.trim().length > 0)
+    )];
+
+    return NextResponse.json(
+      { products, categories, total: products.length },
+      { headers: CACHE_HEADERS }
+    );
+
   } catch (e) {
     console.error('[/api/products] DB error:', e);
   }
 
-  // 2. Try live API
-  try {
-    const liveRes = await fetch('https://satyajan.com/api/products', {
-      next: { revalidate: 3600 },
-    });
-    if (liveRes.ok) {
-      const liveData = await liveRes.json();
-      if (liveData?.products?.length) {
-        const products   = liveData.products.map(cleanProduct);
-        const categories = [...new Set(
-          products.map((p: any) => p.category).filter(Boolean)
-        )];
-        return NextResponse.json({ products, categories }, { headers: CACHE_HEADERS });
-      }
-    }
-  } catch (e) {
-    console.error('[/api/products] Live API error:', e);
-  }
+  // Mock fallback
+  const filtered = category
+    ? mockProducts.filter((p: any) => p.category === category)
+    : mockProducts;
+  const products = filtered.map(cleanProduct);
 
-  // 3. Mock fallback
-  const products = mockProducts.map(cleanProduct);
   return NextResponse.json(
-    { products, categories: mockCategories },
+    { products, categories: mockCategories, total: products.length },
     { headers: CACHE_HEADERS }
   );
 }

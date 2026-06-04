@@ -46,7 +46,7 @@ const PROJECTS: Project[] = [
     title: 'Microtek iMAXX Online UPS with Battery Bank',
     location: 'Hyderabad, Telangana',
     capacity: '6 kVA Online UPS',
-    description: 'Installed a Microtek iMAXX 6kVA online UPS with a 12-battery Exide Powersafe SMF bank for a commercial office requiring zero-downtime power for servers and workstations.',
+    description: 'Installed a Microtek iMAXX 100kVA online UPS with a 32-battery Exide Powersafe SMF bank for a commercial office requiring zero-downtime power for servers and workstations.',
     image: '/images/projects/microtek-imaxx-online-ups-battery-bank-hyderabad.jpg',
     imageFallback: 'ph:lightning-fill',
     imageAlt: 'Microtek iMAXX 6kVA online UPS with Exide Powersafe SMF battery bank installed by Satyajan Energy Solutions in Hyderabad.',

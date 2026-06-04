@@ -1,62 +1,57 @@
 'use client';
+// context/CartContext.tsx
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface CartItem {
-  id: string;
-  name: string;
-  SKU: string;
-  price: number;
-  image: string;
-  quantity: number;
-  originalPrice?: number; // For discounted items
+  id:             string;
+  name:           string;
+  SKU:            string;
+  price:          number;
+  image:          string;
+  quantity:       number;
+  originalPrice?: number;
 }
 
 interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (item: Omit<CartItem, 'quantity'>) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
-  getTotalItems: () => number;
-  getSubtotal: () => number;
+  cartItems:       CartItem[];
+  addToCart:       (item: Omit<CartItem, 'quantity'>) => void;
+  removeFromCart:  (id: string) => void;
+  updateQuantity:  (id: string, quantity: number) => void;
+  clearCart:       () => void;
+  getTotalItems:   () => number;
+  getSubtotal:     () => number;
   getTotalSavings: () => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  // Initialize state from localStorage synchronously (only on client)
-  // This prevents hydration mismatch by ensuring client and server start with same state
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    // Only access localStorage on client side
-    if (typeof window === 'undefined') {
-      return [];
-    }
+    if (typeof window === 'undefined') return [];
     try {
       const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        return JSON.parse(savedCart);
-      }
+      if (savedCart) return JSON.parse(savedCart);
     } catch (error) {
       console.error('Error loading cart from localStorage:', error);
     }
     return [];
   });
 
-  // Track if this is the initial mount to prevent saving empty cart on first render
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Mark as initialized after first render
   useEffect(() => {
     setIsInitialized(true);
   }, []);
 
-  // Save cart to localStorage whenever it changes (but not on initial mount)
+  // CHANGED: debounced write — rapid add-to-cart no longer triggers
+  // a synchronous JSON.stringify + localStorage write on every click
   useEffect(() => {
-    if (isInitialized) {
+    if (!isInitialized) return;
+    const timer = setTimeout(() => {
       localStorage.setItem('cart', JSON.stringify(cartItems));
-    }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [cartItems, isInitialized]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
@@ -133,4 +128,3 @@ export function useCart() {
   }
   return context;
 }
-

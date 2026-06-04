@@ -1,3 +1,4 @@
+// components/shared/HeroSub.tsx
 import React, { FC } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 
@@ -5,14 +6,16 @@ interface HeroSubProps {
   title:       string;
   description: string;
   badge:       string;
-  compact?:    boolean; // ✅ reduces bottom padding when true (e.g. products page)
+  compact?:    boolean;
 }
 
 const HeroSub: FC<HeroSubProps> = ({ title, description, badge, compact = false }) => {
   return (
     <section
-      className={`text-center bg-cover !pt-40 relative overflow-x-hidden ${
-        compact ? 'pb-4' : 'pb-20'
+      className={`text-center bg-cover relative overflow-x-hidden ${
+        compact
+          ? 'pt-28 pb-3'   // compact: just enough for fixed header, no bottom gap
+          : 'pt-40 pb-20'  // normal pages: full spacing
       }`}
     >
       <div className="flex gap-2.5 items-center justify-center">
