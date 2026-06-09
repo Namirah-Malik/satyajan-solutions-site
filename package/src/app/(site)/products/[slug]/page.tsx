@@ -24,8 +24,17 @@ export async function generateStaticParams() {
   }
 }
 
-// ── Slug generator ────────────────────────────────────────────────────────────
+function validateSKU(sku: any): string | null {
+  if (!sku || typeof sku !== 'string') return null;
+  const s = sku.trim();
+  if (s.length < 3 || s.length > 50) return null;
+  if (!/^[A-Za-z0-9][A-Za-z0-9\-_\/\.]*$/.test(s)) return null;
+  if (/^SAT-[A-Z]{4,8}$/i.test(s)) return null; // reject our old fake pattern
+  if ((s.match(/-/g) || []).length > 4) return null; // reject slugs used as SKUs
+  return s;
+}
 function generateSlug(name: string): string {
+  
   return name
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
@@ -329,7 +338,7 @@ export default async function Details(
     description:      dbProduct.description || '',
     category:         dbProduct.category || '',
     categorySlug:     dbProduct.category || '',
-    SKU:              dbProduct.SKU || dbProduct.sku || `SAT-${slug.slice(-6).toUpperCase()}`,
+    SKU:              validateSKU(dbProduct.SKU || dbProduct.sku) || `SAT-${slug.slice(-6).toUpperCase()}`,
     data:             Array.isArray(dbProduct.specifications) ? dbProduct.specifications.slice(0, 3) : [],
     video:            dbProduct.video || '',
     slug:             productSlug,
@@ -347,7 +356,6 @@ export default async function Details(
     name,
     description: dbProduct.description || '',
     image:       images.map((i) => i.src),
-    sku:         product.SKU,
     brand:       { '@type': 'Brand', name: 'Microtek' },
     keywords:    tags.join(', '),
     seller: {
@@ -369,6 +377,11 @@ export default async function Details(
       },
     },
   };
+  const validSKU = validateSKU(dbProduct.SKU || dbProduct.sku);
+  if (validSKU) {
+    productSchema.sku = validSKU;
+    productSchema.mpn = validSKU;
+  }
 
   const faqs = buildFAQs(dbProduct, name, price);
   const faqSchema = {

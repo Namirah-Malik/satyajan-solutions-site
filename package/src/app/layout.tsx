@@ -10,21 +10,17 @@ import NextTopLoader          from 'nextjs-toploader';
 import CallMeBackTrigger     from '@/components/CallMeBackTrigger';
 import { CartProvider }      from '@/context/CartContext';
 import FloatingWhatsApp      from '@/components/FloatingWhatsApp';
-// ❌ Chatbox import removed — replaced by FloatingWhatsApp
 
 const font = Bricolage_Grotesque({ subsets: ['latin'], display: 'swap' });
 
-// ── Site-wide metadata ────────────────────────────────────────────────────────
 export const metadata: Metadata = {
   metadataBase: new URL('https://satyajan.com'),
-
   title: {
     default:  'Buy Microtek Inverter & Battery in Hyderabad | Satyajan Energy Solutions',
     template: '%s | Satyajan Energy Solutions',
   },
   description:
     'Authorised Microtek dealer in Hyderabad. Buy pure sine wave inverters, tubular batteries, solar panels & online UPS. 101+ products. Free delivery. Easy EMI. Call +91 8019179159.',
-
   keywords: [
     'inverter battery hyderabad',
     'microtek inverter hyderabad',
@@ -37,8 +33,6 @@ export const metadata: Metadata = {
     'satyajan energy solutions',
     'solar company telangana',
   ],
-
-  
   openGraph: {
     type:        'website',
     locale:      'en_IN',
@@ -53,14 +47,12 @@ export const metadata: Metadata = {
       alt:    'Satyajan Energy Solutions – Inverter, Battery & Solar in Hyderabad',
     }],
   },
-
   twitter: {
     card:        'summary_large_image',
     title:       'Buy Microtek Inverter & Battery in Hyderabad | Satyajan Energy Solutions',
     description: 'Authorised Microtek dealer in Hyderabad. Solar panels, inverters & batteries. Easy EMI.',
     images:      ['https://satyajan.com/images/og-default.jpg'],
   },
-
   robots: {
     index:  true,
     follow: true,
@@ -72,31 +64,30 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
     },
   },
-icons: {
-  icon: [
-    { url: '/favicon.ico' },
-    { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-    { url: '/web-app-manifest-192x192.png', sizes: '192x192', type: 'image/png' },
-    { url: '/web-app-manifest-512x512.png', sizes: '512x512', type: 'image/png' },
-  ],
-  apple: '/apple-touch-icon.png',
-},
-manifest: '/site.webmanifest',
-
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-32x32.png',           sizes: '32x32',   type: 'image/png' },
+      { url: '/favicon-16x16.png',           sizes: '16x16',   type: 'image/png' },
+      { url: '/web-app-manifest-192x192.png',sizes: '192x192', type: 'image/png' },
+      { url: '/web-app-manifest-512x512.png',sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
   verification: {
     google: 'DuItGjg2FPhjS2UzApHHpW7H28gAQBZrvYOHoDaxzLk',
   },
 };
 
-// ── Organisation Schema (site-wide) ──────────────────────────────────────────
+// ── Organisation Schema ───────────────────────────────────────────────────────
 const orgSchema = {
   '@context':  'https://schema.org',
   '@type':     'LocalBusiness',
   '@id':       'https://satyajan.com/#organization',
   name:        'Satyajan Energy Solutions Private Limited',
   url:         'https://satyajan.com',
-  logo: 'https://satyajan.com/images/header/satyajan-logo.png',
+  logo:        'https://satyajan.com/images/header/satyajan-logo.png',
   description: 'Authorised Microtek dealer in Hyderabad. Solar panels, inverters, batteries & UPS.',
   telephone:   '+91-8019179159',
   email:       'info@satyajan.com',
@@ -119,26 +110,26 @@ const orgSchema = {
     opens:     '09:00',
     closes:    '19:00',
   },
+  // FIX: Added Google Business Profile to sameAs
+  // This helps Google Merchant Center link your 200+ Google reviews
+  // to your Merchant Center account for the Store Rating feature
   sameAs: [
     'https://www.indiamart.com/satyajan-energy-solutions',
+    'https://share.google/xEUrHKGcodkwsSfRF',  // Google Business Profile reviews URL
   ],
   priceRange:         '₹₹',
   currenciesAccepted: 'INR',
   paymentAccepted:    'Cash, Credit Card, Debit Card, UPI, Net Banking, EMI',
 };
 
-// ── Root Layout ───────────────────────────────────────────────────────────────
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Organisation Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
         />
-
-        {/* Google Analytics 4 */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZBB0L9QBHX" />
         <script
           dangerouslySetInnerHTML={{
@@ -150,26 +141,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
-
-        {/* Animations for FloatingWhatsApp — no tailwind.config needed */}
         <style>{`
           @keyframes fade-in {
             0%   { opacity: 0; transform: translateY(4px); }
             100% { opacity: 1; transform: translateY(0); }
           }
-          .animate-fade-in {
-            animation: fade-in 0.3s ease-out;
-          }
+          .animate-fade-in { animation: fade-in 0.3s ease-out; }
           @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
           }
-          .animate-spin-slow {
-            animation: spin-slow 3s linear infinite;
-          }
+          .animate-spin-slow { animation: spin-slow 3s linear infinite; }
         `}</style>
       </head>
-
       <body className={`${font.className} bg-white antialiased`} suppressHydrationWarning>
         <WishlistProvider>
           <CartProvider>
@@ -178,7 +162,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <Footer />
             <CallMeBackTrigger />
-            {/* ✅ FloatingWhatsApp replaces the old Chatbox */}
             <FloatingWhatsApp />
           </CartProvider>
         </WishlistProvider>

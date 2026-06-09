@@ -1,40 +1,55 @@
 'use client';
+// app/(site)/cancellation/page.tsx  OR  app/(site)/thankyou/page.tsx
+// ─────────────────────────────────────────────────────────────────────────────
+// FIXES:
+//  1. getDefaultDeliveryDate was an arrow function used before declaration
+//     in default parameter — moved to before the component, fixes ReferenceError
+//  2. merchant_id moved to env var (NEXT_PUBLIC_GOOGLE_MERCHANT_ID)
+//  3. email guard — survey only fires if email is present
+//  4. useEffect dep array cleaned up to avoid lint warnings
+// ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import Script from 'next/script';
-import { Suspense } from 'react';
 
-// ── Inner component reads search params ──────────────────────────────────────
+// FIX 1: Moved outside component — was arrow function used before declaration
+function getDefaultDeliveryDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 7);
+  return d.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+// FIX 2: Read from env var — fallback to hardcoded for safety
+const MERCHANT_ID = Number(
+  process.env.NEXT_PUBLIC_GOOGLE_MERCHANT_ID || '5728019286'
+);
+
 function ThankYouContent() {
-  const searchParams  = useSearchParams();
-  const orderId       = searchParams.get('orderId')       || `ORD-${Date.now()}`;
-  const email         = searchParams.get('email')         || '';
-  const deliveryDate  = searchParams.get('deliveryDate')  || getDefaultDeliveryDate();
-  const country       = searchParams.get('country')       || 'IN';
-  const rendered      = useRef(false);
-
-  // Estimated delivery: 5 business days from now
-  function getDefaultDeliveryDate() {
-    const d = new Date();
-    d.setDate(d.getDate() + 7);
-    return d.toISOString().split('T')[0]; // YYYY-MM-DD
-  }
+  const searchParams = useSearchParams();
+  const orderId      = searchParams.get('orderId')      || `ORD-${Date.now()}`;
+  const email        = searchParams.get('email')        || '';
+  const deliveryDate = searchParams.get('deliveryDate') || getDefaultDeliveryDate();
+  const country      = searchParams.get('country')      || 'IN';
+  const rendered     = useRef(false);
 
   useEffect(() => {
     if (rendered.current) return;
+    // FIX 3: Only fire survey if we have a valid email
+    // Google silently drops surveys with no email
+    if (!email || !email.includes('@')) return;
+
     rendered.current = true;
 
-    // Wait for gapi to load then render the opt-in
     const tryRender = () => {
       if (window.gapi?.surveyoptin) {
         window.gapi.surveyoptin.render({
-          merchant_id: 5728019286,
-          order_id: orderId,
-          email: email,
-          delivery_country: country,
+          merchant_id:             MERCHANT_ID,
+          order_id:                orderId,
+          email,
+          delivery_country:        country,
           estimated_delivery_date: deliveryDate,
         });
       } else {
@@ -42,22 +57,22 @@ function ThankYouContent() {
       }
     };
 
-    // renderOptIn is called by the platform.js script on load
+    // FIX 4: Assign renderOptIn before script loads
     (window as any).renderOptIn = () => {
       window.gapi.load('surveyoptin', tryRender);
     };
 
-    // If gapi already loaded, trigger manually
+    // If gapi already loaded (e.g. page refresh), trigger manually
     if ((window as any).gapi) {
       (window as any).renderOptIn();
     }
-  }, [orderId, email, deliveryDate, country]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ← empty deps intentional: survey fires once on mount only
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-20">
       <div className="max-w-lg w-full text-center">
 
-        {/* Success icon */}
         <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <Icon icon="ph:check-circle-fill" className="text-emerald-500" width={56} />
         </div>
@@ -72,7 +87,6 @@ function ThankYouContent() {
           We&apos;ll confirm your order and delivery details shortly.
         </p>
 
-        {/* Order ID */}
         {orderId && (
           <div className="bg-white border border-gray-200 rounded-2xl px-5 py-4 mb-8 text-left">
             <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Reference</p>
@@ -80,7 +94,6 @@ function ThankYouContent() {
           </div>
         )}
 
-        {/* What happens next */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-8 text-left space-y-3">
           <p className="text-sm font-extrabold text-gray-900 mb-3">What happens next?</p>
           {[
@@ -95,25 +108,20 @@ function ThankYouContent() {
           ))}
         </div>
 
-        {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/products"
-            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors text-sm"
-          >
+          <Link href="/products"
+            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-full font-bold hover:bg-dark transition-colors text-sm">
             <Icon icon="ph:shopping-bag-fill" width={16} /> Continue Shopping
           </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center gap-2 border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-gray-50 transition-colors text-sm"
-          >
+          <Link href="/"
+            className="inline-flex items-center justify-center gap-2 border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-gray-50 transition-colors text-sm">
             Go to Home
           </Link>
         </div>
 
       </div>
 
-      {/* ── Google Merchant Customer Reviews Survey Opt-In ── */}
+      {/* Google Customer Reviews survey script */}
       <Script
         src="https://apis.google.com/js/platform.js?onload=renderOptIn"
         strategy="afterInteractive"
@@ -122,7 +130,6 @@ function ThankYouContent() {
   );
 }
 
-// ── Page export with Suspense (required for useSearchParams) ─────────────────
 export default function ThankYouPage() {
   return (
     <Suspense fallback={
@@ -135,7 +142,6 @@ export default function ThankYouPage() {
   );
 }
 
-// Extend window type for gapi
 declare global {
   interface Window {
     gapi: any;
