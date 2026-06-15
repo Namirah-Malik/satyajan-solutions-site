@@ -43,7 +43,7 @@ interface Project {
 const PROJECTS: Project[] = [
   {
     id: 'imaxx-online-ups-office',
-    title: 'Microtek iMAXX Online UPS with Battery Bank',
+    title: '30kva max+ Online ups  lab purpose for school',
     location: 'Hyderabad, Telangana',
     capacity: '100 kVA Online UPS',
     description: 'Installed a Microtek iMAXX 100kVA online UPS with a 32-battery Exide Powersafe SMF bank for a commercial office requiring zero-downtime power for servers and workstations.',
@@ -68,7 +68,7 @@ const PROJECTS: Project[] = [
   },
   {
     id: 'home-inverter-tubular-battery',
-    title: 'Home Inverter + Tall Tubular Battery Installation',
+    title: 'Super power Inverter installation in ZPHS School in saroornagar',
     location: 'Hyderabad, Telangana',
     capacity: '1250VA / 150Ah',
     description: 'Installed a Microtek Heavy Duty inverter with a tall tubular battery in a compact home setup — providing 6+ hours of backup for fans, lights, TV and essential appliances.',
@@ -92,7 +92,7 @@ const PROJECTS: Project[] = [
     keywords: ['home inverter installation Hyderabad', 'Microtek Heavy Duty inverter', '150Ah tubular battery installation', 'home UPS backup Hyderabad'],
   },
   {
-    id: 'school-inverter-installation',
+    id: 'Luxe inverter with lithium battery combo installation in home',
     title: 'School Classroom Power Backup',
     location: 'Hyderabad, Telangana',
     capacity: '900VA / 150Ah',
@@ -143,7 +143,7 @@ const PROJECTS: Project[] = [
   },
   {
     id: 'home-inverter-bigpowerr',
-    title: 'Microtek Inverter with BIG POWERR Battery',
+    title: '10kva online ups for OASK Publishers',
     location: 'Hyderabad, Telangana',
     capacity: '1250VA / 180Ah',
     description: 'Complete home power backup solution with Microtek Heavy Duty inverter and a BIG POWERR 180Ah tubular battery — delivering 8+ hours of backup for a 3 BHK apartment.',
@@ -168,7 +168,7 @@ const PROJECTS: Project[] = [
   },
   {
     id: 'lithium-battery-luxe-combo',
-    title: 'Microtek LUXE Inverter + Lithium-Ion Battery',
+    title: 'lithium 1500 SW Inverter For home',
     location: 'Hyderabad, Telangana',
     capacity: '1100VA / 100Ah LFP',
     description: 'Upgraded a home from a conventional tubular battery to a Microtek LFP Lithium-Ion battery with LUXE inverter — 3500+ cycles, maintenance-free, and 5× faster charging.',
