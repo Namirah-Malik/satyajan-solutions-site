@@ -42,86 +42,86 @@ interface Project {
 
 const PROJECTS: Project[] = [
   {
-    id: 'imaxx-online-ups-office',
-    title: '30kva max+ Online ups  lab purpose for school',
+    id: 'online-ups-school-laboratory',
+    title: '30kVA MAX+ Online UPS Installation for School Laboratory',
     location: 'Hyderabad, Telangana',
-    capacity: '100 kVA Online UPS',
-    description: 'Installed a Microtek iMAXX 100kVA online UPS with a 32-battery Exide Powersafe SMF bank for a commercial office requiring zero-downtime power for servers and workstations.',
+    capacity: '30kVA Online UPS',
+    description: 'Installed a Microtek MAX+ 30kVA True Online UPS with SMF battery bank for a school laboratory, ensuring zero transfer time and complete protection for computers and sensitive lab equipment.',
     image: '/images/projects/microtek-imaxx-online-ups-battery-bank-hyderabad.jpg',
     imageFallback: 'ph:lightning-fill',
-    imageAlt: 'Microtek iMAXX 100kVA online UPS with Exide Powersafe SMF battery bank installed by Satyajan Energy Solutions in Hyderabad.',
+    imageAlt: 'Microtek MAX+ 30kVA Online UPS with SMF battery bank installed by Satyajan Energy Solutions for a school laboratory in Hyderabad.',
     imageFile: 'microtek-imaxx-online-ups-battery-bank-hyderabad.jpg',
     category: 'Online UPS',
     categoryColor: 'bg-blue-600',
     components: [
-      'Microtek iMAXX 100kVA Online UPS',
-      '12 × Exide Powersafe SMF Batteries',
-      'MS Battery Rack (2-Tier)',
+      'Microtek MAX+ 30kVA True Online UPS',
+      'High-Capacity SMF Battery Bank',
+      'Dedicated Battery Rack',
       'Distribution Board & Bypass Switch',
       'Copper Interconnects & Lugs',
     ],
-    overview: 'A commercial office in Hyderabad required uninterrupted power for their server room and 20+ workstations. Frequent grid outages were causing data loss and productivity disruption.',
-    challenge: 'The client had no existing UPS — only a basic offline inverter. Server room equipment required true online double-conversion protection with zero transfer time. Limited floor space required a compact, high-density battery layout.',
-    solution: 'Satyajan Energy Solutions installed a Microtek iMAXX 6kVA true online UPS paired with 12 Exide Powersafe SMF batteries on a custom 2-tier MS rack. The online UPS provides zero transfer time, constant voltage/frequency regulation, and complete isolation from grid disturbances — essential for server protection.',
-    result: 'The server room now operates with complete power protection. Zero data loss incidents since installation. The 12-battery bank provides 3–4 hours of backup at 50% load. Client upgraded from reactive emergency fixes to proactive power management.',
-    keywords: ['online UPS installation Hyderabad', 'Microtek iMAXX UPS Hyderabad', 'server room power backup', 'commercial UPS installation'],
+    overview: 'A school laboratory in Hyderabad required uninterrupted power for desktop computers, networking equipment, projectors, and laboratory instruments. Frequent power fluctuations and outages were disrupting practical sessions and damaging sensitive equipment.',
+    challenge: 'The school needed a reliable power backup solution with zero transfer time to protect computers and laboratory equipment. The system had to support multiple workstations simultaneously while maintaining stable voltage and frequency.',
+    solution: 'Satyajan Energy Solutions installed a Microtek MAX+ 30kVA True Online UPS with a high-capacity SMF battery bank mounted on a dedicated battery rack. The double-conversion technology ensures continuous clean power with complete protection from voltage fluctuations, surges, and outages.',
+    result: 'The laboratory now operates without interruptions during power cuts. All computers and educational equipment remain protected, ensuring smooth practical sessions and improved learning experiences for students.',
+    keywords: ['online UPS school laboratory Hyderabad', 'Microtek MAX+ 30kVA UPS', 'school lab power backup', 'zero transfer time UPS Hyderabad'],
   },
   {
-    id: 'home-inverter-tubular-battery',
-    title: 'Super power Inverter installation in ZPHS School in saroornagar',
-    location: 'Hyderabad, Telangana',
+    id: 'super-power-inverter-zphs-saroornagar',
+    title: 'Super Power Inverter Installation at ZPHS School, Saroornagar',
+    location: 'Saroornagar, Hyderabad',
     capacity: '1250VA / 150Ah',
-    description: 'Installed a Microtek Heavy Duty inverter with a tall tubular battery in a compact home setup — providing 6+ hours of backup for fans, lights, TV and essential appliances.',
+    description: 'Installed a Microtek Super Power Inverter with a 150Ah Tall Tubular Battery at ZPHS Saroornagar, providing reliable pure sine wave backup for classrooms, staff rooms, and administrative offices.',
     image: '/images/projects/microtek-heavy-duty-inverter-home-installation.jpg',
-    imageFallback: 'ph:house-fill',
-    imageAlt: 'Microtek Heavy Duty inverter with tall tubular battery installation in a Hyderabad home by Satyajan Energy Solutions.',
+    imageFallback: 'ph:buildings-fill',
+    imageAlt: 'Microtek Super Power Inverter with 150Ah Tall Tubular Battery installed at ZPHS School Saroornagar by Satyajan Energy Solutions.',
     imageFile: 'microtek-heavy-duty-inverter-home-installation.jpg',
-    category: 'Home Inverter',
-    categoryColor: 'bg-emerald-600',
+    category: 'Educational',
+    categoryColor: 'bg-purple-600',
     components: [
-      'Microtek Heavy Duty 1250VA Inverter',
+      'Microtek Super Power Pure Sine Wave Inverter',
       '150Ah Tall Tubular Battery',
       'Battery Trolley with Wheels',
       'Wiring & MCB Protection',
       'Paperless Warranty Registration',
     ],
-    overview: 'A family in Hyderabad was experiencing 6–8 hour daily power cuts during summer. They needed reliable backup for 3 ceiling fans, 8 LED lights, and a 40" LED TV.',
-    challenge: 'Existing basic inverter was undersized and the old flat plate battery was only lasting 2 hours. Client wanted a neat, space-saving installation that could be moved easily — hence the battery trolley requirement.',
-    solution: 'A Microtek Heavy Duty 1250VA pure sine wave inverter was paired with a 150Ah tall tubular battery mounted on a wheeled trolley for easy mobility. The installation was done with concealed wiring and an MCB for overload protection. Digital warranty registration was completed on the same day.',
-    result: 'The family now gets 6+ hours of backup — enough to cover full-day power cuts. The tall tubular battery requires minimal water top-ups (quarterly) and the mobile trolley allows easy repositioning. 100% satisfaction with the neat, professional installation.',
-    keywords: ['home inverter installation Hyderabad', 'Microtek Heavy Duty inverter', '150Ah tubular battery installation', 'home UPS backup Hyderabad'],
+    overview: 'ZPHS School, Saroornagar, required a reliable backup solution for classrooms, staff rooms, and administrative offices to ensure uninterrupted educational activities during power outages.',
+    challenge: 'Frequent power cuts affected classroom lighting, ceiling fans, and essential office equipment. The school required a cost-effective and dependable backup system.',
+    solution: 'Satyajan Energy Solutions installed a Microtek Super Power Inverter paired with a 150Ah Tall Tubular Battery. The system was designed to support classroom fans, lights, and essential administrative equipment with stable pure sine wave output.',
+    result: 'The school now enjoys uninterrupted classroom operations during power outages. Students and staff remain comfortable, and academic activities continue without disruption.',
+    keywords: ['inverter installation ZPHS Saroornagar', 'school power backup Hyderabad', 'Microtek Super Power inverter school', 'educational institution UPS Hyderabad'],
   },
   {
-    id: 'Luxe inverter with lithium battery combo installation in home',
-    title: 'School Classroom Power Backup',
+    id: 'luxe-inverter-lithium-battery-home',
+    title: 'LUXE Inverter with Lithium Battery Installation for Home',
     location: 'Hyderabad, Telangana',
-    capacity: '900VA / 150Ah',
-    description: 'Deployed a Microtek inverter + tall tubular battery for a school classroom, ensuring uninterrupted power for fans, lights and smart board during frequent afternoon outages.',
-    image: '/images/projects/microtek-inverter-school-classroom-hyderabad.jpg',
-    imageFallback: 'ph:buildings-fill',
-    imageAlt: 'Microtek inverter and tall tubular battery backup system installed in a school classroom in Hyderabad by Satyajan Energy Solutions.',
-    imageFile: 'microtek-inverter-school-classroom-hyderabad.jpg',
-    category: 'Educational',
-    categoryColor: 'bg-purple-600',
+    capacity: '1100VA / 100Ah LFP',
+    description: 'Upgraded a Hyderabad home from conventional tubular battery to a Microtek LUXE Inverter with Lithium-Ion (LFP) Battery — maintenance-free, faster charging, and 3500+ cycle life.',
+    image: '/images/projects/microtek-luxe-lithium-battery-combo.jpg',
+    imageFallback: 'ph:atom-fill',
+    imageAlt: 'Microtek LUXE Inverter with Lithium-Ion LFP Battery installed in a Hyderabad home by Satyajan Energy Solutions.',
+    imageFile: 'microtek-luxe-lithium-battery-combo.jpg',
+    category: 'Lithium Battery',
+    categoryColor: 'bg-violet-600',
     components: [
-      'Microtek 900VA Pure Sine Wave Inverter',
-      '150Ah Tall Tubular Battery',
-      'Battery Trolley Cabinet',
-      'MCB Panel & Earthing',
-      'Warranty & AMC Registration',
+      'Microtek LUXE Inverter',
+      'Microtek Lithium-Ion (LFP) Battery',
+      'Built-in Battery Management System (BMS)',
+      'Compact Wall-Mount Installation',
+      'Zero-Maintenance Setup',
     ],
-    overview: 'A school in Hyderabad was facing disruptions to afternoon classes due to daily power cuts. Teaching with a smart board and running ceiling fans for student comfort was becoming impossible during hot months.',
-    challenge: 'The school needed a reliable, safe, and maintenance-easy solution that non-technical school staff could monitor. Budget was a consideration — a cost-effective solution was required without compromising quality.',
-    solution: 'A Microtek 900VA pure sine wave inverter was installed with a 150Ah tall tubular battery in a neat cabinet trolley. The inverter\'s pure sine wave output is safe for the school\'s smart board and other electronics. The installation was designed to be simple for staff to monitor — a single LED indicator shows battery health.',
-    result: 'Zero class disruptions since installation. The system supports 2 ceiling fans, 6 LED lights, and the smart board for 4+ hours of backup. School management expressed satisfaction with both the product quality and the professional, mess-free installation by Satyajan\'s team.',
-    keywords: ['school power backup Hyderabad', 'inverter for classroom', 'educational institution UPS Hyderabad', 'Microtek inverter school installation'],
+    overview: 'A homeowner in Hyderabad wanted a modern, maintenance-free power backup solution for their apartment. The customer was looking for reliable backup for lights, fans, TV, Wi-Fi router, and other essential household appliances during frequent power outages.',
+    challenge: 'The existing tubular battery required regular water top-ups, occupied considerable space, and charged slowly. The customer wanted a compact, hassle-free solution that could be safely installed indoors without ventilation concerns.',
+    solution: 'Satyajan Energy Solutions installed a Microtek LUXE Inverter paired with a Microtek Lithium-Ion (LFP) Battery. The lithium battery features an advanced Battery Management System (BMS) for enhanced safety, longer life, and superior performance. The compact setup was neatly installed, requiring minimal space while delivering fast charging and high efficiency.',
+    result: 'The customer now enjoys uninterrupted backup power with zero maintenance requirements. The lithium battery charges significantly faster than conventional batteries, provides consistent performance, and eliminates the need for water refilling. The compact and modern system blends seamlessly into the home environment while delivering dependable power backup for years to come.',
+    keywords: ['lithium battery inverter Hyderabad', 'Microtek LUXE lithium combo', 'maintenance-free inverter battery', 'LFP battery home installation Hyderabad'],
   },
   {
-    id: 'solar-pcu-home-installation',
+    id: 'solar-pcu-tall-tubular-battery',
     title: 'Solar PCU + Tall Tubular Battery System',
     location: 'Hyderabad, Telangana',
     capacity: '1kW Solar + 200Ah Storage',
-    description: 'Installed a Microtek Solar PCU with 2 × tall tubular batteries, enabling a home to run on solar power during the day and stored energy at night — drastically cutting electricity bills.',
+    description: 'Installed a Microtek Solar PCU integrated with a 1kW Solar Panel System and two 100Ah Tall Tubular Batteries, reducing electricity bills by 60–70% while providing reliable backup during outages.',
     image: '/images/projects/microtek-solar-pcu-tubular-battery-installation.jpg',
     imageFallback: 'ph:sun-fill',
     imageAlt: 'Microtek Solar PCU with 2 tall tubular batteries installed for a home solar power system in Hyderabad by Satyajan Energy Solutions.',
@@ -130,66 +130,66 @@ const PROJECTS: Project[] = [
     categoryColor: 'bg-amber-500',
     components: [
       'Microtek Solar PCU 1kW/24V',
-      '2 × Microtek 100Ah Tall Tubular Batteries',
-      'Solar Panel Array (1kW)',
-      'Charge Controller (Inbuilt)',
+      '1kW Solar Panel Array',
+      '2 × 100Ah Tall Tubular Batteries',
+      'Inbuilt Charge Controller',
       'MC4 Connectors & DC Cabling',
     ],
-    overview: 'A residential property in Hyderabad wanted to reduce their electricity bill and have power independence during grid outages. The terrace had space for a small 1kW solar array.',
-    challenge: 'The client wanted solar power that could also provide backup during outages — a standard grid-tie system would shut down during power cuts. A hybrid Solar PCU solution was needed that could simultaneously charge batteries from solar and power loads.',
-    solution: 'Satyajan installed a Microtek Solar PCU (Power Conditioning Unit) — a hybrid inverter that manages solar charging, battery charging from grid, and load supply simultaneously. Two 100Ah tall tubular batteries provide 24V storage. During the day, solar powers the loads directly; excess charges batteries; grid supplements when solar is insufficient.',
-    result: 'Monthly electricity bill reduced by 60–70%. The family gets 8+ hours of backup with batteries charged by solar. During good sun days, the system operates fully off-grid from 9 AM to 6 PM. Payback estimated at 3.5 years with ₹2,000+ monthly savings.',
-    keywords: ['solar PCU installation Hyderabad', 'hybrid solar inverter home', 'solar + battery backup system', 'Microtek Solar PCU Hyderabad'],
+    overview: 'A homeowner in Hyderabad wanted to reduce electricity bills while maintaining backup power during grid failures. The customer required a solar solution capable of providing power during outages while maximizing solar energy utilization throughout the day.',
+    challenge: 'The customer required a solar solution capable of providing power during outages while maximizing solar energy utilization throughout the day. A standard grid-tie system would shut down during power cuts, so a hybrid Solar PCU solution was needed.',
+    solution: 'Satyajan Energy Solutions installed a Microtek Solar PCU integrated with a 1kW Solar Panel System and two 100Ah Tall Tubular Batteries. The system intelligently manages solar generation, battery charging, and load distribution — powering household loads from solar during the day while charging batteries simultaneously.',
+    result: 'The customer achieved a 60–70% reduction in electricity bills and enjoys reliable backup power during outages. Solar energy now powers household loads throughout the day while charging the batteries. During good sun days, the system operates fully off-grid from 9 AM to 6 PM.',
+    keywords: ['solar PCU installation Hyderabad', 'hybrid solar inverter home', 'solar battery backup system', 'Microtek Solar PCU Hyderabad'],
   },
   {
-    id: 'home-inverter-bigpowerr',
-    title: '10kva online ups for OASK Publishers',
+    id: 'online-ups-oask-publishers',
+    title: '10kVA Online UPS Installation for OASK Publishers',
     location: 'Hyderabad, Telangana',
-    capacity: '1250VA / 180Ah',
-    description: 'Complete home power backup solution with Microtek Heavy Duty inverter and a BIG POWERR 180Ah tubular battery — delivering 8+ hours of backup for a 3 BHK apartment.',
+    capacity: '10kVA Online UPS',
+    description: 'Installed a Microtek 10kVA True Online UPS with high-capacity SMF battery bank for OASK Publishers, eliminating workflow interruptions and protecting critical publishing and office infrastructure.',
     image: '/images/projects/microtek-inverter-bigpowerr-battery-home.jpg',
-    imageFallback: 'ph:battery-charging-fill',
-    imageAlt: 'Microtek Heavy Duty inverter with BIG POWERR 180Ah tubular battery installed in a Hyderabad apartment by Satyajan Energy Solutions.',
+    imageFallback: 'ph:buildings-fill',
+    imageAlt: 'Microtek 10kVA True Online UPS with SMF battery bank installed for OASK Publishers in Hyderabad by Satyajan Energy Solutions.',
     imageFile: 'microtek-inverter-bigpowerr-battery-home.jpg',
-    category: 'Home Inverter',
-    categoryColor: 'bg-emerald-600',
+    category: 'Online UPS',
+    categoryColor: 'bg-blue-600',
     components: [
-      'Microtek Heavy Duty 1250VA Inverter',
-      'BIG POWERR 180Ah Tubular Battery',
-      'Battery Cabinet with Wheels',
-      'MCB + Fuse Protection',
-      'Same-Day Installation & Warranty',
+      'Microtek 10kVA True Online UPS',
+      'High-Capacity SMF Battery Bank',
+      'Robust Battery Rack',
+      'Distribution Board & Bypass Switch',
+      'Enterprise-Grade Cabling & Protection',
     ],
-    overview: 'A family in a 3 BHK apartment in Hyderabad was suffering through 8-hour daily power cuts in summer with an ageing inverter that could barely last 2 hours. They needed a significant upgrade.',
-    challenge: 'Old flat plate battery had reduced to 20% capacity. The apartment had a specific corner installation requirement with no wall space for a fixed rack. Client wanted a solution that could be relocated easily if they moved apartments.',
-    solution: 'A Microtek Heavy Duty 1250VA pure sine wave inverter was paired with a BIG POWERR 180Ah tall tubular battery in a sleek wheeled cabinet. The mobile cabinet design allows easy relocation and keeps the installation neat and compact in the apartment corner. Wiring was neatly channeled with a dedicated MCB for safety.',
-    result: 'The family now gets 8–10 hours of backup — sufficient even for the longest power cuts. The 180Ah battery is significantly larger than their old setup, providing noticeably better performance. Client also saved on installation by reusing the existing wiring from their old system.',
-    keywords: ['home inverter upgrade Hyderabad', 'Microtek Heavy Duty 1250VA', 'BIG POWERR battery installation', '180Ah tubular battery Hyderabad'],
+    overview: 'OASK Publishers required uninterrupted power for their office operations, computer systems, networking infrastructure, and publishing equipment. Power outages and voltage fluctuations were causing workflow interruptions and risk of data loss.',
+    challenge: 'Power outages and voltage fluctuations were causing workflow interruptions and risk of data loss. The organization needed enterprise-grade power protection with zero transfer time to safeguard critical publishing operations.',
+    solution: 'Satyajan Energy Solutions installed a Microtek 10kVA True Online UPS with a high-capacity SMF battery bank mounted on a robust battery rack. The online UPS delivers clean, regulated power with zero transfer time, ensuring complete isolation from all grid disturbances.',
+    result: 'Office operations now continue seamlessly during power failures. Critical systems remain protected, productivity has improved, and the risk of data loss has been eliminated. OASK Publishers now has enterprise-grade power protection for their publishing operations.',
+    keywords: ['online UPS commercial Hyderabad', 'Microtek 10kVA UPS office', 'publisher office power backup', 'enterprise UPS installation Hyderabad'],
   },
   {
-    id: 'lithium-battery-luxe-combo',
-    title: 'lithium 1500 SW Inverter For home',
+    id: 'microtek-lithium-1500-sw-home',
+    title: 'Microtek Lithium 1500 SW Inverter Installation for Home',
     location: 'Hyderabad, Telangana',
-    capacity: '1100VA / 100Ah LFP',
-    description: 'Upgraded a home from a conventional tubular battery to a Microtek LFP Lithium-Ion battery with LUXE inverter — 3500+ cycles, maintenance-free, and 5× faster charging.',
-    image: '/images/projects/microtek-luxe-lithium-battery-combo.jpg',
-    imageFallback: 'ph:atom-fill',
-    imageAlt: 'Microtek LUXE inverter with Microtek Lithium-Ion LFP battery (MLB1280060) installed in a Hyderabad home by Satyajan Energy Solutions.',
-    imageFile: 'microtek-luxe-lithium-battery-combo.jpg',
+    capacity: '1500VA / LFP Lithium',
+    description: 'Upgraded a Hyderabad home from traditional lead-acid battery to the Microtek i-Lithium 1500 SW Inverter with LFP Lithium-Ion Battery — faster charging, 10+ year lifespan, zero maintenance.',
+    image: '/images/projects/microtek-inverter-school-classroom-hyderabad.jpg',
+    imageFallback: 'ph:battery-charging-fill',
+    imageAlt: 'Microtek i-Lithium 1500 SW Inverter with LFP Lithium-Ion Battery installed in a Hyderabad home by Satyajan Energy Solutions.',
+    imageFile: 'microtek-inverter-school-classroom-hyderabad.jpg',
     category: 'Lithium Battery',
     categoryColor: 'bg-violet-600',
     components: [
-      'Microtek LUXE NEW 1400 Inverter (1100VA)',
-      'Microtek Lithium-Ion Battery MLB1280060 (100Ah/12.8V)',
-      'Built-in BMS Protection',
-      '5-Year Lithium Warranty',
-      'Zero-Maintenance Setup',
+      'Microtek i-Lithium 1500 SW Inverter',
+      'Microtek LFP Lithium-Ion Battery',
+      'Advanced Battery Management System (BMS)',
+      'Compact Space-Saving Installation',
+      'Digital Warranty Registration',
     ],
-    overview: 'A customer in Hyderabad wanted to upgrade from a conventional tubular battery that required water top-ups every month and was deteriorating rapidly. They wanted a modern, maintenance-free solution.',
-    challenge: 'Conventional tubular batteries require regular water maintenance, produce hydrogen gas (ventilation needed), and deteriorate over 4–5 years. The customer lived in an apartment with no space for battery ventilation and wanted a safe, compact, zero-maintenance solution.',
-    solution: 'Satyajan recommended the Microtek LUXE NEW 1400 inverter paired with the Microtek MLB1280060 100Ah LFP Lithium-Ion battery — a sealed, maintenance-free system with built-in BMS. The LFP chemistry is thermally stable (no ventilation needed), charges 5× faster than tubular batteries, and delivers 3500+ cycles vs 500 for lead-acid.',
-    result: 'The customer is delighted — no more monthly water top-ups, no acid smell, faster charging, and a 5-year warranty. The compact lithium battery fits neatly on the shelf. At 10kg, it weighs a fraction of a 180Ah tubular battery (50kg). Estimated 10+ years of service life with the LFP chemistry.',
-    keywords: ['lithium battery inverter Hyderabad', 'Microtek LFP lithium battery', 'maintenance-free inverter battery', 'Microtek LUXE lithium combo Hyderabad'],
+    overview: 'A homeowner in Hyderabad wanted to upgrade from a traditional lead-acid battery system to a modern lithium-based power backup solution. The existing tubular battery required frequent maintenance, occupied significant space, and offered slower charging with limited lifespan.',
+    challenge: 'The existing tubular battery required frequent maintenance, occupied significant space, and offered slower charging with a limited lifespan of 4–5 years. The customer wanted a modern, compact solution with no maintenance requirements and longer service life.',
+    solution: 'Satyajan Energy Solutions installed a Microtek i-Lithium 1500 SW Inverter paired with a Microtek LFP Lithium-Ion Battery featuring an advanced Battery Management System (BMS). The compact lithium solution offers faster charging, higher efficiency, and completely maintenance-free operation.',
+    result: 'The customer now enjoys reliable backup power with no water top-ups, faster charging, silent operation, and significantly reduced space requirements. The lithium system provides long-term value with an expected lifespan of over 10 years — far exceeding conventional lead-acid batteries.',
+    keywords: ['lithium 1500 SW inverter Hyderabad', 'Microtek i-Lithium home installation', 'lead-acid to lithium upgrade', 'maintenance-free lithium inverter Hyderabad'],
   },
 ]
 
@@ -317,7 +317,7 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
                  hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1.5
                  transition-all duration-300 flex flex-col h-full"
     >
-      {/* Image — fixed aspect ratio, never grows */}
+      {/* Image */}
       <div className="relative overflow-hidden bg-gray-900 flex-shrink-0" style={{ aspectRatio: '16/10' }}>
         {!imgError ? (
           <img
@@ -342,7 +342,7 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      {/* Content — flex-col + flex-1 so this block fills remaining card height */}
+      {/* Content */}
       <div className="flex flex-col flex-1 p-4 sm:p-5">
         <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 leading-snug group-hover:text-primary transition-colors line-clamp-2">
           {project.title}
@@ -359,12 +359,10 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
           </div>
         </div>
 
-        {/* flex-1 pushes the button to the bottom regardless of text length */}
         <p className="text-xs text-gray-500 leading-relaxed flex-1 mb-4 line-clamp-3">
           {project.description}
         </p>
 
-        {/* mt-auto as belt-and-suspenders to always pin button at bottom */}
         <button
           onClick={onOpen}
           aria-label={`View details of ${project.title}`}
@@ -393,7 +391,6 @@ function ProjectsSection() {
       <WavyDivider flip />
       <div className="max-w-7xl mx-auto">
 
-        {/* Heading */}
         <div className="sr text-center mb-8 sm:mb-12">
           <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full mb-4">
             Our Work
@@ -406,7 +403,6 @@ function ProjectsSection() {
           </p>
         </div>
 
-        {/* Grid — items-stretch ensures every cell in a row is the same height */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 items-stretch">
           {PROJECTS.map((project) => (
             <div key={project.id} className="sr h-full">
@@ -415,7 +411,6 @@ function ProjectsSection() {
           ))}
         </div>
 
-        {/* Bottom CTA */}
         <div className="sr mt-10 text-center">
           <p className="text-sm text-gray-500 mb-4 font-medium">
             Have a similar project in mind? Let&apos;s discuss your requirements.
@@ -430,7 +425,6 @@ function ProjectsSection() {
         </div>
       </div>
 
-      {/* Modal */}
       {activeProject && (
         <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
       )}
@@ -914,7 +908,7 @@ export default function HomePageClient() {
       {/* ── WHY CHOOSE US ── */}
       <WhyChooseUsSection />
 
-      {/* ── PROJECTS GALLERY ── */}
+      {/* ── PROJECTS ── */}
       <ProjectsSection />
 
       {/* ── TESTIMONIALS ── */}
