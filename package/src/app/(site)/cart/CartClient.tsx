@@ -43,7 +43,7 @@ interface PincodeData {
   city: string;
   district: string;
   loaded: boolean;
-  manual: boolean; // true if user selected state manually
+  manual: boolean;
 }
 
 const INDIAN_STATES = [
@@ -56,7 +56,6 @@ const INDIAN_STATES = [
   'Daman & Diu','Delhi','Jammu & Kashmir','Ladakh','Lakshadweep','Puducherry',
 ];
 
-// ── Trust badges ──────────────────────────────────────────────────────────────
 const TRUST_ITEMS = [
   { icon: 'ph:receipt-fill',      label: 'GST Included',         iconClass: 'text-emerald-600', bgClass: 'bg-emerald-50',  borderClass: 'border-emerald-200' },
   { icon: 'ph:wrench-fill',       label: 'Installation Support', iconClass: 'text-blue-600',    bgClass: 'bg-blue-50',     borderClass: 'border-blue-200'    },
@@ -116,58 +115,37 @@ export default function CartClient() {
   const [errors,          setErrors]          = useState<FieldErrors>({ name: '', phone: '', email: '', address: '', pincode: '' });
   const [touched,         setTouched]         = useState({ name: false, phone: false, email: false, address: false, pincode: false });
 
-  // Effective state — from API or manual
-  const effectiveState = pincodeData?.state || manualState || '';
-  const isOutsideTelangana = effectiveState && effectiveState.toLowerCase() !== 'telangana';
+  const effectiveState      = pincodeData?.state || manualState || '';
+  const isOutsideTelangana  = effectiveState && effectiveState.toLowerCase() !== 'telangana';
 
-  // ── Pincode lookup via internal API route ─────────────────────────────────
   const fetchPincode = useCallback(async (pin: string) => {
     if (pin.length !== 6) {
-      setPincodeData(null);
-      setPincodeError('');
-      setShowManualState(false);
-      setManualState('');
+      setPincodeData(null); setPincodeError('');
+      setShowManualState(false); setManualState('');
       return;
     }
-
-    setPincodeLoading(true);
-    setPincodeError('');
-    setShowManualState(false);
-
+    setPincodeLoading(true); setPincodeError(''); setShowManualState(false);
     try {
       const res = await fetch(`/api/pincode?pin=${pin}`);
       if (res.ok) {
         const data = await res.json();
         if (data?.state) {
           setPincodeData({ state: data.state, city: data.city || '', district: data.district || '', loaded: true, manual: false });
-          setPincodeError('');
-          setShowManualState(false);
-          setManualState('');
+          setPincodeError(''); setShowManualState(false); setManualState('');
           setPincodeLoading(false);
           return;
         }
       }
     } catch {}
-
-    // API failed — show manual state selector
-    setPincodeData(null);
-    setPincodeError('');
-    setShowManualState(true);
-    setPincodeLoading(false);
+    setPincodeData(null); setPincodeError('');
+    setShowManualState(true); setPincodeLoading(false);
   }, []);
 
   useEffect(() => {
-    if (customerPincode.length === 6) {
-      fetchPincode(customerPincode);
-    } else {
-      setPincodeData(null);
-      setPincodeError('');
-      setShowManualState(false);
-      setManualState('');
-    }
+    if (customerPincode.length === 6) fetchPincode(customerPincode);
+    else { setPincodeData(null); setPincodeError(''); setShowManualState(false); setManualState(''); }
   }, [customerPincode, fetchPincode]);
 
-  // When user picks state manually, create a pincodeData-like object
   useEffect(() => {
     if (manualState) {
       setPincodeData({ state: manualState, city: '', district: '', loaded: true, manual: true });
@@ -184,6 +162,7 @@ export default function CartClient() {
 
   const onlineDiscountAmt = Math.round((baseTotal * ONLINE_DISCOUNT_PCT) / 100);
   const totalOnline       = baseTotal - onlineDiscountAmt;
+  // ✅ EMI: full amount goes to PhonePe — EMI is set up ON PhonePe's page, not here
   const totalEmi          = baseTotal;
   const emiMonthly        = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
   const codDiscountAmt    = Math.round((baseTotal * COD_DISCOUNT_PCT) / 100);
@@ -241,7 +220,7 @@ export default function CartClient() {
       setTimeout(() => document.getElementById('customer-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
       return false;
     }
-    const cityPart = pincodeData?.city ? `, ${pincodeData.city}` : '';
+    const cityPart    = pincodeData?.city ? `, ${pincodeData.city}` : '';
     const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
     try {
       sessionStorage.setItem('pendingOrder', JSON.stringify({
@@ -261,7 +240,7 @@ export default function CartClient() {
   const handleCodCheckout = async () => {
     if (!validateForm()) return;
 
-    const cityPart = pincodeData?.city ? `, ${pincodeData.city}` : '';
+    const cityPart    = pincodeData?.city ? `, ${pincodeData.city}` : '';
     const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
 
     const itemLines = activeItems
@@ -418,6 +397,9 @@ export default function CartClient() {
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:calendar-check-fill" width={15} />
                     EMI
+                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5 ${paymentTab === 'emi' ? 'bg-green-400 text-gray-900' : 'bg-blue-500 text-white'}`}>
+                      Approved ✓
+                    </span>
                   </button>
                   <button onClick={() => setPaymentTab('cod')}
                     className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'cod' ? 'bg-[#25D366] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
@@ -438,15 +420,23 @@ export default function CartClient() {
                     </div>
                   </div>
                 )}
+
+                {/* ✅ FIXED: Clear EMI explanation — full amount goes to PhonePe, EMI set up there */}
                 {paymentTab === 'emi' && (
-                  <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-blue-50 border border-blue-100">
-                    <Icon icon="ph:bank-fill" width={15} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-blue-50 border border-blue-200">
+                    <Icon icon="ph:check-circle-fill" width={15} className="text-blue-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-bold text-blue-700">No Cost EMI — Pay in Easy Instalments</p>
-                      <p className="text-[11px] text-blue-500">Choose your EMI plan below. On the next screen, select EMI option via your bank or Bajaj Finserv.</p>
+                      <p className="text-xs font-bold text-blue-700">EMI — Pay in Easy Monthly Instalments</p>
+                      <p className="text-[11px] text-blue-600 leading-relaxed mt-0.5">
+                        You will be redirected to PhonePe to complete the full payment of{' '}
+                        <strong>{inr(totalEmi)}</strong>. On the PhonePe screen, select{' '}
+                        <strong>"Pay via EMI"</strong> and choose your bank or Bajaj Finserv to split into{' '}
+                        <strong>{inr(emiMonthly)}/month</strong> × {selectedEmi.months} months.
+                      </p>
                     </div>
                   </div>
                 )}
+
                 {paymentTab === 'cod' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-green-50 border border-green-100">
                     <Icon icon="ph:truck-fill" width={15} className="text-green-600 flex-shrink-0 mt-0.5" />
@@ -464,7 +454,7 @@ export default function CartClient() {
                   <p className="text-xs font-bold text-gray-700 mb-3">Select EMI Duration</p>
                   <div className="grid grid-cols-2 gap-2">
                     {EMI_PLANS.map((plan) => {
-                      const monthly = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
+                      const monthly    = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
                       const isSelected = selectedEmi.months === plan.months;
                       return (
                         <button key={plan.months} onClick={() => setSelectedEmi(plan)}
@@ -483,10 +473,28 @@ export default function CartClient() {
                       );
                     })}
                   </div>
-                  <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
-                    <p className="text-[11px] text-amber-700 font-medium flex items-start gap-1.5">
-                      <Icon icon="ph:info-fill" width={12} className="flex-shrink-0 mt-0.5" />
-                      EMI amounts shown are indicative. Final EMI & eligibility confirmed by your bank on the PhonePe payment screen.
+
+                  {/* ✅ NEW: Clear "how PhonePe EMI works" callout */}
+                  <div className="mt-3 p-3 bg-white border border-blue-200 rounded-xl space-y-2">
+                    <p className="text-[11px] font-bold text-gray-800 flex items-center gap-1.5">
+                      <Icon icon="ph:info-fill" width={13} className="text-blue-500" />
+                      How EMI works on PhonePe
+                    </p>
+                    <div className="space-y-1.5">
+                      {[
+                        { step: '1', text: `Click "Pay ${inr(totalEmi)} via EMI" below` },
+                        { step: '2', text: 'On PhonePe screen, tap "Pay via EMI"' },
+                        { step: '3', text: `Select your bank or Bajaj Finserv / HDFC cardless EMI` },
+                        { step: '4', text: `Your bank splits it into ${inr(emiMonthly)}/month × ${selectedEmi.months} months` },
+                      ].map(s => (
+                        <div key={s.step} className="flex items-start gap-2">
+                          <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">{s.step}</span>
+                          <p className="text-[11px] text-gray-600 leading-snug">{s.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 leading-relaxed">
+                      ⚠️ PhonePe collects the full amount ({inr(totalEmi)}) and converts it to EMI. The EMI shown above is indicative — your bank confirms the final amount.
                     </p>
                   </div>
                 </div>
@@ -516,10 +524,11 @@ export default function CartClient() {
                     <span className="text-purple-600 font-semibold">− ₹{onlineDiscountAmt.toLocaleString('en-IN')}</span>
                   </div>
                 )}
+                {/* ✅ FIXED: EMI row shows full amount + indicative monthly, not just monthly */}
                 {paymentTab === 'emi' && (
                   <div className="flex justify-between">
-                    <span className="text-blue-600 font-semibold">EMI ({selectedEmi.months} months)</span>
-                    <span className="text-blue-600 font-semibold">{inr(emiMonthly)}/mo</span>
+                    <span className="text-blue-600 font-semibold">EMI Plan ({selectedEmi.months} months)</span>
+                    <span className="text-blue-600 font-semibold">≈ {inr(emiMonthly)}/mo</span>
                   </div>
                 )}
                 {paymentTab === 'cod' && (
@@ -535,12 +544,17 @@ export default function CartClient() {
                   </span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
+                  {/* ✅ FIXED: Show correct label — for EMI it's "Total to pay on PhonePe" */}
                   <div className="flex justify-between text-base font-black">
-                    <span>{paymentTab === 'emi' ? 'Total (billed via EMI)' : 'Total Payable'}</span>
+                    <span className="text-gray-900">
+                      {paymentTab === 'emi' ? 'Total to pay on PhonePe' : 'Total Payable'}
+                    </span>
                     <span className="text-primary">₹{totalAmount.toLocaleString('en-IN')}</span>
                   </div>
                   {paymentTab === 'emi' && (
-                    <p className="text-[11px] text-blue-500 text-right mt-1">≈ {inr(emiMonthly)}/month × {selectedEmi.months} months</p>
+                    <p className="text-[11px] text-blue-500 text-right mt-1">
+                      Then select EMI on PhonePe → {inr(emiMonthly)}/mo × {selectedEmi.months} months
+                    </p>
                   )}
                 </div>
                 {paymentTab !== 'emi' && (totalSavings + couponAmt + (paymentTab === 'online' ? onlineDiscountAmt : codDiscountAmt)) > 0 && (
@@ -605,7 +619,7 @@ export default function CartClient() {
                   {errors.email && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.email}</p>}
                 </div>
 
-                {/* ── Pincode with auto-detect + manual fallback ── */}
+                {/* Pincode */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Pincode <span className="text-red-500">*</span>
@@ -633,10 +647,8 @@ export default function CartClient() {
                       {!pincodeLoading && pincodeData?.loaded && <Icon icon="ph:check-circle-fill" className="text-green-500" width={16} />}
                     </div>
                   </div>
-
                   {errors.pincode && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><Icon icon="ph:warning-circle-fill" width={11} />{errors.pincode}</p>}
 
-                  {/* ── Auto-detected state result ── */}
                   {pincodeData?.loaded && !pincodeData.manual && (
                     <div className={`mt-2 p-3 rounded-xl border flex items-start gap-2 ${isOutsideTelangana ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
                       <Icon
@@ -648,19 +660,16 @@ export default function CartClient() {
                         <p className={`text-[11px] font-bold mb-1 ${isOutsideTelangana ? 'text-amber-800' : 'text-green-800'}`}>
                           📍 {[pincodeData.city, pincodeData.state].filter(Boolean).join(', ')}
                         </p>
-                        {!isOutsideTelangana && (
-                          <p className="text-[11px] text-green-700">✅ Free delivery to your location.</p>
-                        )}
+                        {!isOutsideTelangana && <p className="text-[11px] text-green-700">✅ Free delivery to your location.</p>}
                         {isOutsideTelangana && (
                           <p className="text-[11px] text-amber-800 leading-relaxed">
-                            <strong>Delivery Information:</strong> To ensure your products arrive safely, all orders are shipped directly from our central warehouse in Hyderabad. While we cover local shipping within Telangana, deliveries to other states will incur actual logistics charges payable by the customer. We appreciate your support and understanding!
+                            <strong>Delivery Information:</strong> Orders are shipped from our Hyderabad warehouse. Deliveries outside Telangana incur actual logistics charges payable by the customer.
                           </p>
                         )}
                       </div>
                     </div>
                   )}
 
-                  {/* ── Manual state selector (shown when API can't detect) ── */}
                   {showManualState && customerPincode.length === 6 && (
                     <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
                       <p className="text-[11px] text-gray-600 font-medium flex items-center gap-1.5">
@@ -668,20 +677,13 @@ export default function CartClient() {
                         Could not auto-detect. Please select your state:
                       </p>
                       <div className="relative">
-                        <select
-                          value={manualState}
-                          onChange={(e) => setManualState(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none"
-                        >
+                        <select value={manualState} onChange={(e) => setManualState(e.target.value)}
+                          className="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
                           <option value="">Select your state</option>
-                          {INDIAN_STATES.map(s => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
+                          {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <Icon icon="ph:caret-down-bold" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width={11} />
                       </div>
-
-                      {/* Show delivery message after manual state selected */}
                       {manualState && (
                         <div className={`p-2.5 rounded-lg border flex items-start gap-2 ${isOutsideTelangana ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
                           <Icon
@@ -690,12 +692,10 @@ export default function CartClient() {
                             width={13}
                           />
                           <div>
-                            {!isOutsideTelangana && (
-                              <p className="text-[11px] text-green-700 font-medium">✅ Free delivery to {manualState}.</p>
-                            )}
+                            {!isOutsideTelangana && <p className="text-[11px] text-green-700 font-medium">✅ Free delivery to {manualState}.</p>}
                             {isOutsideTelangana && (
                               <p className="text-[11px] text-amber-800 leading-relaxed">
-                                <strong>Delivery Information:</strong> To ensure your products arrive safely, all orders are shipped directly from our central warehouse in Hyderabad. While we cover local shipping within Telangana, deliveries to other states will incur actual logistics charges payable by the customer. We appreciate your support and understanding!
+                                <strong>Delivery Information:</strong> Deliveries outside Telangana incur actual logistics charges payable by the customer.
                               </p>
                             )}
                           </div>
@@ -721,9 +721,9 @@ export default function CartClient() {
 
                 {/* Completion indicator */}
                 {(() => {
-                  const filled = [customerName, customerPhone, customerEmail, customerAddress].filter(v => v.trim().length > 2).length;
+                  const filled    = [customerName, customerPhone, customerEmail, customerAddress].filter(v => v.trim().length > 2).length;
                   const pincodeOk = customerPincode.length === 6 && pincodeData?.loaded && !pincodeError;
-                  const total = filled + (pincodeOk ? 1 : 0);
+                  const total     = filled + (pincodeOk ? 1 : 0);
                   return total < 5 ? (
                     <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
                       <Icon icon="ph:warning-fill" width={14} className="text-amber-500 flex-shrink-0" />
@@ -740,6 +740,7 @@ export default function CartClient() {
 
               {/* ── Payment Action Buttons ── */}
               <div className="border-t border-gray-100 pt-4 space-y-3">
+
                 {paymentTab === 'online' && (
                   <>
                     <PhonePeButton
@@ -760,6 +761,7 @@ export default function CartClient() {
                   </>
                 )}
 
+                {/* ✅ FIXED: EMI button — shows full amount with EMI context, not just monthly */}
                 {paymentTab === 'emi' && (
                   <>
                     <PhonePeButton
@@ -768,13 +770,16 @@ export default function CartClient() {
                       customerPhone={customerPhone ? `+91${customerPhone}` : undefined}
                       customerEmail={customerEmail || undefined}
                       items={activeItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
-                      label={`Proceed to EMI → ${inr(emiMonthly)}/mo`}
+                      label={`Pay ${inr(totalEmi)} via EMI`}
                       onBeforePay={validateForm}
                     />
-                    <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                      <Icon icon="ph:info-fill" width={15} className="text-blue-600 flex-shrink-0" />
-                      <p className="text-xs text-blue-700 font-medium">
-                        On the next screen, tap <strong>"Pay via EMI"</strong> and select your bank or Bajaj Finserv / HDFC cardless EMI.
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 space-y-1.5">
+                      <p className="text-xs font-bold text-blue-800 flex items-center gap-1.5">
+                        <Icon icon="ph:info-fill" width={13} className="text-blue-600" />
+                        Full amount is charged — EMI is set up on PhonePe
+                      </p>
+                      <p className="text-[11px] text-blue-600 leading-relaxed">
+                        After clicking above, on PhonePe's page tap <strong>"Pay via EMI"</strong> → select your bank → confirm <strong>{inr(emiMonthly)}/month × {selectedEmi.months} months</strong>.
                       </p>
                     </div>
                     <div className="grid grid-cols-3 gap-1.5">
