@@ -16,11 +16,13 @@ const font = Bricolage_Grotesque({ subsets: ['latin'], display: 'swap' });
 export const metadata: Metadata = {
   metadataBase: new URL('https://satyajan.com'),
   title: {
-    default:  'Buy Microtek Inverter & Battery in Hyderabad | Satyajan Energy Solutions',
+    // Under 60 chars ✓
+    default:  'Microtek Inverter & Battery Dealer Hyderabad | Satyajan',
     template: '%s | Satyajan Energy Solutions',
   },
+  // Under 160 chars ✓
   description:
-    'Authorised Microtek dealer in Hyderabad. Buy pure sine wave inverters, tubular batteries, solar panels & online UPS. 101+ products. Free delivery. Easy EMI. Call +91 8019179159.',
+    'Authorised Microtek dealer in Hyderabad. Buy inverters, lithium batteries, tubular batteries, solar panels & UPS. 114+ products. Free delivery. EMI available. Call +91 8019179159.',
   keywords: [
     'inverter battery hyderabad',
     'microtek inverter hyderabad',
@@ -32,25 +34,36 @@ export const metadata: Metadata = {
     'microtek dealer hyderabad',
     'satyajan energy solutions',
     'solar company telangana',
+    // Lithium SEO keywords
+    'lithium battery',
+    'lithium inverter',
+    'lithium battery hyderabad',
+    'lithium battery supplier hyderabad',
+    'microtek lithium battery',
+    'lifepo4 battery hyderabad',
+    'maintenance free inverter battery',
+    'microtek channel partner',
+    'solar power backup hyderabad',
+    'home ups hyderabad',
   ],
   openGraph: {
     type:        'website',
     locale:      'en_IN',
     url:         'https://satyajan.com',
     siteName:    'Satyajan Energy Solutions',
-    title:       'Buy Microtek Inverter & Battery in Hyderabad | Satyajan Energy Solutions',
-    description: 'Authorised Microtek dealer in Hyderabad. Solar panels, inverters, batteries & UPS. 101+ products. Easy EMI. Free delivery.',
+    title:       'Microtek Inverter, Battery & Solar Dealer Hyderabad | Satyajan Energy',
+    description: 'Authorised Microtek dealer in Hyderabad. Inverters, lithium batteries, solar panels & UPS. 114+ products. Easy EMI. Free delivery.',
     images: [{
       url:    'https://satyajan.com/images/og-default.jpg',
       width:  1200,
       height: 630,
-      alt:    'Satyajan Energy Solutions – Inverter, Battery & Solar in Hyderabad',
+      alt:    'Satyajan Energy Solutions – Microtek Inverter, Battery & Solar in Hyderabad',
     }],
   },
   twitter: {
     card:        'summary_large_image',
-    title:       'Buy Microtek Inverter & Battery in Hyderabad | Satyajan Energy Solutions',
-    description: 'Authorised Microtek dealer in Hyderabad. Solar panels, inverters & batteries. Easy EMI.',
+    title:       'Microtek Inverter & Battery Dealer Hyderabad | Satyajan Energy',
+    description: 'Authorised Microtek dealer. Inverters, lithium batteries, solar & UPS in Hyderabad. Easy EMI.',
     images:      ['https://satyajan.com/images/og-default.jpg'],
   },
   robots: {
@@ -88,7 +101,7 @@ const orgSchema = {
   name:        'Satyajan Energy Solutions Private Limited',
   url:         'https://satyajan.com',
   logo:        'https://satyajan.com/images/header/satyajan-logo.png',
-  description: 'Authorised Microtek dealer in Hyderabad. Solar panels, inverters, batteries & UPS.',
+  description: 'Authorised Microtek dealer in Hyderabad. Inverters, lithium batteries, solar panels & UPS systems.',
   telephone:   '+91-8019179159',
   email:       'info@satyajan.com',
   address: {
@@ -110,12 +123,9 @@ const orgSchema = {
     opens:     '09:00',
     closes:    '19:00',
   },
-  // FIX: Added Google Business Profile to sameAs
-  // This helps Google Merchant Center link your 200+ Google reviews
-  // to your Merchant Center account for the Store Rating feature
   sameAs: [
     'https://www.indiamart.com/satyajan-energy-solutions',
-    'https://share.google/xEUrHKGcodkwsSfRF',  // Google Business Profile reviews URL
+    'https://share.google/xEUrHKGcodkwsSfRF',
   ],
   priceRange:         '₹₹',
   currenciesAccepted: 'INR',

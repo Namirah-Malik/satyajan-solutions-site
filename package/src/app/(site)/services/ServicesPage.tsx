@@ -1,4 +1,3 @@
-// src/app/(site)/services/ServicesPage.tsx
 'use client';
 
 import React from 'react';
@@ -90,14 +89,6 @@ const steps = [
   { icon: 'ph:check-circle-fill', bg: 'bg-gradient-to-br from-emerald-400 to-green-500',  ring: 'border-emerald-400', title: 'Service Completion', desc: 'Professional work with full warranty' },
 ];
 
-// ── Quick Services strip ───────────────────────────────────────────────────────
-const QUICK_SERVICES = [
-  { label: 'UPS / Inverter\nInstallation',          slug: 'inverter-installation', icon: 'ph:lightning-fill',        bg: 'bg-primary',                                      ring: 'border-primary' },
-  { label: 'Battery\nReplacement',                  slug: 'battery-replacement',   icon: 'ph:battery-charging-fill', bg: 'bg-gradient-to-br from-emerald-400 to-green-500', ring: 'border-emerald-400' },
-  { label: 'Solar Panel\nInstallation',             slug: 'solar-installation',    icon: 'ph:solar-panel-fill',      bg: 'bg-gradient-to-br from-yellow-400 to-orange-400', ring: 'border-yellow-400' },
-  { label: 'UPS / Inverter\nService & Maintenance', slug: 'inverter-maintenance',  icon: 'ph:wrench-fill',           bg: 'bg-gradient-to-br from-blue-400 to-indigo-500',   ring: 'border-blue-400' },
-];
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function ServicesPage() {
   const router = useRouter();
@@ -142,15 +133,13 @@ export default function ServicesPage() {
               className="inline-flex items-center justify-center gap-2 border-2 border-white text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-white hover:text-dark transition-colors text-sm sm:text-base">
               <Icon icon="ph:whatsapp-logo-fill" width={18} /> WhatsApp Us
             </a>
-            {/* Book a Service → goes to /services/book selection page */}
+            {/* CHANGED: link text updated to "Inverter, UPS & Lithium Battery Services" */}
             <button
               onClick={() => router.push('/services/book')}
               className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-emerald-600 transition-colors shadow-xl text-sm sm:text-base border-2 border-primary/60">
-              <Icon icon="ph:calendar-check-fill" width={18} /> Book a Service
+              <Icon icon="ph:calendar-check-fill" width={18} /> Inverter, UPS &amp; Lithium Battery Services
             </button>
           </div>
-
-         
 
         </div>
       </section>

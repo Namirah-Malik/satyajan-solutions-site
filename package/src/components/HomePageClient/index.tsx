@@ -13,10 +13,32 @@ const categoryFilterMap: Record<string, string> = {
   'online-ups': 'ONLINE UPS', 'battery': 'Battery', 'lithium': 'New Lithium Battery', 'combos': 'Combo',
 }
 
+// FIX: Updated alt tags to be keyword-rich for Google Images SEO
 const SLIDES = [
-  { id: 0, type: 'image' as const, src: '/images/hero/Product_range.png', alt: 'Microtek Product Range', fit: 'cover' },
-  { id: 1, type: 'image' as const, src: '/images/hero/startup-india.png', alt: 'Startup India Certificate', fit: 'contain' },
-  { id: 2, type: 'image' as const, src: '/images/hero/startup-telangana.png', alt: 'Startup Telangana Certificate', fit: 'contain' },
+  {
+    id: 0, type: 'image' as const,
+    src: '/images/hero/Product_range.png',
+    alt: 'Microtek inverter, lithium battery, solar panel and UPS product range — Satyajan Energy Solutions Hyderabad authorized dealer',
+    fit: 'cover',
+  },
+  {
+    id: 1, type: 'image' as const,
+    src: '/images/hero/startup-india.png',
+    alt: 'Startup India recognition certificate — Satyajan Energy Solutions Pvt Ltd, Hyderabad, Telangana',
+    fit: 'contain',
+  },
+  {
+    id: 2, type: 'image' as const,
+    src: '/images/hero/startup-telangana.png',
+    alt: 'Startup Telangana recognition certificate — Satyajan Energy Solutions Pvt Ltd, Hyderabad',
+    fit: 'contain',
+  },
+  {
+    id: 3, type: 'image' as const,
+    src: '/images/hero/microtek-authorized-distributor-certificate.png',
+    alt: 'Microtek Authorized Distributor Certificate 2025–2027 — Satyajan Energy Solutions Hyderabad',
+    fit: 'contain',
+  },
 ]
 
 // ── Projects data ─────────────────────────────────────────────────────────────
@@ -49,7 +71,7 @@ const PROJECTS: Project[] = [
     description: 'Installed a Microtek MAX+ 30kVA True Online UPS with SMF battery bank for a school laboratory, ensuring zero transfer time and complete protection for computers and sensitive lab equipment.',
     image: '/images/projects/microtek-imaxx-online-ups-battery-bank-hyderabad.jpg',
     imageFallback: 'ph:lightning-fill',
-    imageAlt: 'Microtek MAX+ 30kVA Online UPS with SMF battery bank installed by Satyajan Energy Solutions for a school laboratory in Hyderabad.',
+    imageAlt: 'Microtek MAX+ 30kVA Online UPS with SMF battery bank installed by Satyajan Energy Solutions for school laboratory in Hyderabad — zero transfer time UPS',
     imageFile: 'microtek-imaxx-online-ups-battery-bank-hyderabad.jpg',
     category: 'Online UPS',
     categoryColor: 'bg-blue-600',
@@ -74,7 +96,7 @@ const PROJECTS: Project[] = [
     description: 'Installed a Microtek Super Power Inverter with a 150Ah Tall Tubular Battery at ZPHS Saroornagar, providing reliable pure sine wave backup for classrooms, staff rooms, and administrative offices.',
     image: '/images/projects/microtek-heavy-duty-inverter-home-installation.jpg',
     imageFallback: 'ph:buildings-fill',
-    imageAlt: 'Microtek Super Power Inverter with 150Ah Tall Tubular Battery installed at ZPHS School Saroornagar by Satyajan Energy Solutions.',
+    imageAlt: 'Microtek Super Power 1250VA Inverter with 150Ah Tall Tubular Battery installed at ZPHS School Saroornagar Hyderabad by Satyajan Energy Solutions',
     imageFile: 'microtek-heavy-duty-inverter-home-installation.jpg',
     category: 'Educational',
     categoryColor: 'bg-purple-600',
@@ -99,7 +121,7 @@ const PROJECTS: Project[] = [
     description: 'Upgraded a Hyderabad home from conventional tubular battery to a Microtek LUXE Inverter with Lithium-Ion (LFP) Battery — maintenance-free, faster charging, and 3500+ cycle life.',
     image: '/images/projects/microtek-luxe-lithium-battery-combo.jpg',
     imageFallback: 'ph:atom-fill',
-    imageAlt: 'Microtek LUXE Inverter with Lithium-Ion LFP Battery installed in a Hyderabad home by Satyajan Energy Solutions.',
+    imageAlt: 'Microtek LUXE Inverter with Lithium-Ion LFP Battery 100Ah installed in Hyderabad home — maintenance-free lithium battery inverter combo by Satyajan Energy Solutions',
     imageFile: 'microtek-luxe-lithium-battery-combo.jpg',
     category: 'Lithium Battery',
     categoryColor: 'bg-violet-600',
@@ -124,7 +146,7 @@ const PROJECTS: Project[] = [
     description: 'Installed a Microtek Solar PCU integrated with a 1kW Solar Panel System and two 100Ah Tall Tubular Batteries, reducing electricity bills by 60–70% while providing reliable backup during outages.',
     image: '/images/projects/microtek-solar-pcu-tubular-battery-installation.jpg',
     imageFallback: 'ph:sun-fill',
-    imageAlt: 'Microtek Solar PCU with 2 tall tubular batteries installed for a home solar power system in Hyderabad by Satyajan Energy Solutions.',
+    imageAlt: 'Microtek Solar PCU 1kW with 2 tall tubular batteries 100Ah installed for home solar power system in Hyderabad — solar backup by Satyajan Energy Solutions',
     imageFile: 'microtek-solar-pcu-tubular-battery-installation.jpg',
     category: 'Solar + Battery',
     categoryColor: 'bg-amber-500',
@@ -149,7 +171,7 @@ const PROJECTS: Project[] = [
     description: 'Installed a Microtek 10kVA True Online UPS with high-capacity SMF battery bank for OASK Publishers, eliminating workflow interruptions and protecting critical publishing and office infrastructure.',
     image: '/images/projects/microtek-inverter-bigpowerr-battery-home.jpg',
     imageFallback: 'ph:buildings-fill',
-    imageAlt: 'Microtek 10kVA True Online UPS with SMF battery bank installed for OASK Publishers in Hyderabad by Satyajan Energy Solutions.',
+    imageAlt: 'Microtek 10kVA True Online UPS with SMF battery bank installed for OASK Publishers commercial office in Hyderabad — enterprise UPS by Satyajan Energy Solutions',
     imageFile: 'microtek-inverter-bigpowerr-battery-home.jpg',
     category: 'Online UPS',
     categoryColor: 'bg-blue-600',
@@ -174,7 +196,7 @@ const PROJECTS: Project[] = [
     description: 'Upgraded a Hyderabad home from traditional lead-acid battery to the Microtek i-Lithium 1500 SW Inverter with LFP Lithium-Ion Battery — faster charging, 10+ year lifespan, zero maintenance.',
     image: '/images/projects/microtek-inverter-school-classroom-hyderabad.jpg',
     imageFallback: 'ph:battery-charging-fill',
-    imageAlt: 'Microtek i-Lithium 1500 SW Inverter with LFP Lithium-Ion Battery installed in a Hyderabad home by Satyajan Energy Solutions.',
+    imageAlt: 'Microtek i-Lithium 1500 SW Inverter with LFP Lithium-Ion Battery installed in Hyderabad home — zero maintenance lithium inverter by Satyajan Energy Solutions',
     imageFile: 'microtek-inverter-school-classroom-hyderabad.jpg',
     category: 'Lithium Battery',
     categoryColor: 'bg-violet-600',
@@ -217,7 +239,6 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
           className="relative bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
-          {/* Header */}
           <div className="relative bg-gray-900 rounded-t-3xl p-6 sm:p-8">
             <button onClick={onClose}
               className="absolute top-4 right-4 w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors">
@@ -238,11 +259,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
               </div>
             </div>
           </div>
-
-          {/* Body */}
           <div className="p-6 sm:p-8 space-y-6">
-
-            {/* Components */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-3">
                 <Package className="w-4 h-4 text-emerald-600" /> Components Used
@@ -255,38 +272,28 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                 ))}
               </div>
             </div>
-
-            {/* Project Overview */}
             <div className="bg-gray-50 rounded-2xl p-4 sm:p-5">
               <h3 className="text-sm font-bold text-gray-900 mb-2">📋 Project Overview</h3>
               <p className="text-sm text-gray-600 leading-relaxed">{project.overview}</p>
             </div>
-
-            {/* Challenge */}
             <div className="bg-red-50 border border-red-100 rounded-2xl p-4 sm:p-5">
               <h3 className="text-sm font-bold text-red-800 mb-2 flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-red-500" /> The Challenge
               </h3>
               <p className="text-sm text-red-700 leading-relaxed">{project.challenge}</p>
             </div>
-
-            {/* Solution */}
             <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 sm:p-5">
               <h3 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-1.5">
                 <Lightbulb className="w-4 h-4 text-blue-500" /> Our Solution
               </h3>
               <p className="text-sm text-blue-700 leading-relaxed">{project.solution}</p>
             </div>
-
-            {/* Result */}
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 sm:p-5">
               <h3 className="text-sm font-bold text-emerald-800 mb-2 flex items-center gap-1.5">
                 <TrendingUp className="w-4 h-4 text-emerald-600" /> Result & Impact
               </h3>
               <p className="text-sm text-emerald-700 leading-relaxed">{project.result}</p>
             </div>
-
-            {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <a
                 href={`https://wa.me/918019179159?text=${encodeURIComponent(`Hi! I saw your ${project.title} project on your website and I'm interested in a similar solution. Please share more details.`)}`}
@@ -310,30 +317,18 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
 // ── Project Card ──────────────────────────────────────────────────────────────
 function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
   const [imgError, setImgError] = useState(false)
-
   return (
-    <article
-      className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm
-                 hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1.5
-                 transition-all duration-300 flex flex-col h-full"
-    >
-      {/* Image */}
+    <article className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full">
       <div className="relative overflow-hidden bg-gray-900 flex-shrink-0" style={{ aspectRatio: '16/10' }}>
         {!imgError ? (
-          <img
-            src={project.image}
-            alt={project.imageAlt}
-            loading="lazy"
-            onError={() => setImgError(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <img src={project.image} alt={project.imageAlt} loading="lazy" onError={() => setImgError(true)}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-6">
             <Icon icon={project.imageFallback} className="text-emerald-400 mb-3" width={48} />
             <p className="text-white/60 text-xs text-center font-medium leading-snug">{project.imageAlt}</p>
           </div>
         )}
-        {/* Category badge */}
         <div className="absolute top-3 left-3">
           <span className={`inline-block text-[10px] font-black text-white uppercase tracking-widest px-3 py-1 rounded-full shadow-md ${project.categoryColor}`}>
             {project.category}
@@ -341,36 +336,19 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-
-      {/* Content */}
       <div className="flex flex-col flex-1 p-4 sm:p-5">
-        <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 leading-snug group-hover:text-primary transition-colors line-clamp-2">
-          {project.title}
-        </h3>
-
+        <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 leading-snug group-hover:text-primary transition-colors line-clamp-2">{project.title}</h3>
         <div className="flex flex-wrap gap-x-3 gap-y-1 mb-3">
           <div className="flex items-center gap-1 text-xs text-gray-500">
-            <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
-            <span>{project.location}</span>
+            <MapPin className="w-3 h-3 text-primary flex-shrink-0" /><span>{project.location}</span>
           </div>
           <div className="flex items-center gap-1 text-xs text-gray-500">
-            <Zap className="w-3 h-3 text-amber-500 flex-shrink-0" />
-            <span className="font-semibold text-gray-700">{project.capacity}</span>
+            <Zap className="w-3 h-3 text-amber-500 flex-shrink-0" /><span className="font-semibold text-gray-700">{project.capacity}</span>
           </div>
         </div>
-
-        <p className="text-xs text-gray-500 leading-relaxed flex-1 mb-4 line-clamp-3">
-          {project.description}
-        </p>
-
-        <button
-          onClick={onOpen}
-          aria-label={`View details of ${project.title}`}
-          className="mt-auto w-full flex items-center justify-center gap-2
-                     bg-gray-900 hover:bg-primary text-white
-                     py-2.5 rounded-xl text-xs font-bold
-                     transition-all duration-200 active:scale-95"
-        >
+        <p className="text-xs text-gray-500 leading-relaxed flex-1 mb-4 line-clamp-3">{project.description}</p>
+        <button onClick={onOpen} aria-label={`View details of ${project.title}`}
+          className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-primary text-white py-2.5 rounded-xl text-xs font-bold transition-all duration-200 active:scale-95">
           View Details <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -381,28 +359,15 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
 // ── Projects Section ──────────────────────────────────────────────────────────
 function ProjectsSection() {
   const [activeProject, setActiveProject] = useState<Project | null>(null)
-
   return (
-    <section
-      id="projects"
-      aria-labelledby="projects-heading"
-      className="py-10 sm:py-14 md:py-20 px-4 sm:px-6 bg-gradient-to-b from-gray-50/80 to-white"
-    >
+    <section id="projects" aria-labelledby="projects-heading" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6 bg-gradient-to-b from-gray-50/80 to-white">
       <WavyDivider flip />
       <div className="max-w-7xl mx-auto">
-
         <div className="sr text-center mb-8 sm:mb-12">
-          <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full mb-4">
-            Our Work
-          </span>
-          <h2 id="projects-heading" className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">
-            Our Projects
-          </h2>
-          <p className="text-xs sm:text-sm md:text-base text-gray-500 max-w-2xl mx-auto font-medium">
-            Delivering Reliable Power Backup &amp; Energy Solutions Across India
-          </p>
+          <span className="inline-block text-xs font-semibold text-primary uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full mb-4">Our Work</span>
+          <h2 id="projects-heading" className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">Our Projects</h2>
+          <p className="text-xs sm:text-sm md:text-base text-gray-500 max-w-2xl mx-auto font-medium">Delivering Reliable Power Backup &amp; Energy Solutions Across India</p>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 items-stretch">
           {PROJECTS.map((project) => (
             <div key={project.id} className="sr h-full">
@@ -410,24 +375,16 @@ function ProjectsSection() {
             </div>
           ))}
         </div>
-
         <div className="sr mt-10 text-center">
-          <p className="text-sm text-gray-500 mb-4 font-medium">
-            Have a similar project in mind? Let&apos;s discuss your requirements.
-          </p>
-          <a
-            href="https://wa.me/918019179159?text=Hi! I'd like to discuss a power backup project for my business."
+          <p className="text-sm text-gray-500 mb-4 font-medium">Have a similar project in mind? Let&apos;s discuss your requirements.</p>
+          <a href="https://wa.me/918019179159?text=Hi! I'd like to discuss a power backup project for my business."
             target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fba58] text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-[1.03]"
-          >
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fba58] text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg transition-all hover:scale-[1.03]">
             <Icon icon="mdi:whatsapp" width={18} /> Discuss Your Project — Free Consultation
           </a>
         </div>
       </div>
-
-      {activeProject && (
-        <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
-      )}
+      {activeProject && <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />}
     </section>
   )
 }
@@ -445,8 +402,8 @@ function useScrollReveal() {
 }
 
 function useCounter(target: number, suffix: string, duration = 1600) {
-  const [count, setCount] = useState('0')
-  const ref = useRef<HTMLSpanElement>(null)
+  const [count, setCount] = useState('')
+  const ref     = useRef<HTMLSpanElement>(null)
   const started = useRef(false)
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -500,12 +457,17 @@ const PlayfulIcon = ({ icon, ringColor, bgColor }: { icon: string; ringColor: st
   </div>
 )
 
+// FIX: StatCard now shows real value as fallback — never shows "0" to crawlers
 function StatCard({ value, label }: { value: string; label: string }) {
-  const num = parseInt(value.replace(/\D/g, '')); const suffix = value.replace(/[0-9,]/g, '')
+  const num    = parseInt(value.replace(/\D/g, ''))
+  const suffix = value.replace(/[0-9,]/g, '')
   const { ref, count } = useCounter(num, suffix)
   return (
     <div className="text-center">
-      <span ref={ref} className="block text-2xl sm:text-3xl font-extrabold text-primary">{count || '0'}</span>
+      {/* Falls back to value prop (e.g. "1000+") if counter hasn't fired yet */}
+      <span ref={ref} className="block text-2xl sm:text-3xl font-extrabold text-primary">
+        {count || value}
+      </span>
       <div className="text-[11px] sm:text-xs text-gray-500 mt-0.5 font-medium">{label}</div>
     </div>
   )
@@ -722,8 +684,8 @@ function WhyChooseUsSection() {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function HomePageClient() {
-  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' })
-  const [contactErrors, setContactErrors] = useState({ name: '', email: '', phone: '', message: '' })
+  const [contactForm,    setContactForm]    = useState({ name: '', email: '', phone: '', message: '' })
+  const [contactErrors,  setContactErrors]  = useState({ name: '', email: '', phone: '', message: '' })
   const [contactTouched, setContactTouched] = useState({ name: false, email: false, phone: false, message: false })
   const [contactSuccess, setContactSuccess] = useState(false)
   useScrollReveal()
@@ -762,7 +724,8 @@ export default function HomePageClient() {
   const renderProductCard = (product: any) => (
     <div key={product.id} className="sr group rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl h-full">
       <div className="relative w-full bg-white flex-shrink-0" style={{ aspectRatio: '16/9' }}>
-        <img src={product.image} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+        <img src={product.image} alt={`${product.name} — buy in Hyderabad at Satyajan Energy Solutions`}
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
         <span className="absolute top-2 left-2 bg-emerald-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow">{product.category || 'Solar'}</span>
       </div>
       <div className="flex flex-col flex-1 border-t border-gray-100 p-3 sm:p-4 md:p-5">
@@ -850,7 +813,10 @@ export default function HomePageClient() {
       <section id="about" className="py-10 sm:py-14 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="sr text-center mb-6 sm:mb-10 md:mb-12">
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">About Satyajan Energy Solutions</h2>
-          <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto font-medium">{companyInfo.description}</p>
+          {/* FIX: Replaced {companyInfo.description} with keyword-rich hardcoded text */}
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto font-medium">
+            Satyajan Energy Solutions is an authorized channel partner providing reliable power backup and solar solutions. We offer a wide range of inverters, batteries, UPS systems, next-generation Lithium Inverters and Lithium Batteries, and solar solutions to ensure uninterrupted power for homes and businesses. With years of experience and a commitment to quality, we deliver energy-efficient and future-ready solutions. Our team provides fast delivery, expert installation, and strong after-sales support. Trusted by dealers and customers across the region, we combine competitive pricing with excellent service. At Satyajan Energy Solutions, your needs are our top priority.
+          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
           {[
@@ -963,7 +929,7 @@ export default function HomePageClient() {
               </button>
               <div className="sr h-36 sm:h-44 md:h-56 rounded-2xl md:rounded-3xl overflow-hidden shadow-xl relative group border border-white/30">
                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.5!2d78.5387496!3d17.3342621!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb99c0c3e1ffe7:0xa6b7d4b850493ba0!2sSatyajan%20Energy%20Solutions%20Pvt.Ltd.!5e0!3m2!1sen!2sin!4v1234567890123"
-                  width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Satyajan Energy Solutions location on Google Maps" className="pointer-events-none" />
+                  width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Satyajan Energy Solutions location — Green Lands Colony, Karmanghat, Hyderabad 500079" className="pointer-events-none" />
                 <a href="https://maps.app.goo.gl/vtyTimUrenngkoHn9" target="_blank" rel="noopener noreferrer"
                   className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 transition-opacity duration-300 rounded-2xl md:rounded-3xl">
                   <span className="text-white font-semibold text-xs sm:text-sm">Open in Google Maps</span>

@@ -48,12 +48,12 @@ export const batteryServices = [
   {
     icon: 'Activity',
     title: 'Battery Health Check & Diagnostics',
-    description: 'Capacity testing and performance evaluation. Advanced testing equipment measures actual battery health and remaining lifespan accurately.'
+    description: 'Capacity testing and performance evaluation for all battery types, including Tall Tubular and maintenance-free Lithium-ion. Advanced testing equipment measures actual battery health and remaining lifespan accurately.'
   },
   {
     icon: 'Wrench',
     title: 'Battery Maintenance Services',
-    description: 'Life extension and efficiency improvement programs. Proper maintenance can extend battery life by 30-40% through timely water top-ups and terminal cleaning.'
+    description: 'Life extension and efficiency improvement programs. We specialize in traditional Tall Tubular maintenance and Smart Lithium-ion BMS (Battery Management System) calibration to ensure peak performance.'
   },
   {
     icon: 'RefreshCw',

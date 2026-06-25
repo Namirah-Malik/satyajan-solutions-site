@@ -33,7 +33,6 @@ export const productsMetadata: Metadata = {
 };
 
 // ── Category metadata map ─────────────────────────────────────────────────────
-// Use this in pages that render a specific category.
 export const categoryMetadata: Record<string, Metadata> = {
   Inverter: {
     title: 'Buy Microtek Inverters Online | Pure Sine Wave & Digital Wave | Satyajan Hyderabad',
@@ -78,13 +77,30 @@ export const categoryMetadata: Record<string, Metadata> = {
     alternates: { canonical: 'https://satyajan.com/products?category=Combo' },
   },
 };
-export const servicesMetadata: Metadata = {
-  title: 'Power Backup & Solar Services in Hyderabad | Satyajan',
-  description:
-    'Expert inverter installation, battery maintenance, solar panel setup & UPS services in Hyderabad. Trusted service by Satyajan Energy Solutions.',
-  alternates: { canonical: 'https://satyajan.com/services' },
-};
 
+// ── Services page — UPDATED with lithium keywords ─────────────────────────────
+export const servicesMetadata: Metadata = {
+  title: 'Inverter, UPS & Lithium Battery Services Hyderabad | Satyajan',
+  description:
+    'Expert inverter repair, lithium battery service, UPS maintenance & solar installation in Hyderabad. Authorized Microtek service partner. Call +91 8019179159.',
+  keywords: [
+    'inverter repair hyderabad',
+    'lithium battery service hyderabad',
+    'ups support hyderabad',
+    'battery maintenance hyderabad',
+    'inverter troubleshooting hyderabad',
+    'microtek service center hyderabad',
+    'battery health check hyderabad',
+    'solar panel installation hyderabad',
+  ],
+  alternates: { canonical: 'https://satyajan.com/services' },
+  openGraph: {
+    url:         'https://satyajan.com/services',
+    title:       'Inverter, UPS & Lithium Battery Services Hyderabad | Satyajan',
+    description: 'Expert inverter repair, lithium battery service & UPS maintenance in Hyderabad. Authorized Microtek partner.',
+    images: [{ url: 'https://satyajan.com/images/og-default.jpg', width: 1200, height: 630 }],
+  },
+};
 
 // ── Blog page ─────────────────────────────────────────────────────────────────
 export const blogMetadata: Metadata = {
@@ -93,6 +109,7 @@ export const blogMetadata: Metadata = {
     'Expert articles on choosing the right inverter, extending battery life, solar installation in Hyderabad, UPS for office, and more. Free guides from Satyajan Energy Solutions.',
   alternates: { canonical: 'https://satyajan.com/blog' },
 };
+
 // ── Careers page ──────────────────────────────────────────────────────────────
 export const careersMetadata: Metadata = {
   title: 'Careers at Satyajan Energy Solutions | Join Our Team',
