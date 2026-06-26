@@ -96,6 +96,62 @@ const GlassCard = ({ children, className = '' }: { children: React.ReactNode; cl
   </div>
 );
 
+// ── Promo Banner ──────────────────────────────────────────────────────────────
+function PromoBanner() {
+  return (
+    <div className="w-full bg-blue-50 border border-blue-100 rounded-2xl px-4 sm:px-6 py-3 mb-5 sm:mb-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-0 justify-between">
+      {/* Left: discount badge + text */}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="relative flex-shrink-0">
+          <div className="bg-blue-900 text-white font-black text-center rounded-lg px-2.5 py-1.5 leading-none shadow-md">
+            <div className="text-[18px] sm:text-[22px] leading-none">5%</div>
+            <div className="text-[8px] sm:text-[9px] font-extrabold tracking-widest uppercase leading-none mt-0.5">OFF</div>
+          </div>
+          {/* corner ribbon effect */}
+          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-400 rotate-45 rounded-sm" />
+        </div>
+        <div>
+          <p className="text-sm sm:text-base font-extrabold text-blue-900 leading-tight">
+            5% DISCOUNT{' '}
+            <span className="font-medium text-blue-700 text-xs sm:text-sm">on online payment</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="hidden sm:block w-px h-10 bg-blue-200 mx-6 flex-shrink-0" />
+      <div className="sm:hidden w-full h-px bg-blue-200" />
+
+      {/* Right: payment methods + label */}
+      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+        <p className="text-[10px] sm:text-xs text-blue-500 font-medium hidden sm:block">Pay full amount via</p>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* UPI */}
+          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-blue-100 rounded-lg shadow-sm">
+            <Icon icon="ph:lightning-fill" width={14} className="text-blue-600" />
+            <span className="text-[11px] sm:text-xs font-bold text-blue-800">UPI</span>
+          </div>
+          {/* Debit/Credit Card */}
+          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-blue-100 rounded-lg shadow-sm">
+            <Icon icon="ph:credit-card-fill" width={14} className="text-blue-600" />
+            <span className="text-[11px] sm:text-xs font-bold text-blue-800 hidden sm:inline">Debit/Credit Card</span>
+            <span className="text-[11px] sm:text-xs font-bold text-blue-800 sm:hidden">Card</span>
+          </div>
+          {/* Net Banking */}
+          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-blue-100 rounded-lg shadow-sm">
+            <Icon icon="ph:bank-fill" width={14} className="text-blue-600" />
+            <span className="text-[11px] sm:text-xs font-bold text-blue-800 hidden sm:inline">Net Banking</span>
+            <span className="text-[11px] sm:text-xs font-bold text-blue-800 sm:hidden">Bank</span>
+          </div>
+        </div>
+        <p className="text-[10px] sm:text-xs font-bold text-blue-600 hidden sm:block">
+          Discount applied<br />instantly.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function SortFilterBar({
   sort, onSort, inStockOnly, onInStockToggle,
 }: {
@@ -260,7 +316,10 @@ const ProductsContent = () => {
 
   return (
     <main className="min-h-screen">
-      <section className="px-3 sm:px-4 max-w-7xl mx-auto pb-12">
+      <section className="px-3 sm:px-4 max-w-7xl mx-auto pb-12 -mt-6 sm:-mt-10">
+
+        {/* ── Promo Banner — appears between HeroSub and category filter ── */}
+        <PromoBanner />
 
         {/* Category chips + Sort/Filter */}
         <GlassCard className="p-3 sm:p-4 mb-5 sm:mb-8">

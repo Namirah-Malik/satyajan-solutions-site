@@ -8,18 +8,24 @@ datasource db {
 }
 
 model Product {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
   name             String
-  SKU              String
-  description      String
-  price            Float
+  SKU              String?
+  description      String?
+  price            Float?
+  rate             Float?
   images           String[]
   video            String?
   slug             String?
-  tags             String[]   // ← NEW: product tags/keywords
+  tags             String[]
   salient_features String[]
   features         String[]
   specifications   Json[]
   data             Json[]
   category         String?
+  stockStatus      String?
+  capacity         String?
+  isBestSeller     Boolean?
+  isNew            Boolean?
+  createdAt        DateTime? @default(now())
 }
