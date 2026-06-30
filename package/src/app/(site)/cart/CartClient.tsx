@@ -115,8 +115,8 @@ export default function CartClient() {
   const [errors,          setErrors]          = useState<FieldErrors>({ name: '', phone: '', email: '', address: '', pincode: '' });
   const [touched,         setTouched]         = useState({ name: false, phone: false, email: false, address: false, pincode: false });
 
-  const effectiveState      = pincodeData?.state || manualState || '';
-  const isOutsideTelangana  = effectiveState && effectiveState.toLowerCase() !== 'telangana';
+  const effectiveState     = pincodeData?.state || manualState || '';
+  const isOutsideTelangana = effectiveState && effectiveState.toLowerCase() !== 'telangana';
 
   const fetchPincode = useCallback(async (pin: string) => {
     if (pin.length !== 6) {
@@ -162,11 +162,21 @@ export default function CartClient() {
 
   const onlineDiscountAmt = Math.round((baseTotal * ONLINE_DISCOUNT_PCT) / 100);
   const totalOnline       = baseTotal - onlineDiscountAmt;
-  // ✅ EMI: full amount goes to PhonePe — EMI is set up ON PhonePe's page, not here
-  const totalEmi          = baseTotal;
-  const emiMonthly        = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
-  const codDiscountAmt    = Math.round((baseTotal * COD_DISCOUNT_PCT) / 100);
-  const totalCod          = baseTotal - codDiscountAmt;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // EMI IMPORTANT NOTE:
+  // PhonePe always collects the FULL amount from the customer.
+  // EMI is NOT split by our code — it is handled 100% by PhonePe / the bank.
+  // We send the full baseTotal to PhonePe. On PhonePe's payment page,
+  // the customer selects "Pay via EMI", picks their bank or Bajaj Finserv,
+  // and the bank converts the full amount into monthly instalments.
+  // The emiMonthly shown here is INDICATIVE only — the bank confirms the final EMI.
+  // ─────────────────────────────────────────────────────────────────────────
+  const totalEmi   = baseTotal;
+  const emiMonthly = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
+
+  const codDiscountAmt = Math.round((baseTotal * COD_DISCOUNT_PCT) / 100);
+  const totalCod       = baseTotal - codDiscountAmt;
 
   const totalAmount =
     paymentTab === 'online' ? totalOnline :
@@ -239,11 +249,9 @@ export default function CartClient() {
   // ── COD / WhatsApp checkout ───────────────────────────────────────────────
   const handleCodCheckout = async () => {
     if (!validateForm()) return;
-
     const cityPart    = pincodeData?.city ? `, ${pincodeData.city}` : '';
     const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
-
-    const itemLines = activeItems
+    const itemLines   = activeItems
       .map((item, i) => `${i + 1}. *${item.name}*\n   SKU: ${item.SKU}\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`)
       .join('\n\n');
 
@@ -275,11 +283,8 @@ export default function CartClient() {
         body: JSON.stringify({
           orderId: `SAT-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
           method: 'cod', status: 'COD_PLACED',
-          customerName,
-          customerPhone: `+91${customerPhone}`,
-          customerEmail,
-          customerAddress: fullAddress,
-          amount: totalCod,
+          customerName, customerPhone: `+91${customerPhone}`, customerEmail,
+          customerAddress: fullAddress, amount: totalCod,
           items: activeItems.map(i => ({ name: i.name, SKU: i.SKU || '', price: i.price, quantity: i.quantity })),
         }),
       });
@@ -336,12 +341,10 @@ export default function CartClient() {
                   <p className="text-xs text-primary font-semibold">Express checkout — only this item will be ordered. Your cart remains unchanged.</p>
                 </div>
               )}
-
               {activeItems.map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row gap-4 pb-6 mb-6 border-b border-gray-100 last:border-b-0 last:pb-0 last:mb-0">
                   <Link href={`/products/${item.id}`}
                     className="w-full sm:w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 hover:opacity-90 transition-opacity block">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.image || '/images/fallback.jpg'} alt={item.name}
                       className="w-full h-full object-contain p-2"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/images/fallback.jpg'; }} />
@@ -381,7 +384,7 @@ export default function CartClient() {
 
               <TrustBadges />
 
-              {/* Payment Method Tabs */}
+              {/* ── Payment Method Tabs ── */}
               <div>
                 <p className="text-sm font-bold text-gray-800 mb-2">How would you like to pay?</p>
                 <div className="grid grid-cols-3 gap-1.5 p-1 bg-gray-100 rounded-2xl">
@@ -411,6 +414,7 @@ export default function CartClient() {
                   </button>
                 </div>
 
+                {/* Pay Now info */}
                 {paymentTab === 'online' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-purple-50 border border-purple-100">
                     <Icon icon="ph:lightning-fill" width={15} className="text-purple-600 flex-shrink-0 mt-0.5" />
@@ -421,22 +425,41 @@ export default function CartClient() {
                   </div>
                 )}
 
-                {/* ✅ FIXED: Clear EMI explanation — full amount goes to PhonePe, EMI set up there */}
+                {/* ── EMI explanation banner ── */}
                 {paymentTab === 'emi' && (
-                  <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-blue-50 border border-blue-200">
-                    <Icon icon="ph:check-circle-fill" width={15} className="text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-bold text-blue-700">EMI — Pay in Easy Monthly Instalments</p>
-                      <p className="text-[11px] text-blue-600 leading-relaxed mt-0.5">
-                        You will be redirected to PhonePe to complete the full payment of{' '}
-                        <strong>{inr(totalEmi)}</strong>. On the PhonePe screen, select{' '}
-                        <strong>"Pay via EMI"</strong> and choose your bank or Bajaj Finserv to split into{' '}
-                        <strong>{inr(emiMonthly)}/month</strong> × {selectedEmi.months} months.
+                  <div className="mt-2.5 rounded-xl overflow-hidden border border-blue-200">
+                    {/* Header */}
+                    <div className="bg-blue-600 px-3 py-2.5 flex items-center gap-2">
+                      <Icon icon="ph:info-fill" width={15} className="text-white flex-shrink-0" />
+                      <p className="text-xs font-black text-white">How EMI works — Please read before paying</p>
+                    </div>
+                    {/* Body */}
+                    <div className="bg-blue-50 px-3 py-3 space-y-2">
+                      <p className="text-[11px] text-blue-800 leading-relaxed font-medium">
+                        ✅ <strong>EMI is approved</strong> and available on your order.
                       </p>
+                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                        When you click <strong>"Pay via EMI"</strong> below, you will be taken to the
+                        <strong> PhonePe payment page</strong> which will show the <strong>full amount</strong> of{' '}
+                        <strong className="text-blue-900">{inr(totalEmi)}</strong>.
+                      </p>
+                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                        👉 On PhonePe's page, tap <strong>"EMI"</strong> option → select your bank or
+                        Bajaj Finserv → your bank will split the payment into{' '}
+                        <strong className="text-blue-900">{inr(emiMonthly)}/month × {selectedEmi.months} months</strong>.
+                      </p>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 mt-1">
+                        <p className="text-[10px] text-amber-800 font-semibold leading-relaxed">
+                          ⚠️ The full amount {inr(totalEmi)} is shown on PhonePe — this is normal and correct.
+                          EMI conversion happens inside PhonePe, not on our website.
+                          Monthly EMI of {inr(emiMonthly)} is indicative — your bank confirms the final amount.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
 
+                {/* COD info */}
                 {paymentTab === 'cod' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-green-50 border border-green-100">
                     <Icon icon="ph:truck-fill" width={15} className="text-green-600 flex-shrink-0 mt-0.5" />
@@ -448,10 +471,10 @@ export default function CartClient() {
                 )}
               </div>
 
-              {/* EMI Plan Selector */}
+              {/* ── EMI Plan Selector ── */}
               {paymentTab === 'emi' && (
                 <div className="border border-blue-100 rounded-2xl p-4 bg-blue-50/40">
-                  <p className="text-xs font-bold text-gray-700 mb-3">Select EMI Duration</p>
+                  <p className="text-xs font-bold text-gray-700 mb-3">Select your EMI plan</p>
                   <div className="grid grid-cols-2 gap-2">
                     {EMI_PLANS.map((plan) => {
                       const monthly    = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
@@ -474,18 +497,15 @@ export default function CartClient() {
                     })}
                   </div>
 
-                  {/* ✅ NEW: Clear "how PhonePe EMI works" callout */}
-                  <div className="mt-3 p-3 bg-white border border-blue-200 rounded-xl space-y-2">
-                    <p className="text-[11px] font-bold text-gray-800 flex items-center gap-1.5">
-                      <Icon icon="ph:info-fill" width={13} className="text-blue-500" />
-                      How EMI works on PhonePe
-                    </p>
+                  {/* Step by step guide */}
+                  <div className="mt-3 p-3 bg-white border border-blue-200 rounded-xl">
+                    <p className="text-[11px] font-bold text-gray-800 mb-2">Steps after clicking Pay:</p>
                     <div className="space-y-1.5">
                       {[
-                        { step: '1', text: `Click "Pay ${inr(totalEmi)} via EMI" below` },
-                        { step: '2', text: 'On PhonePe screen, tap "Pay via EMI"' },
-                        { step: '3', text: `Select your bank or Bajaj Finserv / HDFC cardless EMI` },
-                        { step: '4', text: `Your bank splits it into ${inr(emiMonthly)}/month × ${selectedEmi.months} months` },
+                        { step: '1', text: `PhonePe will show full amount: ${inr(totalEmi)}` },
+                        { step: '2', text: 'On PhonePe page → tap "EMI" payment option' },
+                        { step: '3', text: 'Select your bank / Bajaj Finserv / HDFC cardless' },
+                        { step: '4', text: `Bank confirms: ${inr(emiMonthly)}/mo × ${selectedEmi.months} months` },
                       ].map(s => (
                         <div key={s.step} className="flex items-start gap-2">
                           <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">{s.step}</span>
@@ -493,14 +513,11 @@ export default function CartClient() {
                         </div>
                       ))}
                     </div>
-                    <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 leading-relaxed">
-                      ⚠️ PhonePe collects the full amount ({inr(totalEmi)}) and converts it to EMI. The EMI shown above is indicative — your bank confirms the final amount.
-                    </p>
                   </div>
                 </div>
               )}
 
-              {/* Price Breakdown */}
+              {/* ── Price Breakdown ── */}
               <div className="space-y-2 text-sm border-t border-gray-100 pt-4">
                 <div className="flex justify-between">
                   <span className="text-gray-500">MRP Total</span>
@@ -524,11 +541,13 @@ export default function CartClient() {
                     <span className="text-purple-600 font-semibold">− ₹{onlineDiscountAmt.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-                {/* ✅ FIXED: EMI row shows full amount + indicative monthly, not just monthly */}
                 {paymentTab === 'emi' && (
-                  <div className="flex justify-between">
-                    <span className="text-blue-600 font-semibold">EMI Plan ({selectedEmi.months} months)</span>
-                    <span className="text-blue-600 font-semibold">≈ {inr(emiMonthly)}/mo</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-600 font-semibold">EMI ({selectedEmi.months} months)</span>
+                    <span className="text-blue-600 font-semibold text-right">
+                      ≈ {inr(emiMonthly)}/mo
+                      <span className="block text-[10px] text-blue-400 font-normal">set up on PhonePe</span>
+                    </span>
                   </div>
                 )}
                 {paymentTab === 'cod' && (
@@ -543,20 +562,23 @@ export default function CartClient() {
                     {isOutsideTelangana ? 'Charges apply' : effectiveState ? 'FREE 🎉' : 'FREE'}
                   </span>
                 </div>
+
+                {/* Total row */}
                 <div className="border-t border-gray-200 pt-3">
-                  {/* ✅ FIXED: Show correct label — for EMI it's "Total to pay on PhonePe" */}
                   <div className="flex justify-between text-base font-black">
                     <span className="text-gray-900">
-                      {paymentTab === 'emi' ? 'Total to pay on PhonePe' : 'Total Payable'}
+                      {paymentTab === 'emi' ? 'Total (paid on PhonePe)' : 'Total Payable'}
                     </span>
                     <span className="text-primary">₹{totalAmount.toLocaleString('en-IN')}</span>
                   </div>
                   {paymentTab === 'emi' && (
-                    <p className="text-[11px] text-blue-500 text-right mt-1">
-                      Then select EMI on PhonePe → {inr(emiMonthly)}/mo × {selectedEmi.months} months
+                    <p className="text-[11px] text-blue-500 text-right mt-1 leading-snug">
+                      PhonePe collects full amount →<br />
+                      select EMI → {inr(emiMonthly)}/mo × {selectedEmi.months} months
                     </p>
                   )}
                 </div>
+
                 {paymentTab !== 'emi' && (totalSavings + couponAmt + (paymentTab === 'online' ? onlineDiscountAmt : codDiscountAmt)) > 0 && (
                   <div className="bg-green-50 rounded-xl px-3 py-2">
                     <p className="text-xs font-bold text-green-700">
@@ -627,21 +649,11 @@ export default function CartClient() {
                   </label>
                   <div className="relative">
                     <Icon icon="ph:map-pin-fill" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width={13} />
-                    <input
-                      type="text" inputMode="numeric" maxLength={6}
-                      value={customerPincode}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, '').slice(0, 6);
-                        setCustomerPincode(v);
-                        if (touched.pincode) setErrors(p => ({ ...p, pincode: validateField('pincode', v) }));
-                      }}
+                    <input type="text" inputMode="numeric" maxLength={6} value={customerPincode}
+                      onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 6); setCustomerPincode(v); if (touched.pincode) setErrors(p => ({ ...p, pincode: validateField('pincode', v) })); }}
                       onBlur={(e) => handleBlur('pincode', e.target.value)}
                       placeholder="e.g. 500007"
-                      className={`w-full pl-8 pr-10 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors
-                        ${errors.pincode ? 'border-red-400 bg-red-50'
-                          : pincodeData?.loaded ? 'border-green-400 bg-green-50/30'
-                          : 'border-gray-300'}`}
-                    />
+                      className={`w-full pl-8 pr-10 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors ${errors.pincode ? 'border-red-400 bg-red-50' : pincodeData?.loaded ? 'border-green-400 bg-green-50/30' : 'border-gray-300'}`} />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {pincodeLoading && <Icon icon="svg-spinners:3-dots-fade" className="text-gray-400" width={16} />}
                       {!pincodeLoading && pincodeData?.loaded && <Icon icon="ph:check-circle-fill" className="text-green-500" width={16} />}
@@ -651,11 +663,8 @@ export default function CartClient() {
 
                   {pincodeData?.loaded && !pincodeData.manual && (
                     <div className={`mt-2 p-3 rounded-xl border flex items-start gap-2 ${isOutsideTelangana ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
-                      <Icon
-                        icon={isOutsideTelangana ? 'ph:warning-fill' : 'ph:check-circle-fill'}
-                        className={isOutsideTelangana ? 'text-amber-500 flex-shrink-0 mt-0.5' : 'text-green-500 flex-shrink-0 mt-0.5'}
-                        width={14}
-                      />
+                      <Icon icon={isOutsideTelangana ? 'ph:warning-fill' : 'ph:check-circle-fill'}
+                        className={isOutsideTelangana ? 'text-amber-500 flex-shrink-0 mt-0.5' : 'text-green-500 flex-shrink-0 mt-0.5'} width={14} />
                       <div>
                         <p className={`text-[11px] font-bold mb-1 ${isOutsideTelangana ? 'text-amber-800' : 'text-green-800'}`}>
                           📍 {[pincodeData.city, pincodeData.state].filter(Boolean).join(', ')}
@@ -663,7 +672,7 @@ export default function CartClient() {
                         {!isOutsideTelangana && <p className="text-[11px] text-green-700">✅ Free delivery to your location.</p>}
                         {isOutsideTelangana && (
                           <p className="text-[11px] text-amber-800 leading-relaxed">
-                            <strong>Delivery Information:</strong> Orders are shipped from our Hyderabad warehouse. Deliveries outside Telangana incur actual logistics charges payable by the customer.
+                            <strong>Delivery Information:</strong> Orders shipped from Hyderabad warehouse. Deliveries outside Telangana incur actual logistics charges payable by the customer.
                           </p>
                         )}
                       </div>
@@ -686,11 +695,8 @@ export default function CartClient() {
                       </div>
                       {manualState && (
                         <div className={`p-2.5 rounded-lg border flex items-start gap-2 ${isOutsideTelangana ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
-                          <Icon
-                            icon={isOutsideTelangana ? 'ph:warning-fill' : 'ph:check-circle-fill'}
-                            className={isOutsideTelangana ? 'text-amber-500 flex-shrink-0 mt-0.5' : 'text-green-500 flex-shrink-0 mt-0.5'}
-                            width={13}
-                          />
+                          <Icon icon={isOutsideTelangana ? 'ph:warning-fill' : 'ph:check-circle-fill'}
+                            className={isOutsideTelangana ? 'text-amber-500 flex-shrink-0 mt-0.5' : 'text-green-500 flex-shrink-0 mt-0.5'} width={13} />
                           <div>
                             {!isOutsideTelangana && <p className="text-[11px] text-green-700 font-medium">✅ Free delivery to {manualState}.</p>}
                             {isOutsideTelangana && (
@@ -761,33 +767,34 @@ export default function CartClient() {
                   </>
                 )}
 
-                {/* ✅ FIXED: EMI button — shows full amount with EMI context, not just monthly */}
                 {paymentTab === 'emi' && (
                   <>
+                    {/* Big EMI reminder box above button */}
+                    <div className="bg-blue-600 rounded-xl p-3 text-center">
+                      <p className="text-white text-xs font-bold mb-0.5">You will pay full amount on PhonePe</p>
+                      <p className="text-yellow-300 text-lg font-black">{inr(totalEmi)}</p>
+                      <p className="text-blue-200 text-[11px] mt-0.5">Then select EMI → {inr(emiMonthly)}/mo × {selectedEmi.months} months</p>
+                    </div>
+
                     <PhonePeButton
                       amount={totalEmi}
                       customerName={customerName || undefined}
                       customerPhone={customerPhone ? `+91${customerPhone}` : undefined}
                       customerEmail={customerEmail || undefined}
                       items={activeItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
-                      label={`Pay ${inr(totalEmi)} via EMI`}
+                      label={`Pay ${inr(totalEmi)} via EMI on PhonePe`}
                       onBeforePay={validateForm}
                     />
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 space-y-1.5">
-                      <p className="text-xs font-bold text-blue-800 flex items-center gap-1.5">
-                        <Icon icon="ph:info-fill" width={13} className="text-blue-600" />
-                        Full amount is charged — EMI is set up on PhonePe
-                      </p>
-                      <p className="text-[11px] text-blue-600 leading-relaxed">
-                        After clicking above, on PhonePe's page tap <strong>"Pay via EMI"</strong> → select your bank → confirm <strong>{inr(emiMonthly)}/month × {selectedEmi.months} months</strong>.
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {['Credit Card EMI', 'Debit Card EMI', 'Bajaj Finserv'].map(p => (
-                        <div key={p} className="text-center py-1.5 px-1 bg-gray-50 border border-gray-200 rounded-lg">
-                          <p className="text-[10px] text-gray-500 font-medium leading-tight">{p}</p>
-                        </div>
-                      ))}
+
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                      <p className="text-[10px] text-gray-500 font-semibold mb-1.5">EMI available via:</p>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {['Credit Card EMI', 'Debit Card EMI', 'Bajaj Finserv'].map(p => (
+                          <div key={p} className="text-center py-1.5 px-1 bg-white border border-gray-200 rounded-lg">
+                            <p className="text-[10px] text-gray-600 font-medium leading-tight">{p}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </>
                 )}

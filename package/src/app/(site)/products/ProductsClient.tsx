@@ -99,7 +99,7 @@ const GlassCard = ({ children, className = '' }: { children: React.ReactNode; cl
 // ── Promo Banner ──────────────────────────────────────────────────────────────
 function PromoBanner() {
   return (
-    <div className="w-full bg-blue-50 border border-blue-100 rounded-2xl px-4 sm:px-6 py-3 mb-5 sm:mb-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-0 justify-between">
+    <div className="w-full bg-blue-50 border border-blue-100 rounded-2xl px-4 sm:px-6 py-3 mb-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-0 justify-between">
       {/* Left: discount badge + text */}
       <div className="flex items-center gap-3 flex-shrink-0">
         <div className="relative flex-shrink-0">
@@ -316,7 +316,7 @@ const ProductsContent = () => {
 
   return (
     <main className="min-h-screen">
-      <section className="px-3 sm:px-4 max-w-7xl mx-auto pb-12 -mt-6 sm:-mt-10">
+      <section className="px-3 sm:px-4 max-w-7xl mx-auto pb-12 -mt-2">
 
         {/* ── Promo Banner — appears between HeroSub and category filter ── */}
         <PromoBanner />

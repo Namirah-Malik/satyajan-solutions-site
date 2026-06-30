@@ -50,8 +50,7 @@ html {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-section { @apply py-24 }
-
+section:not(.no-section-padding) { @apply py-24 }
 .blog-details p, .blog-details hr { @apply mb-8; }
 .blog-details strong { @apply font-bold; }
 .blog-details ul { @apply list-none space-y-3 mb-10; }
