@@ -7,9 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PhonePeButton from '@/components/PhonePeButton';
 
-const WHATSAPP_NUMBER     = '918019179159';
-const COD_DISCOUNT_PCT    = 2.5;
-const ONLINE_DISCOUNT_PCT = 5;
+const WHATSAPP_NUMBER = '918019179159';
 
 function inr(n: number) {
   return new Intl.NumberFormat('en-IN', {
@@ -39,11 +37,7 @@ interface FieldErrors {
 }
 
 interface PincodeData {
-  state: string;
-  city: string;
-  district: string;
-  loaded: boolean;
-  manual: boolean;
+  state: string; city: string; district: string; loaded: boolean; manual: boolean;
 }
 
 const INDIAN_STATES = [
@@ -120,9 +114,7 @@ export default function CartClient() {
 
   const fetchPincode = useCallback(async (pin: string) => {
     if (pin.length !== 6) {
-      setPincodeData(null); setPincodeError('');
-      setShowManualState(false); setManualState('');
-      return;
+      setPincodeData(null); setPincodeError(''); setShowManualState(false); setManualState(''); return;
     }
     setPincodeLoading(true); setPincodeError(''); setShowManualState(false);
     try {
@@ -131,14 +123,11 @@ export default function CartClient() {
         const data = await res.json();
         if (data?.state) {
           setPincodeData({ state: data.state, city: data.city || '', district: data.district || '', loaded: true, manual: false });
-          setPincodeError(''); setShowManualState(false); setManualState('');
-          setPincodeLoading(false);
-          return;
+          setPincodeError(''); setShowManualState(false); setManualState(''); setPincodeLoading(false); return;
         }
       }
     } catch {}
-    setPincodeData(null); setPincodeError('');
-    setShowManualState(true); setPincodeLoading(false);
+    setPincodeData(null); setPincodeError(''); setShowManualState(true); setPincodeLoading(false);
   }, []);
 
   useEffect(() => {
@@ -147,9 +136,7 @@ export default function CartClient() {
   }, [customerPincode, fetchPincode]);
 
   useEffect(() => {
-    if (manualState) {
-      setPincodeData({ state: manualState, city: '', district: '', loaded: true, manual: true });
-    }
+    if (manualState) setPincodeData({ state: manualState, city: '', district: '', loaded: true, manual: true });
   }, [manualState]);
 
   // ── Totals ────────────────────────────────────────────────────────────────
@@ -160,24 +147,23 @@ export default function CartClient() {
   const couponAmt       = couponDiscount;
   const baseTotal       = subtotal - couponAmt;
 
-  const onlineDiscountAmt = Math.round((baseTotal * ONLINE_DISCOUNT_PCT) / 100);
-  const totalOnline       = baseTotal - onlineDiscountAmt;
+  // No payment-method discounts — all tabs charge same base amount
+  const totalOnline = baseTotal;
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // EMI IMPORTANT NOTE:
-  // PhonePe always collects the FULL amount from the customer.
-  // EMI is NOT split by our code — it is handled 100% by PhonePe / the bank.
-  // We send the full baseTotal to PhonePe. On PhonePe's payment page,
-  // the customer selects "Pay via EMI", picks their bank or Bajaj Finserv,
-  // and the bank converts the full amount into monthly instalments.
-  // The emiMonthly shown here is INDICATIVE only — the bank confirms the final EMI.
-  // ─────────────────────────────────────────────────────────────────────────
-  const totalEmi   = baseTotal;
-  const emiMonthly = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
+  // ── EMI calculations ──────────────────────────────────────────────────────
+  // PhonePe always charges the BASE amount (totalEmi = baseTotal).
+  // The bank then converts it to EMI on their side.
+  // For interest-bearing plans, total repaid = emiMonthly × months (more than base).
+  // We show both clearly: PhonePe charge = baseTotal, total repaid = emiTotalPayable.
+  const totalEmi       = baseTotal;
+  const emiMonthly     = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
+  // Interest = extra amount paid over the loan period (₹0 for 0% plans)
+  const emiInterest    = selectedEmi.rate === 0 ? 0 : (emiMonthly * selectedEmi.months) - totalEmi;
+  // Total repaid to bank over the loan tenure
+  const emiTotalPayable = selectedEmi.rate === 0 ? totalEmi : emiMonthly * selectedEmi.months;
 
-  const codDiscountAmt = Math.round((baseTotal * COD_DISCOUNT_PCT) / 100);
-  const totalCod       = baseTotal - codDiscountAmt;
-
+  const totalCod    = baseTotal;
+  // totalAmount = what PhonePe actually charges (always baseTotal for EMI)
   const totalAmount =
     paymentTab === 'online' ? totalOnline :
     paymentTab === 'emi'    ? totalEmi    : totalCod;
@@ -234,12 +220,8 @@ export default function CartClient() {
     const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
     try {
       sessionStorage.setItem('pendingOrder', JSON.stringify({
-        customerName,
-        customerPhone: `+91${customerPhone}`,
-        customerEmail,
-        customerAddress: fullAddress,
-        amount: paymentTab === 'online' ? totalOnline : totalEmi,
-        discount: paymentTab === 'online' ? onlineDiscountAmt : 0,
+        customerName, customerPhone: `+91${customerPhone}`, customerEmail,
+        customerAddress: fullAddress, amount: baseTotal, discount: 0,
         items: activeItems.map(i => ({ name: i.name, SKU: i.SKU || '', price: i.price, quantity: i.quantity, image: i.image || '' })),
       }));
     } catch {}
@@ -263,7 +245,6 @@ export default function CartClient() {
       `   MRP Total: ${inr(mrpTotal)}`,
       productDiscount > 0 ? `   Product Discount: -${inr(productDiscount)}` : '',
       couponAmt > 0       ? `   Coupon (${appliedCoupon}): -${inr(couponAmt)}` : '',
-      `   COD Discount (${COD_DISCOUNT_PCT}%): -${inr(codDiscountAmt)}`,
       `   Delivery: ${isOutsideTelangana ? 'Actual logistics charges applicable' : 'FREE'}`,
       `   *Total (Cash on Delivery): ${inr(totalCod)}*`,
       '━━━━━━━━━━━━━━━━━━━━━━━',
@@ -389,69 +370,59 @@ export default function CartClient() {
                 <p className="text-sm font-bold text-gray-800 mb-2">How would you like to pay?</p>
                 <div className="grid grid-cols-3 gap-1.5 p-1 bg-gray-100 rounded-2xl">
                   <button onClick={() => setPaymentTab('online')}
-                    className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'online' ? 'bg-[#5f259f] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
+                    className={`py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'online' ? 'bg-[#5f259f] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:credit-card-fill" width={15} />
                     Pay Now
-                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5 ${paymentTab === 'online' ? 'bg-yellow-400 text-gray-900' : 'bg-green-500 text-white'}`}>
-                      {ONLINE_DISCOUNT_PCT}% OFF
-                    </span>
                   </button>
                   <button onClick={() => setPaymentTab('emi')}
-                    className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
+                    className={`py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:calendar-check-fill" width={15} />
                     EMI
-                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5 ${paymentTab === 'emi' ? 'bg-green-400 text-gray-900' : 'bg-blue-500 text-white'}`}>
-                      Approved ✓
-                    </span>
                   </button>
                   <button onClick={() => setPaymentTab('cod')}
-                    className={`relative py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'cod' ? 'bg-[#25D366] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
+                    className={`py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'cod' ? 'bg-[#25D366] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="mdi:cash" width={15} />
                     COD
-                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5 ${paymentTab === 'cod' ? 'bg-yellow-400 text-gray-900' : 'bg-green-500 text-white'}`}>
-                      {COD_DISCOUNT_PCT}% OFF
-                    </span>
                   </button>
                 </div>
 
-                {/* Pay Now info */}
                 {paymentTab === 'online' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-purple-50 border border-purple-100">
                     <Icon icon="ph:lightning-fill" width={15} className="text-purple-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-bold text-purple-700">{ONLINE_DISCOUNT_PCT}% Instant Discount — Best Price</p>
-                      <p className="text-[11px] text-purple-500">Pay full amount via UPI, debit/credit card or net banking. Discount applied instantly.</p>
+                      <p className="text-xs font-bold text-purple-700">Pay Online — UPI, Card or Net Banking</p>
+                      <p className="text-[11px] text-purple-500">Secure payment via PhonePe. Instant order confirmation.</p>
                     </div>
                   </div>
                 )}
 
-                {/* ── EMI explanation banner ── */}
                 {paymentTab === 'emi' && (
                   <div className="mt-2.5 rounded-xl overflow-hidden border border-blue-200">
-                    {/* Header */}
                     <div className="bg-blue-600 px-3 py-2.5 flex items-center gap-2">
                       <Icon icon="ph:info-fill" width={15} className="text-white flex-shrink-0" />
-                      <p className="text-xs font-black text-white">How EMI works — Please read before paying</p>
+                      <p className="text-xs font-black text-white">How EMI works — Please read</p>
                     </div>
-                    {/* Body */}
                     <div className="bg-blue-50 px-3 py-3 space-y-2">
-                      <p className="text-[11px] text-blue-800 leading-relaxed font-medium">
-                        ✅ <strong>EMI is approved</strong> and available on your order.
+                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                        When you click <strong>"Pay via EMI"</strong> below, PhonePe will show the{' '}
+                        <strong>full amount {inr(totalEmi)}</strong> — this is normal and correct.
                       </p>
                       <p className="text-[11px] text-blue-700 leading-relaxed">
-                        When you click <strong>"Pay via EMI"</strong> below, you will be taken to the
-                        <strong> PhonePe payment page</strong> which will show the <strong>full amount</strong> of{' '}
-                        <strong className="text-blue-900">{inr(totalEmi)}</strong>.
-                      </p>
-                      <p className="text-[11px] text-blue-700 leading-relaxed">
-                        👉 On PhonePe's page, tap <strong>"EMI"</strong> option → select your bank or
-                        Bajaj Finserv → your bank will split the payment into{' '}
+                        👉 On PhonePe's page, tap <strong>"EMI"</strong> → select your bank or Bajaj Finserv → your bank splits it into{' '}
                         <strong className="text-blue-900">{inr(emiMonthly)}/month × {selectedEmi.months} months</strong>.
                       </p>
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 mt-1">
+                      {emiInterest > 0 && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg px-2.5 py-2">
+                          <p className="text-[10px] text-orange-800 font-semibold leading-relaxed">
+                            ℹ️ For {selectedEmi.months}-month plan at {selectedEmi.rate}% p.a., your bank adds{' '}
+                            {inr(emiInterest)} interest. Total repaid = {inr(emiTotalPayable)} over {selectedEmi.months} months.
+                            PhonePe itself charges only {inr(totalEmi)}.
+                          </p>
+                        </div>
+                      )}
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2">
                         <p className="text-[10px] text-amber-800 font-semibold leading-relaxed">
-                          ⚠️ The full amount {inr(totalEmi)} is shown on PhonePe — this is normal and correct.
-                          EMI conversion happens inside PhonePe, not on our website.
+                          ⚠️ EMI conversion happens inside PhonePe/bank — not on our website.
                           Monthly EMI of {inr(emiMonthly)} is indicative — your bank confirms the final amount.
                         </p>
                       </div>
@@ -459,13 +430,12 @@ export default function CartClient() {
                   </div>
                 )}
 
-                {/* COD info */}
                 {paymentTab === 'cod' && (
                   <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-green-50 border border-green-100">
                     <Icon icon="ph:truck-fill" width={15} className="text-green-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-bold text-green-700">{COD_DISCOUNT_PCT}% COD Discount — Pay at Doorstep</p>
-                      <p className="text-[11px] text-green-500">Order via WhatsApp. Pay cash when product is delivered to your address.</p>
+                      <p className="text-xs font-bold text-green-700">Cash on Delivery — Pay at Doorstep</p>
+                      <p className="text-[11px] text-green-500">Order via WhatsApp. Pay cash when product is delivered.</p>
                     </div>
                   </div>
                 )}
@@ -477,8 +447,10 @@ export default function CartClient() {
                   <p className="text-xs font-bold text-gray-700 mb-3">Select your EMI plan</p>
                   <div className="grid grid-cols-2 gap-2">
                     {EMI_PLANS.map((plan) => {
-                      const monthly    = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
-                      const isSelected = selectedEmi.months === plan.months;
+                      const monthly     = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
+                      const planTotal   = plan.rate === 0 ? totalEmi : monthly * plan.months;
+                      const planInterest = plan.rate === 0 ? 0 : planTotal - totalEmi;
+                      const isSelected  = selectedEmi.months === plan.months;
                       return (
                         <button key={plan.months} onClick={() => setSelectedEmi(plan)}
                           className={`relative rounded-xl p-2.5 text-left border-2 transition-all ${isSelected ? 'border-blue-500 bg-blue-600 text-white' : 'border-gray-200 bg-white hover:border-blue-300'}`}>
@@ -491,19 +463,21 @@ export default function CartClient() {
                           <p className={`text-base font-black ${isSelected ? 'text-yellow-300' : 'text-blue-600'}`}>
                             {inr(monthly)}<span className={`text-[10px] font-normal ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>/mo</span>
                           </p>
-                          <p className={`text-[10px] ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>{plan.rate === 0 ? 'Zero interest' : `${plan.rate}% p.a.`}</p>
+                          <p className={`text-[10px] ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>
+                            {plan.rate === 0 ? 'Zero interest' : `${plan.rate}% p.a. · +${inr(planInterest)}`}
+                          </p>
                         </button>
                       );
                     })}
                   </div>
 
-                  {/* Step by step guide */}
+                  {/* Step-by-step guide */}
                   <div className="mt-3 p-3 bg-white border border-blue-200 rounded-xl">
                     <p className="text-[11px] font-bold text-gray-800 mb-2">Steps after clicking Pay:</p>
                     <div className="space-y-1.5">
                       {[
-                        { step: '1', text: `PhonePe will show full amount: ${inr(totalEmi)}` },
-                        { step: '2', text: 'On PhonePe page → tap "EMI" payment option' },
+                        { step: '1', text: `PhonePe will show: ${inr(totalEmi)}` },
+                        { step: '2', text: 'Tap "EMI" payment option on PhonePe' },
                         { step: '3', text: 'Select your bank / Bajaj Finserv / HDFC cardless' },
                         { step: '4', text: `Bank confirms: ${inr(emiMonthly)}/mo × ${selectedEmi.months} months` },
                       ].map(s => (
@@ -535,27 +509,23 @@ export default function CartClient() {
                     <span className="text-green-600 font-medium">− ₹{couponAmt.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-                {paymentTab === 'online' && (
-                  <div className="flex justify-between">
-                    <span className="text-purple-600 font-semibold">Online Discount ({ONLINE_DISCOUNT_PCT}%)</span>
-                    <span className="text-purple-600 font-semibold">− ₹{onlineDiscountAmt.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
+
+                {/* EMI breakdown rows */}
                 {paymentTab === 'emi' && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-blue-600 font-semibold">EMI ({selectedEmi.months} months)</span>
-                    <span className="text-blue-600 font-semibold text-right">
-                      ≈ {inr(emiMonthly)}/mo
-                      <span className="block text-[10px] text-blue-400 font-normal">set up on PhonePe</span>
-                    </span>
-                  </div>
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-600 font-semibold">EMI ({selectedEmi.months} months)</span>
+                      <span className="text-blue-600 font-semibold">≈ {inr(emiMonthly)}/mo</span>
+                    </div>
+                    {emiInterest > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-orange-500 text-xs font-semibold">Interest ({selectedEmi.rate}% p.a.)</span>
+                        <span className="text-orange-500 text-xs font-semibold">+ {inr(emiInterest)} <span className="text-gray-400 font-normal">(added by bank)</span></span>
+                      </div>
+                    )}
+                  </>
                 )}
-                {paymentTab === 'cod' && (
-                  <div className="flex justify-between">
-                    <span className="text-green-600 font-semibold">COD Discount ({COD_DISCOUNT_PCT}%)</span>
-                    <span className="text-green-600 font-semibold">− ₹{codDiscountAmt.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
+
                 <div className="flex justify-between">
                   <span className="text-gray-500">Delivery</span>
                   <span className={isOutsideTelangana ? 'text-amber-600 font-semibold' : 'text-green-600 font-medium'}>
@@ -563,26 +533,37 @@ export default function CartClient() {
                   </span>
                 </div>
 
-                {/* Total row */}
+                {/* ── Total row ── */}
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-base font-black">
                     <span className="text-gray-900">
-                      {paymentTab === 'emi' ? 'Total (paid on PhonePe)' : 'Total Payable'}
+                      {paymentTab === 'emi' ? 'Charged on PhonePe' : 'Total Payable'}
                     </span>
                     <span className="text-primary">₹{totalAmount.toLocaleString('en-IN')}</span>
                   </div>
                   {paymentTab === 'emi' && (
-                    <p className="text-[11px] text-blue-500 text-right mt-1 leading-snug">
-                      PhonePe collects full amount →<br />
-                      select EMI → {inr(emiMonthly)}/mo × {selectedEmi.months} months
-                    </p>
+                    <div className="mt-1 text-right space-y-0.5">
+                      <p className="text-[11px] text-blue-500 leading-snug">
+                        {inr(emiMonthly)}/mo × {selectedEmi.months} months
+                      </p>
+                      {emiInterest > 0 && (
+                        <p className="text-[10px] text-orange-500 leading-snug">
+                          Total repaid to bank: {inr(emiTotalPayable)} (incl. {inr(emiInterest)} interest)
+                        </p>
+                      )}
+                      {emiInterest === 0 && (
+                        <p className="text-[10px] text-green-600 leading-snug font-semibold">
+                          ✅ No-cost EMI — zero interest
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
 
-                {paymentTab !== 'emi' && (totalSavings + couponAmt + (paymentTab === 'online' ? onlineDiscountAmt : codDiscountAmt)) > 0 && (
+                {(totalSavings + couponAmt) > 0 && (
                   <div className="bg-green-50 rounded-xl px-3 py-2">
                     <p className="text-xs font-bold text-green-700">
-                      🎉 Total Savings: ₹{(totalSavings + couponAmt + (paymentTab === 'online' ? onlineDiscountAmt : codDiscountAmt)).toLocaleString('en-IN')}
+                      🎉 Total Savings: ₹{(totalSavings + couponAmt).toLocaleString('en-IN')}
                     </p>
                   </div>
                 )}
@@ -755,25 +736,30 @@ export default function CartClient() {
                       customerPhone={customerPhone ? `+91${customerPhone}` : undefined}
                       customerEmail={customerEmail || undefined}
                       items={activeItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
-                      label={`Pay ${inr(totalOnline)} · Save ${inr(onlineDiscountAmt)}`}
+                      label={`Pay ${inr(totalOnline)} via PhonePe`}
                       onBeforePay={validateForm}
                     />
                     <div className="flex items-center gap-2 p-3 bg-purple-50 border border-purple-100 rounded-xl">
                       <Icon icon="ph:seal-check-fill" width={15} className="text-purple-600 flex-shrink-0" />
-                      <p className="text-xs text-purple-700 font-medium">
-                        <strong>{ONLINE_DISCOUNT_PCT}% instant discount</strong> applied · Secured by PhonePe
-                      </p>
+                      <p className="text-xs text-purple-700 font-medium">Secured by PhonePe · UPI · Cards · Net Banking</p>
                     </div>
                   </>
                 )}
 
                 {paymentTab === 'emi' && (
                   <>
-                    {/* Big EMI reminder box above button */}
+                    {/* EMI summary box — shows what PhonePe charges + interest info */}
                     <div className="bg-blue-600 rounded-xl p-3 text-center">
-                      <p className="text-white text-xs font-bold mb-0.5">You will pay full amount on PhonePe</p>
+                      <p className="text-white text-xs font-bold mb-0.5">Amount charged on PhonePe</p>
                       <p className="text-yellow-300 text-lg font-black">{inr(totalEmi)}</p>
-                      <p className="text-blue-200 text-[11px] mt-0.5">Then select EMI → {inr(emiMonthly)}/mo × {selectedEmi.months} months</p>
+                      {emiInterest > 0 && (
+                        <p className="text-blue-200 text-[10px] mt-0.5">
+                          Bank adds {inr(emiInterest)} interest · Total repaid: {inr(emiTotalPayable)}
+                        </p>
+                      )}
+                      <p className="text-blue-100 text-[11px] mt-1">
+                        Then select EMI → {inr(emiMonthly)}/mo × {selectedEmi.months} months
+                      </p>
                     </div>
 
                     <PhonePeButton
@@ -809,8 +795,8 @@ export default function CartClient() {
                     <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl">
                       <Icon icon="mdi:cash" width={15} className="text-green-600 flex-shrink-0" />
                       <div>
-                        <p className="text-xs text-green-700 font-bold">{COD_DISCOUNT_PCT}% COD Discount — Pay {inr(totalCod)}</p>
-                        <p className="text-[11px] text-green-500">Cash on delivery at your doorstep</p>
+                        <p className="text-xs text-green-700 font-bold">Pay {inr(totalCod)} — Cash on Delivery</p>
+                        <p className="text-[11px] text-green-500">Pay cash when product is delivered to your doorstep</p>
                       </div>
                     </div>
                   </>

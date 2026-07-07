@@ -76,12 +76,12 @@ export const technicalSupport = [
   {
     icon: 'AlertCircle',
     title: 'System Troubleshooting',
-    description: 'Fault detection and corrective action. Expert diagnosis of inverter errors, battery issues, and solar panel problems with effective solutions.'
+    description: 'Fault detection and corrective action. Expert diagnosis of lithium and solarinverter errors, lithium and traditionalbattery issues, and solar panel problems with effective solutions.'
   },
   {
     icon: 'TrendingUp',
     title: 'Performance Optimization',
-    description: 'Ensuring systems operate at peak efficiency. Fine-tuning settings, cleaning connections, and upgrading firmware for maximum output and longevity.'
+    description: 'Ensuring systems,including modern lithium inverter and battery installations, operate at peak efficiency. Fine-tuning settings, cleaning connections, and upgrading firmware for maximum output and longevity.'
   },
   {
     icon: 'Headphones',

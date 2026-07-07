@@ -1,18 +1,3 @@
-// next.config.ts
-// ─────────────────────────────────────────────────────────────────────────────
-// KEY CHANGE: removed `unoptimized: true`
-//
-// With unoptimized:true, every product image loads as the raw original file
-// from microtek.in — often 300–800 KB per image.
-// With Next.js image optimization enabled, images are:
-//   • Automatically converted to WebP / AVIF (60–80% smaller)
-//   • Resized to the exact display size (no 1200px image for a 300px card)
-//   • Cached at the CDN edge after first request
-//   • Lazy-loaded by default
-//
-// NOTE: The Card component uses a plain <img> tag with loading="lazy".
-// For even better LCP, swap it to Next.js <Image> (see Card.tsx notes below).
-// ─────────────────────────────────────────────────────────────────────────────
 
 import type { NextConfig } from 'next';
 
@@ -24,9 +9,8 @@ const nextConfig: NextConfig = {
   compress:   true,
 
   images: {
-    // ✅ REMOVED: unoptimized: true   ← this was the #1 cause of slow images
-    formats: ['image/avif', 'image/webp'],   // serve AVIF first, WebP fallback
-    minimumCacheTTL: 60 * 60 * 24 * 7,      // cache optimized images for 7 days
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 7,
     deviceSizes:  [320, 480, 640, 750, 828, 1080, 1200],
     imageSizes:   [16, 32, 64, 96, 128, 256, 384],
     remotePatterns: [
@@ -38,12 +22,10 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // ── Experimental: faster JS bundling ─────────────────────────────────────
   experimental: {
     optimizePackageImports: ['@iconify/react', 'lucide-react'],
   },
 
-  // ── Security + caching headers ────────────────────────────────────────────
   async headers() {
     return [
       {
@@ -56,12 +38,10 @@ const nextConfig: NextConfig = {
           { key: 'Permissions-Policy',        value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
-      // Aggressive cache for static assets
       {
         source: '/images/(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
-      // API route caching (also set in the route handler, belt-and-suspenders)
       {
         source: '/api/products(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' }],
@@ -71,21 +51,101 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+
+      // ── www → non-www canonical ───────────────────────────────────────────
       {
         source:      '/:path*',
         has:         [{ type: 'host', value: 'www.satyajan.com' }],
         destination: 'https://satyajan.com/:path*',
         permanent:   true,
       },
+
+      // ── Old .html pages ───────────────────────────────────────────────────
       { source: '/technology.html', destination: '/about',                   permanent: true },
       { source: '/blog.html',       destination: '/blog',                    permanent: true },
       { source: '/Careers.html',    destination: '/careers',                 permanent: true },
-      { source: '/solar-1.html',    destination: '/products?category=Solar', permanent: true },
       { source: '/index.html',      destination: '/',                        permanent: true },
-      { source: '/contact.html',    destination: '/contact',                 permanent: true },
       { source: '/about.html',      destination: '/about',                   permanent: true },
-      { source: '/products/',       destination: '/products',                permanent: true },
-      { source: '/blog/',           destination: '/blog',                    permanent: true },
+      { source: '/solar-1.html',    destination: '/products?category=Solar', permanent: true },
+
+      // ── FIX: /contact was 404 — site uses /contactus ──────────────────────
+      { source: '/contact.html',    destination: '/contactus',               permanent: true },
+      { source: '/contact',         destination: '/contactus',               permanent: true },
+
+      // ── Trailing slash redirects ──────────────────────────────────────────
+      { source: '/products/',   destination: '/products',   permanent: true },
+      { source: '/blog/',       destination: '/blog',       permanent: true },
+      { source: '/about/',      destination: '/about',      permanent: true },
+      { source: '/contactus/',  destination: '/contactus',  permanent: true },
+      { source: '/faqs/',       destination: '/faqs',       permanent: true },
+      { source: '/careers/',    destination: '/careers',    permanent: true },
+      { source: '/services/',   destination: '/services',   permanent: true },
+
+      // ── FIX: Deleted product slugs → relevant category pages ─────────────
+      // These were indexed by Google but no longer exist in the DB.
+      {
+        source:      '/products/microtek-jumbo-new-3500-24v-100ah-lithium-battery-combo',
+        destination: '/products?category=New+Lithium+Battery',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-jumbo-ups-4000-48v-100ah-lithium-battery-combo',
+        destination: '/products?category=New+Lithium+Battery',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-512v-100ah-lithium-battery-lifepo4',
+        destination: '/products?category=New+Lithium+Battery',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-combo-luxe-1900-pure-sine-wave-inverterups-1650va-24v-256v-100ah-lifepo4-battery-256kwh-',
+        destination: '/products?category=Combo',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-jumbo-ups-2500-24v-100ah-lithium-battery-combo',
+        destination: '/products?category=New+Lithium+Battery',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-jumbo-ups-5500-48v-100ah-lithium-battery-combo',
+        destination: '/products?category=New+Lithium+Battery',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-jumbo-new-3000-24v-100ah-lithium-battery-combo',
+        destination: '/products?category=New+Lithium+Battery',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-msmf-72-12-12v-72ah-sealed-maintenance-free-vrla-battery',
+        destination: '/products?category=Battery',
+        permanent:   true,
+      },
+      {
+        source:      '/products/microtek-dura-strong-m2203624tt-220ah-tall-tubular-inverter-battery-with-adc-tec',
+        destination: '/products?category=Battery',
+        permanent:   true,
+      },
+
+      // ── FIX: Old MongoDB ObjectID 404 URLs → /products ────────────────────
+      // From "Not found (404)" GSC report
+      {
+        source:      '/products/68f9c60f901822815a053ef2',
+        destination: '/products',
+        permanent:   true,
+      },
+      {
+        source:      '/products/6904529f70a71d5331b58f0b',
+        destination: '/products',
+        permanent:   true,
+      },
+      {
+        source:      '/products/68f9c6b49039fc1f4ccf1b63',
+        destination: '/products',
+        permanent:   true,
+      },
     ];
   },
 };

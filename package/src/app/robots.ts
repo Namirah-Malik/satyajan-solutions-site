@@ -1,30 +1,28 @@
-/**
- * robots.ts
- * ─────────────────────────────────────────────────────────────
- * Deploy to: src/app/robots.ts
- *
- * Next.js serves this at: https://satyajan.com/robots.txt
- */
+
 
 import { MetadataRoute } from 'next';
-import { SEO } from '@/lib/seo.config';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        // Allow all crawlers to index the site
         userAgent: '*',
-        allow:     '/',
+        allow: '/',
         disallow: [
-          '/api/',          // never index raw API endpoints
-          '/admin/',        // admin pages if any
-          '/_next/',        // Next.js internals
-          '/career/apply',  // form pages — no SEO value
+          '/api/',             // raw API endpoints — no SEO value
+          '/admin/',           // admin dashboard
+          '/_next/',           // Next.js internals
+          '/career/apply',     // form-only page
+          '/cart/',            // cart pages — not indexable
+          '/payment/',         // all payment pages — not indexable
+          '/payment/status',   // payment status page
+          '/site.webmanifest', // PWA manifest — not a page
+          '/products?search=', // search result URLs — duplicates of /products
+          '/products?category=', // category filter URLs — duplicates of /products
         ],
       },
     ],
-    sitemap: `${SEO.domain}/sitemap.xml`,
-    host:    SEO.domain,
+    sitemap: 'https://satyajan.com/sitemap.xml',
+    host:    'https://satyajan.com',
   };
 }
