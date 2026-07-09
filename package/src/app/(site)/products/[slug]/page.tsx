@@ -1,4 +1,3 @@
-// app/(site)/products/[slug]/page.tsx
 
 import type { Metadata } from 'next';
 import { notFound }      from 'next/navigation';
@@ -6,8 +5,6 @@ import ProductDetailsClient from '@/components/ProductDetailsClient';
 import { mockProducts }  from '@/mock/products';
 import prisma            from '@/lib/prisma';   // ← CHANGED: singleton import
 
-// ── REMOVED: export const dynamic = 'force-dynamic'
-// ── ADDED: ISR — revalidate every hour, pre-build top 200 at deploy time
 export const revalidate = 3600;
 
 export async function generateStaticParams() {

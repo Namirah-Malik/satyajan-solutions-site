@@ -47,15 +47,18 @@ export async function notifyTeamWhatsApp(order: NotifyOrderPayload): Promise<voi
       </tr>
     `).join('');
 
-    const headerColor  = isOnline ? '#059669' : '#2563eb';
-    const headerEmoji  = isOnline ? '💰' : '📦';
-    const headerText   = isOnline ? 'Payment Received' : 'New COD Order';
-    const statusBadge  = isOnline
-      ? '<span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:9999px;font-size:13px;font-weight:700">✅ PAID via PhonePe</span>'
+    const headerColor = isOnline ? '#059669' : '#2563eb';
+    const headerEmoji = isOnline ? '💰' : '📦';
+    const headerText  = isOnline ? 'Payment Received' : 'New COD Order';
+
+    // ✅ FIXED: Changed PhonePe → Razorpay
+    const statusBadge = isOnline
+      ? '<span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:9999px;font-size:13px;font-weight:700">✅ PAID via Razorpay</span>'
       : '<span style="background:#dbeafe;color:#1e40af;padding:4px 10px;border-radius:9999px;font-size:13px;font-weight:700">🚚 Cash on Delivery</span>';
 
+    // ✅ FIXED: Changed PhonePe → Razorpay
     const actionNote = isOnline
-      ? '<div style="background:#d1fae5;border-left:4px solid #059669;padding:12px 16px;margin-top:16px;border-radius:4px"><strong style="color:#065f46">✅ Money received in PhonePe account. Arrange delivery ASAP.</strong></div>'
+      ? '<div style="background:#d1fae5;border-left:4px solid #059669;padding:12px 16px;margin-top:16px;border-radius:4px"><strong style="color:#065f46">✅ Money received via Razorpay. Arrange delivery ASAP.</strong></div>'
       : '<div style="background:#dbeafe;border-left:4px solid #2563eb;padding:12px 16px;margin-top:16px;border-radius:4px"><strong style="color:#1e40af">⚠️ Collect cash on delivery. Confirm with customer before dispatching.</strong></div>';
 
     await resend.emails.send({

@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import PhonePeButton from '@/components/PhonePeButton';
+import RazorpayButton from '@/components/RazorpayButton';
 
 const WHATSAPP_NUMBER = '918019179159';
 
@@ -147,26 +147,20 @@ export default function CartClient() {
   const couponAmt       = couponDiscount;
   const baseTotal       = subtotal - couponAmt;
 
-  // No payment-method discounts — all tabs charge same base amount
-  const totalOnline = baseTotal;
-
-  // ── EMI calculations ──────────────────────────────────────────────────────
-  // PhonePe always charges the BASE amount (totalEmi = baseTotal).
-  // The bank then converts it to EMI on their side.
-  // For interest-bearing plans, total repaid = emiMonthly × months (more than base).
-  // We show both clearly: PhonePe charge = baseTotal, total repaid = emiTotalPayable.
-  const totalEmi       = baseTotal;
-  const emiMonthly     = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
-  // Interest = extra amount paid over the loan period (₹0 for 0% plans)
-  const emiInterest    = selectedEmi.rate === 0 ? 0 : (emiMonthly * selectedEmi.months) - totalEmi;
-  // Total repaid to bank over the loan tenure
+  const totalOnline     = baseTotal;
+  const totalEmi        = baseTotal;
+  const emiMonthly      = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
+  const emiInterest     = selectedEmi.rate === 0 ? 0 : (emiMonthly * selectedEmi.months) - totalEmi;
   const emiTotalPayable = selectedEmi.rate === 0 ? totalEmi : emiMonthly * selectedEmi.months;
-
-  const totalCod    = baseTotal;
-  // totalAmount = what PhonePe actually charges (always baseTotal for EMI)
-  const totalAmount =
+  const totalCod        = baseTotal;
+  const totalAmount     =
     paymentTab === 'online' ? totalOnline :
     paymentTab === 'emi'    ? totalEmi    : totalCod;
+
+  const cityPart    = pincodeData?.city ? `, ${pincodeData.city}` : '';
+  const fullAddress = customerAddress
+    ? `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`
+    : '';
 
   // ── Coupon ────────────────────────────────────────────────────────────────
   const handleApplyCoupon = () => {
@@ -216,24 +210,14 @@ export default function CartClient() {
       setTimeout(() => document.getElementById('customer-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
       return false;
     }
-    const cityPart    = pincodeData?.city ? `, ${pincodeData.city}` : '';
-    const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
-    try {
-      sessionStorage.setItem('pendingOrder', JSON.stringify({
-        customerName, customerPhone: `+91${customerPhone}`, customerEmail,
-        customerAddress: fullAddress, amount: baseTotal, discount: 0,
-        items: activeItems.map(i => ({ name: i.name, SKU: i.SKU || '', price: i.price, quantity: i.quantity, image: i.image || '' })),
-      }));
-    } catch {}
     return true;
   };
 
   // ── COD / WhatsApp checkout ───────────────────────────────────────────────
   const handleCodCheckout = async () => {
     if (!validateForm()) return;
-    const cityPart    = pincodeData?.city ? `, ${pincodeData.city}` : '';
-    const fullAddress = `${customerAddress}${cityPart}, ${effectiveState} - ${customerPincode}`;
-    const itemLines   = activeItems
+
+    const itemLines = activeItems
       .map((item, i) => `${i + 1}. *${item.name}*\n   SKU: ${item.SKU}\n   Qty: ${item.quantity} × ${inr(item.price)} = ${inr(item.price * item.quantity)}`)
       .join('\n\n');
 
@@ -370,7 +354,7 @@ export default function CartClient() {
                 <p className="text-sm font-bold text-gray-800 mb-2">How would you like to pay?</p>
                 <div className="grid grid-cols-3 gap-1.5 p-1 bg-gray-100 rounded-2xl">
                   <button onClick={() => setPaymentTab('online')}
-                    className={`py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'online' ? 'bg-[#5f259f] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
+                    className={`py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'online' ? 'bg-[#072654] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:credit-card-fill" width={15} />
                     Pay Now
                   </button>
@@ -386,12 +370,13 @@ export default function CartClient() {
                   </button>
                 </div>
 
+                {/* Tab info boxes */}
                 {paymentTab === 'online' && (
-                  <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-purple-50 border border-purple-100">
-                    <Icon icon="ph:lightning-fill" width={15} className="text-purple-600 flex-shrink-0 mt-0.5" />
+                  <div className="mt-2.5 rounded-xl p-3 flex items-start gap-2 bg-[#072654]/5 border border-[#072654]/10">
+                    <Icon icon="ph:lightning-fill" width={15} className="text-[#072654] flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-bold text-purple-700">Pay Online — UPI, Card or Net Banking</p>
-                      <p className="text-[11px] text-purple-500">Secure payment via PhonePe. Instant order confirmation.</p>
+                      <p className="text-xs font-bold text-[#072654]">Pay Online — UPI, Card, Net Banking</p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">Secure payment via Razorpay. Supports GPay, PhonePe UPI, Paytm & all cards.</p>
                     </div>
                   </div>
                 )}
@@ -404,26 +389,23 @@ export default function CartClient() {
                     </div>
                     <div className="bg-blue-50 px-3 py-3 space-y-2">
                       <p className="text-[11px] text-blue-700 leading-relaxed">
-                        When you click <strong>"Pay via EMI"</strong> below, PhonePe will show the{' '}
-                        <strong>full amount {inr(totalEmi)}</strong> — this is normal and correct.
+                        Click <strong>"Pay via EMI"</strong> below → Razorpay popup opens → select <strong>"EMI"</strong> tab → choose your bank (SBI, HDFC, Axis, ICICI etc.) or Bajaj Finserv.
                       </p>
                       <p className="text-[11px] text-blue-700 leading-relaxed">
-                        👉 On PhonePe's page, tap <strong>"EMI"</strong> → select your bank or Bajaj Finserv → your bank splits it into{' '}
+                        Razorpay will show your indicative EMI:{' '}
                         <strong className="text-blue-900">{inr(emiMonthly)}/month × {selectedEmi.months} months</strong>.
                       </p>
                       {emiInterest > 0 && (
                         <div className="bg-orange-50 border border-orange-200 rounded-lg px-2.5 py-2">
                           <p className="text-[10px] text-orange-800 font-semibold leading-relaxed">
-                            ℹ️ For {selectedEmi.months}-month plan at {selectedEmi.rate}% p.a., your bank adds{' '}
-                            {inr(emiInterest)} interest. Total repaid = {inr(emiTotalPayable)} over {selectedEmi.months} months.
-                            PhonePe itself charges only {inr(totalEmi)}.
+                            ℹ️ For {selectedEmi.months}-month plan at {selectedEmi.rate}% p.a., bank adds {inr(emiInterest)} interest.
+                            Total repaid = {inr(emiTotalPayable)} over {selectedEmi.months} months.
                           </p>
                         </div>
                       )}
                       <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2">
                         <p className="text-[10px] text-amber-800 font-semibold leading-relaxed">
-                          ⚠️ EMI conversion happens inside PhonePe/bank — not on our website.
-                          Monthly EMI of {inr(emiMonthly)} is indicative — your bank confirms the final amount.
+                          ⚠️ Razorpay will charge the full amount {inr(totalEmi)} — EMI conversion is done by your bank on their side.
                         </p>
                       </div>
                     </div>
@@ -447,10 +429,10 @@ export default function CartClient() {
                   <p className="text-xs font-bold text-gray-700 mb-3">Select your EMI plan</p>
                   <div className="grid grid-cols-2 gap-2">
                     {EMI_PLANS.map((plan) => {
-                      const monthly     = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
-                      const planTotal   = plan.rate === 0 ? totalEmi : monthly * plan.months;
+                      const monthly      = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
+                      const planTotal    = plan.rate === 0 ? totalEmi : monthly * plan.months;
                       const planInterest = plan.rate === 0 ? 0 : planTotal - totalEmi;
-                      const isSelected  = selectedEmi.months === plan.months;
+                      const isSelected   = selectedEmi.months === plan.months;
                       return (
                         <button key={plan.months} onClick={() => setSelectedEmi(plan)}
                           className={`relative rounded-xl p-2.5 text-left border-2 transition-all ${isSelected ? 'border-blue-500 bg-blue-600 text-white' : 'border-gray-200 bg-white hover:border-blue-300'}`}>
@@ -470,15 +452,13 @@ export default function CartClient() {
                       );
                     })}
                   </div>
-
-                  {/* Step-by-step guide */}
                   <div className="mt-3 p-3 bg-white border border-blue-200 rounded-xl">
                     <p className="text-[11px] font-bold text-gray-800 mb-2">Steps after clicking Pay:</p>
                     <div className="space-y-1.5">
                       {[
-                        { step: '1', text: `PhonePe will show: ${inr(totalEmi)}` },
-                        { step: '2', text: 'Tap "EMI" payment option on PhonePe' },
-                        { step: '3', text: 'Select your bank / Bajaj Finserv / HDFC cardless' },
+                        { step: '1', text: `Razorpay popup opens — click "EMI" tab` },
+                        { step: '2', text: 'Select your bank — SBI, HDFC, Axis, ICICI, etc.' },
+                        { step: '3', text: 'Confirm EMI plan & enter card/OTP' },
                         { step: '4', text: `Bank confirms: ${inr(emiMonthly)}/mo × ${selectedEmi.months} months` },
                       ].map(s => (
                         <div key={s.step} className="flex items-start gap-2">
@@ -509,8 +489,6 @@ export default function CartClient() {
                     <span className="text-green-600 font-medium">− ₹{couponAmt.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-
-                {/* EMI breakdown rows */}
                 {paymentTab === 'emi' && (
                   <>
                     <div className="flex justify-between items-center">
@@ -525,19 +503,16 @@ export default function CartClient() {
                     )}
                   </>
                 )}
-
                 <div className="flex justify-between">
                   <span className="text-gray-500">Delivery</span>
                   <span className={isOutsideTelangana ? 'text-amber-600 font-semibold' : 'text-green-600 font-medium'}>
                     {isOutsideTelangana ? 'Charges apply' : effectiveState ? 'FREE 🎉' : 'FREE'}
                   </span>
                 </div>
-
-                {/* ── Total row ── */}
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-base font-black">
                     <span className="text-gray-900">
-                      {paymentTab === 'emi' ? 'Charged on PhonePe' : 'Total Payable'}
+                      {paymentTab === 'emi' ? 'Charged via Razorpay' : 'Total Payable'}
                     </span>
                     <span className="text-primary">₹{totalAmount.toLocaleString('en-IN')}</span>
                   </div>
@@ -546,25 +521,19 @@ export default function CartClient() {
                       <p className="text-[11px] text-blue-500 leading-snug">
                         {inr(emiMonthly)}/mo × {selectedEmi.months} months
                       </p>
-                      {emiInterest > 0 && (
+                      {emiInterest > 0 ? (
                         <p className="text-[10px] text-orange-500 leading-snug">
                           Total repaid to bank: {inr(emiTotalPayable)} (incl. {inr(emiInterest)} interest)
                         </p>
-                      )}
-                      {emiInterest === 0 && (
-                        <p className="text-[10px] text-green-600 leading-snug font-semibold">
-                          ✅ No-cost EMI — zero interest
-                        </p>
+                      ) : (
+                        <p className="text-[10px] text-green-600 leading-snug font-semibold">✅ No-cost EMI — zero interest</p>
                       )}
                     </div>
                   )}
                 </div>
-
                 {(totalSavings + couponAmt) > 0 && (
                   <div className="bg-green-50 rounded-xl px-3 py-2">
-                    <p className="text-xs font-bold text-green-700">
-                      🎉 Total Savings: ₹{(totalSavings + couponAmt).toLocaleString('en-IN')}
-                    </p>
+                    <p className="text-xs font-bold text-green-700">🎉 Total Savings: ₹{(totalSavings + couponAmt).toLocaleString('en-IN')}</p>
                   </div>
                 )}
               </div>
@@ -653,7 +622,7 @@ export default function CartClient() {
                         {!isOutsideTelangana && <p className="text-[11px] text-green-700">✅ Free delivery to your location.</p>}
                         {isOutsideTelangana && (
                           <p className="text-[11px] text-amber-800 leading-relaxed">
-                            <strong>Delivery Information:</strong> Orders shipped from Hyderabad warehouse. Deliveries outside Telangana incur actual logistics charges payable by the customer.
+                            <strong>Delivery Information:</strong> Orders shipped from Hyderabad. Deliveries outside Telangana incur actual logistics charges payable by the customer.
                           </p>
                         )}
                       </div>
@@ -682,7 +651,7 @@ export default function CartClient() {
                             {!isOutsideTelangana && <p className="text-[11px] text-green-700 font-medium">✅ Free delivery to {manualState}.</p>}
                             {isOutsideTelangana && (
                               <p className="text-[11px] text-amber-800 leading-relaxed">
-                                <strong>Delivery Information:</strong> Deliveries outside Telangana incur actual logistics charges payable by the customer.
+                                <strong>Delivery Information:</strong> Deliveries outside Telangana incur actual logistics charges payable by customer.
                               </p>
                             )}
                           </div>
@@ -728,29 +697,31 @@ export default function CartClient() {
               {/* ── Payment Action Buttons ── */}
               <div className="border-t border-gray-100 pt-4 space-y-3">
 
+                {/* Pay Now — Razorpay */}
                 {paymentTab === 'online' && (
                   <>
-                    <PhonePeButton
+                    <RazorpayButton
                       amount={totalOnline}
-                      customerName={customerName || undefined}
+                      customerName={customerName   || undefined}
                       customerPhone={customerPhone ? `+91${customerPhone}` : undefined}
-                      customerEmail={customerEmail || undefined}
+                      customerEmail={customerEmail  || undefined}
+                      customerAddress={fullAddress  || undefined}
                       items={activeItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
-                      label={`Pay ${inr(totalOnline)} via PhonePe`}
+                      label={`Pay ${inr(totalOnline)} — UPI / Card / Net Banking`}
                       onBeforePay={validateForm}
                     />
-                    <div className="flex items-center gap-2 p-3 bg-purple-50 border border-purple-100 rounded-xl">
-                      <Icon icon="ph:seal-check-fill" width={15} className="text-purple-600 flex-shrink-0" />
-                      <p className="text-xs text-purple-700 font-medium">Secured by PhonePe · UPI · Cards · Net Banking</p>
+                    <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+                      <Icon icon="ph:seal-check-fill" width={15} className="text-[#072654] flex-shrink-0" />
+                      <p className="text-xs text-gray-600 font-medium">Secured by Razorpay · UPI · Cards · Net Banking · Wallets</p>
                     </div>
                   </>
                 )}
 
+                {/* EMI — Razorpay */}
                 {paymentTab === 'emi' && (
                   <>
-                    {/* EMI summary box — shows what PhonePe charges + interest info */}
                     <div className="bg-blue-600 rounded-xl p-3 text-center">
-                      <p className="text-white text-xs font-bold mb-0.5">Amount charged on PhonePe</p>
+                      <p className="text-white text-xs font-bold mb-0.5">Amount charged via Razorpay</p>
                       <p className="text-yellow-300 text-lg font-black">{inr(totalEmi)}</p>
                       {emiInterest > 0 && (
                         <p className="text-blue-200 text-[10px] mt-0.5">
@@ -758,26 +729,27 @@ export default function CartClient() {
                         </p>
                       )}
                       <p className="text-blue-100 text-[11px] mt-1">
-                        Then select EMI → {inr(emiMonthly)}/mo × {selectedEmi.months} months
+                        Select EMI inside Razorpay → {inr(emiMonthly)}/mo × {selectedEmi.months} months
                       </p>
                     </div>
 
-                    <PhonePeButton
+                    <RazorpayButton
                       amount={totalEmi}
-                      customerName={customerName || undefined}
+                      customerName={customerName   || undefined}
                       customerPhone={customerPhone ? `+91${customerPhone}` : undefined}
-                      customerEmail={customerEmail || undefined}
+                      customerEmail={customerEmail  || undefined}
+                      customerAddress={fullAddress  || undefined}
                       items={activeItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
-                      label={`Pay ${inr(totalEmi)} via EMI on PhonePe`}
+                      label={`Pay ${inr(totalEmi)} via EMI — SBI / HDFC / Bajaj`}
                       onBeforePay={validateForm}
                     />
 
                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
                       <p className="text-[10px] text-gray-500 font-semibold mb-1.5">EMI available via:</p>
                       <div className="grid grid-cols-3 gap-1.5">
-                        {['Credit Card EMI', 'Debit Card EMI', 'Bajaj Finserv'].map(p => (
+                        {['SBI Card EMI', 'HDFC Card EMI', 'Bajaj Finserv', 'Axis Bank', 'ICICI Bank', 'Kotak Bank'].map(p => (
                           <div key={p} className="text-center py-1.5 px-1 bg-white border border-gray-200 rounded-lg">
-                            <p className="text-[10px] text-gray-600 font-medium leading-tight">{p}</p>
+                            <p className="text-[9px] text-gray-600 font-medium leading-tight">{p}</p>
                           </div>
                         ))}
                       </div>
@@ -785,6 +757,7 @@ export default function CartClient() {
                   </>
                 )}
 
+                {/* COD — WhatsApp */}
                 {paymentTab === 'cod' && (
                   <>
                     <button onClick={handleCodCheckout}
