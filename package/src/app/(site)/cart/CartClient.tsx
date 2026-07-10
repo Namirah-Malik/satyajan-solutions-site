@@ -16,11 +16,11 @@ function inr(n: number) {
 }
 
 const EMI_PLANS = [
-  { months: 3,  label: '3 months',  rate: 0,  tag: 'No Cost' },
-  { months: 6,  label: '6 months',  rate: 0,  tag: 'No Cost' },
-  { months: 9,  label: '9 months',  rate: 12, tag: '' },
-  { months: 12, label: '12 months', rate: 12, tag: 'Popular' },
-  { months: 18, label: '18 months', rate: 14, tag: '' },
+  { months: 3,  label: '3 months',  rate: 15, tag: '' },
+  { months: 6,  label: '6 months',  rate: 15, tag: '' },
+  { months: 9,  label: '9 months',  rate: 15, tag: '' },
+  { months: 12, label: '12 months', rate: 15, tag: 'Popular' },
+  { months: 18, label: '18 months', rate: 15, tag: '' },
   { months: 24, label: '24 months', rate: 15, tag: '' },
 ];
 
@@ -150,8 +150,8 @@ export default function CartClient() {
   const totalOnline     = baseTotal;
   const totalEmi        = baseTotal;
   const emiMonthly      = calcIndicativeEmi(totalEmi, selectedEmi.rate, selectedEmi.months);
-  const emiInterest     = selectedEmi.rate === 0 ? 0 : (emiMonthly * selectedEmi.months) - totalEmi;
-  const emiTotalPayable = selectedEmi.rate === 0 ? totalEmi : emiMonthly * selectedEmi.months;
+  const emiInterest     = (emiMonthly * selectedEmi.months) - totalEmi;
+  const emiTotalPayable = emiMonthly * selectedEmi.months;
   const totalCod        = baseTotal;
   const totalAmount     =
     paymentTab === 'online' ? totalOnline :
@@ -359,7 +359,7 @@ export default function CartClient() {
                     Pay Now
                   </button>
                   <button onClick={() => setPaymentTab('emi')}
-                    className={`py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
+                    className={`py-3 px-1 rounded-xl text-[11px] font-bold transition-all duration-200 flex flex-col items-center gap-0.5 ${paymentTab === 'emi' ? 'bg-dark text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon icon="ph:calendar-check-fill" width={15} />
                     EMI
                   </button>
@@ -382,27 +382,25 @@ export default function CartClient() {
                 )}
 
                 {paymentTab === 'emi' && (
-                  <div className="mt-2.5 rounded-xl overflow-hidden border border-blue-200">
-                    <div className="bg-blue-600 px-3 py-2.5 flex items-center gap-2">
+                  <div className="mt-2.5 rounded-xl overflow-hidden border border-gray-200">
+                    <div className="bg-dark px-3 py-2.5 flex items-center gap-2">
                       <Icon icon="ph:info-fill" width={15} className="text-white flex-shrink-0" />
                       <p className="text-xs font-black text-white">How EMI works — Please read</p>
                     </div>
-                    <div className="bg-blue-50 px-3 py-3 space-y-2">
-                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                    <div className="bg-gray-50 px-3 py-3 space-y-2">
+                      <p className="text-[11px] text-gray-700 leading-relaxed">
                         Click <strong>"Pay via EMI"</strong> below → Razorpay popup opens → select <strong>"EMI"</strong> tab → choose your bank (SBI, HDFC, Axis, ICICI etc.) or Bajaj Finserv.
                       </p>
-                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                      <p className="text-[11px] text-gray-700 leading-relaxed">
                         Razorpay will show your indicative EMI:{' '}
-                        <strong className="text-blue-900">{inr(emiMonthly)}/month × {selectedEmi.months} months</strong>.
+                        <strong className="text-dark">{inr(emiMonthly)}/month × {selectedEmi.months} months</strong>.
                       </p>
-                      {emiInterest > 0 && (
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg px-2.5 py-2">
-                          <p className="text-[10px] text-orange-800 font-semibold leading-relaxed">
-                            ℹ️ For {selectedEmi.months}-month plan at {selectedEmi.rate}% p.a., bank adds {inr(emiInterest)} interest.
-                            Total repaid = {inr(emiTotalPayable)} over {selectedEmi.months} months.
-                          </p>
-                        </div>
-                      )}
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg px-2.5 py-2">
+                        <p className="text-[10px] text-orange-800 font-semibold leading-relaxed">
+                          ℹ️ {selectedEmi.months}-month plan @ {selectedEmi.rate}% p.a. — bank adds {inr(emiInterest)} interest.
+                          Total repaid = {inr(emiTotalPayable)} over {selectedEmi.months} months.
+                        </p>
+                      </div>
                       <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2">
                         <p className="text-[10px] text-amber-800 font-semibold leading-relaxed">
                           ⚠️ Razorpay will charge the full amount {inr(totalEmi)} — EMI conversion is done by your bank on their side.
@@ -425,34 +423,34 @@ export default function CartClient() {
 
               {/* ── EMI Plan Selector ── */}
               {paymentTab === 'emi' && (
-                <div className="border border-blue-100 rounded-2xl p-4 bg-blue-50/40">
+                <div className="border border-gray-200 rounded-2xl p-4 bg-gray-50/60">
                   <p className="text-xs font-bold text-gray-700 mb-3">Select your EMI plan</p>
                   <div className="grid grid-cols-2 gap-2">
                     {EMI_PLANS.map((plan) => {
                       const monthly      = calcIndicativeEmi(totalEmi, plan.rate, plan.months);
-                      const planTotal    = plan.rate === 0 ? totalEmi : monthly * plan.months;
-                      const planInterest = plan.rate === 0 ? 0 : planTotal - totalEmi;
+                      const planTotal    = monthly * plan.months;
+                      const planInterest = planTotal - totalEmi;
                       const isSelected   = selectedEmi.months === plan.months;
                       return (
                         <button key={plan.months} onClick={() => setSelectedEmi(plan)}
-                          className={`relative rounded-xl p-2.5 text-left border-2 transition-all ${isSelected ? 'border-blue-500 bg-blue-600 text-white' : 'border-gray-200 bg-white hover:border-blue-300'}`}>
+                          className={`relative rounded-xl p-2.5 text-left border-2 transition-all ${isSelected ? 'border-primary bg-dark text-white' : 'border-gray-200 bg-white hover:border-primary/40'}`}>
                           {plan.tag && (
-                            <span className={`absolute -top-2 -right-1 text-[9px] font-black px-1.5 py-0.5 rounded-full ${plan.tag === 'No Cost' ? 'bg-green-500 text-white' : 'bg-orange-400 text-white'}`}>
+                            <span className="absolute -top-2 -right-1 text-[9px] font-black px-1.5 py-0.5 rounded-full bg-orange-400 text-white">
                               {plan.tag}
                             </span>
                           )}
                           <p className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-gray-800'}`}>{plan.label}</p>
-                          <p className={`text-base font-black ${isSelected ? 'text-yellow-300' : 'text-blue-600'}`}>
-                            {inr(monthly)}<span className={`text-[10px] font-normal ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>/mo</span>
+                          <p className={`text-base font-black ${isSelected ? 'text-primary' : 'text-dark'}`}>
+                            {inr(monthly)}<span className={`text-[10px] font-normal ${isSelected ? 'text-primary/60' : 'text-gray-400'}`}>/mo</span>
                           </p>
-                          <p className={`text-[10px] ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>
-                            {plan.rate === 0 ? 'Zero interest' : `${plan.rate}% p.a. · +${inr(planInterest)}`}
+                          <p className={`text-[10px] ${isSelected ? 'text-primary/60' : 'text-gray-400'}`}>
+                            {`${plan.rate}% p.a. · +${inr(planInterest)}`}
                           </p>
                         </button>
                       );
                     })}
                   </div>
-                  <div className="mt-3 p-3 bg-white border border-blue-200 rounded-xl">
+                  <div className="mt-3 p-3 bg-white border border-gray-200 rounded-xl">
                     <p className="text-[11px] font-bold text-gray-800 mb-2">Steps after clicking Pay:</p>
                     <div className="space-y-1.5">
                       {[
@@ -462,7 +460,7 @@ export default function CartClient() {
                         { step: '4', text: `Bank confirms: ${inr(emiMonthly)}/mo × ${selectedEmi.months} months` },
                       ].map(s => (
                         <div key={s.step} className="flex items-start gap-2">
-                          <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">{s.step}</span>
+                          <span className="w-4 h-4 rounded-full bg-dark text-white text-[9px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">{s.step}</span>
                           <p className="text-[11px] text-gray-600 leading-snug">{s.text}</p>
                         </div>
                       ))}
@@ -492,15 +490,13 @@ export default function CartClient() {
                 {paymentTab === 'emi' && (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-blue-600 font-semibold">EMI ({selectedEmi.months} months)</span>
-                      <span className="text-blue-600 font-semibold">≈ {inr(emiMonthly)}/mo</span>
+                      <span className="text-primary font-semibold">EMI ({selectedEmi.months} months)</span>
+                      <span className="text-primary font-semibold">≈ {inr(emiMonthly)}/mo</span>
                     </div>
-                    {emiInterest > 0 && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-orange-500 text-xs font-semibold">Interest ({selectedEmi.rate}% p.a.)</span>
-                        <span className="text-orange-500 text-xs font-semibold">+ {inr(emiInterest)} <span className="text-gray-400 font-normal">(added by bank)</span></span>
-                      </div>
-                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-orange-500 text-xs font-semibold">Interest ({selectedEmi.rate}% p.a.)</span>
+                      <span className="text-orange-500 text-xs font-semibold">+ {inr(emiInterest)} <span className="text-gray-400 font-normal">(added by bank)</span></span>
+                    </div>
                   </>
                 )}
                 <div className="flex justify-between">
@@ -518,16 +514,12 @@ export default function CartClient() {
                   </div>
                   {paymentTab === 'emi' && (
                     <div className="mt-1 text-right space-y-0.5">
-                      <p className="text-[11px] text-blue-500 leading-snug">
+                      <p className="text-[11px] text-gray-500 leading-snug">
                         {inr(emiMonthly)}/mo × {selectedEmi.months} months
                       </p>
-                      {emiInterest > 0 ? (
-                        <p className="text-[10px] text-orange-500 leading-snug">
-                          Total repaid to bank: {inr(emiTotalPayable)} (incl. {inr(emiInterest)} interest)
-                        </p>
-                      ) : (
-                        <p className="text-[10px] text-green-600 leading-snug font-semibold">✅ No-cost EMI — zero interest</p>
-                      )}
+                      <p className="text-[10px] text-orange-500 leading-snug">
+                        Total repaid to bank: {inr(emiTotalPayable)} (incl. {inr(emiInterest)} interest)
+                      </p>
                     </div>
                   )}
                 </div>
@@ -720,15 +712,13 @@ export default function CartClient() {
                 {/* EMI — Razorpay */}
                 {paymentTab === 'emi' && (
                   <>
-                    <div className="bg-blue-600 rounded-xl p-3 text-center">
+                    <div className="bg-dark rounded-xl p-3 text-center">
                       <p className="text-white text-xs font-bold mb-0.5">Amount charged via Razorpay</p>
                       <p className="text-yellow-300 text-lg font-black">{inr(totalEmi)}</p>
-                      {emiInterest > 0 && (
-                        <p className="text-blue-200 text-[10px] mt-0.5">
-                          Bank adds {inr(emiInterest)} interest · Total repaid: {inr(emiTotalPayable)}
-                        </p>
-                      )}
-                      <p className="text-blue-100 text-[11px] mt-1">
+                      <p className="text-gray-400 text-[10px] mt-0.5">
+                        Bank adds {inr(emiInterest)} interest · Total repaid: {inr(emiTotalPayable)}
+                      </p>
+                      <p className="text-gray-300 text-[11px] mt-1">
                         Select EMI inside Razorpay → {inr(emiMonthly)}/mo × {selectedEmi.months} months
                       </p>
                     </div>

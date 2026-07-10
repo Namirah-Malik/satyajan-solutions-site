@@ -98,55 +98,81 @@ const GlassCard = ({ children, className = '' }: { children: React.ReactNode; cl
 
 // ── Promo Banner ──────────────────────────────────────────────────────────────
 function PromoBanner() {
+  const benefits = [
+    {
+      icon:  'ph:truck-fill',
+      text:  'Free Delivery & Installation',
+      sub:   'Across Hyderabad city',
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-primary',
+      border: 'border-emerald-100',
+    },
+    {
+      icon:  'ph:credit-card-fill',
+      text:  'All Major Cards Accepted',
+      sub:   'Visa · Mastercard · RuPay · Amex',
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      border: 'border-blue-100',
+    },
+    {
+      icon:  'ph:calendar-check-fill',
+      text:  'Easy EMI Options',
+      sub:   'SBI · HDFC · Bajaj Finserv & more',
+      iconBg: 'bg-violet-50',
+      iconColor: 'text-violet-600',
+      border: 'border-violet-100',
+    },
+    {
+      icon:  'ph:arrows-clockwise-fill',
+      text:  'Special Exchange Discounts',
+      sub:   'On your old battery / inverter',
+      iconBg: 'bg-orange-50',
+      iconColor: 'text-orange-500',
+      border: 'border-orange-100',
+    },
+  ];
+
   return (
-    <div className="w-full bg-blue-50 border border-blue-100 rounded-2xl px-4 sm:px-6 py-3 mb-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-0 justify-between">
-      {/* Left: discount badge + text */}
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <div className="relative flex-shrink-0">
-          <div className="bg-blue-900 text-white font-black text-center rounded-lg px-2.5 py-1.5 leading-none shadow-md">
-            <div className="text-[18px] sm:text-[22px] leading-none">5%</div>
-            <div className="text-[8px] sm:text-[9px] font-extrabold tracking-widest uppercase leading-none mt-0.5">OFF</div>
-          </div>
-          {/* corner ribbon effect */}
-          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-400 rotate-45 rounded-sm" />
-        </div>
-        <div>
-          <p className="text-sm sm:text-base font-extrabold text-blue-900 leading-tight">
-            5% DISCOUNT{' '}
-            <span className="font-medium text-blue-700 text-xs sm:text-sm">on online payment</span>
+    <div className="w-full bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden shadow-sm">
+
+      {/* Top headline */}
+      <div className="px-4 sm:px-6 py-2.5 border-b border-gray-100 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Icon icon="ph:lightning-fill" width={14} className="text-primary flex-shrink-0" />
+          <p className="text-dark font-black text-xs sm:text-sm tracking-tight">
+            Powering Hyderabad with Unmatched Benefits!
           </p>
         </div>
+        <a href="https://satyajan.com" target="_blank" rel="noopener noreferrer"
+          className="hidden sm:flex items-center gap-1 text-[10px] text-gray-400 hover:text-primary font-semibold transition-colors whitespace-nowrap flex-shrink-0">
+          satyajan.com <Icon icon="ph:arrow-up-right-bold" width={9} />
+        </a>
       </div>
 
-      {/* Divider */}
-      <div className="hidden sm:block w-px h-10 bg-blue-200 mx-6 flex-shrink-0" />
-      <div className="sm:hidden w-full h-px bg-blue-200" />
+      {/* 4 benefit cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-gray-100">
+        {benefits.map((b, i) => (
+          <div key={i} className="flex items-center gap-3 px-3 sm:px-4 py-3 hover:bg-gray-50 transition-colors">
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl ${b.iconBg} border ${b.border} flex items-center justify-center flex-shrink-0`}>
+              <Icon icon={b.icon} width={16} className={b.iconColor} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-dark text-[11px] sm:text-xs font-bold leading-snug">{b.text}</p>
+              <p className="text-gray-400 text-[9px] sm:text-[10px] font-medium leading-snug mt-0.5">{b.sub}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {/* Right: payment methods + label */}
-      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-        <p className="text-[10px] sm:text-xs text-blue-500 font-medium hidden sm:block">Pay full amount via</p>
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* UPI */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-blue-100 rounded-lg shadow-sm">
-            <Icon icon="ph:lightning-fill" width={14} className="text-blue-600" />
-            <span className="text-[11px] sm:text-xs font-bold text-blue-800">UPI</span>
-          </div>
-          {/* Debit/Credit Card */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-blue-100 rounded-lg shadow-sm">
-            <Icon icon="ph:credit-card-fill" width={14} className="text-blue-600" />
-            <span className="text-[11px] sm:text-xs font-bold text-blue-800 hidden sm:inline">Debit/Credit Card</span>
-            <span className="text-[11px] sm:text-xs font-bold text-blue-800 sm:hidden">Card</span>
-          </div>
-          {/* Net Banking */}
-          <div className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-blue-100 rounded-lg shadow-sm">
-            <Icon icon="ph:bank-fill" width={14} className="text-blue-600" />
-            <span className="text-[11px] sm:text-xs font-bold text-blue-800 hidden sm:inline">Net Banking</span>
-            <span className="text-[11px] sm:text-xs font-bold text-blue-800 sm:hidden">Bank</span>
-          </div>
-        </div>
-        <p className="text-[10px] sm:text-xs font-bold text-blue-600 hidden sm:block">
-          Discount applied<br />instantly.
+      {/* Bottom green strip */}
+      <div className="bg-primary px-4 sm:px-6 py-1.5 flex items-center justify-center gap-2">
+        <Icon icon="ph:star-four-fill" width={10} className="text-white/60" />
+        <p className="text-white text-[10px] sm:text-[11px] font-semibold">
+          Upgrade your power backup seamlessly at{' '}
+          <span className="font-black underline underline-offset-2">satyajan.com</span>
         </p>
+        <Icon icon="ph:star-four-fill" width={10} className="text-white/60" />
       </div>
     </div>
   );
