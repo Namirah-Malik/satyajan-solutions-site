@@ -15,8 +15,16 @@ const CACHE_TTL = 5 * 60 * 1000;
 type SortOption = 'bestseller' | 'price-asc' | 'price-desc';
 
 const BESTSELLER_PATTERNS: string[] = [
-  'i lithium 1500', 'heavy duty 1550 advanced', 'super power ups 900',
-  'super power ups 1100', 'luxe wifi.*1400', 'msmf 7.2',
+  'vtурbo new 2350',
+  'vturbo new 2350',
+  'vturbo new 1400.*lithium',
+  'vturbo new 1550',
+  'i lithium 1500',
+  'heavy duty 1550 advanced',
+  'super power ups 900',
+  'super power ups 1100',
+  'luxe wifi.*1400',
+  'msmf 7.2',
   'super power 1100 advanced digital',
 ];
 
@@ -118,7 +126,7 @@ function PromoBanner() {
     {
       icon:  'ph:calendar-check-fill',
       text:  'Easy EMI Options',
-      sub:   'SBI · HDFC · Bajaj Finserv & more',
+      sub:   'Bajaj Finserv · Axis · ICICI & more',
       iconBg: 'bg-violet-50',
       iconColor: 'text-violet-600',
       border: 'border-violet-100',

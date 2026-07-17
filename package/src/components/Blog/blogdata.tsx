@@ -942,4 +942,54 @@ export const existingBlogs = [
     metaDescription: 'Learn how online UPS double-conversion technology protects server rooms with zero transfer time and pure sine wave output.',
     metaKeywords: 'online UPS server room, double conversion UPS, server protection UPS, power failure protection',
   },
+  // ─────────────────────────────────────────────────────────────────────────────
+// ADD THESE 3 ENTRIES to the existingBlogs array in blogdata.ts
+// Place them at the END of the array, before the closing ];
+// ─────────────────────────────────────────────────────────────────────────────
+
+  {
+    id: 'lithium-battery-inverter-buying-guide',
+    slug: 'lithium-battery-inverter-buying-guide',
+    title: 'Planning to Buy a Lithium Battery and Inverter? Read This First',
+    category: 'batteries',
+    excerpt: 'Thinking of upgrading to a lithium battery and inverter? Discover what makes lithium-ion technology the smart choice — faster charging, longer life, zero maintenance, and better compatibility with modern homes.',
+    featuredImage: 'https://cms.microtek.in/upload/files/Planning-to-Buy-a-Lithium-Battery-and-Inverter-Read-This-First-1781343720933.jpeg',
+    author: 'Satyajan Energy Solutions',
+    publishedDate: '2026-03-02',
+    readTime: '6 min read',
+    metaTitle: 'Planning to Buy a Lithium Battery and Inverter? Read This First | Satyajan',
+    metaDescription: 'Planning to buy a lithium battery and inverter? Discover the benefits of LiFePO4 technology, pure sine wave inverters, fast charging, and reliable power backup for modern homes.',
+    metaKeywords: 'lithium battery inverter, lithium ion battery home, buy lithium battery hyderabad, microtek lithium battery, LiFePO4 inverter battery',
+  },
+
+  {
+    id: '5-things-check-before-buying-lithium-battery',
+    slug: '5-things-check-before-buying-lithium-battery',
+    title: '5 Things to Check Before Buying a Lithium Battery',
+    category: 'batteries',
+    excerpt: 'Not all lithium batteries are the same. Before you buy, check these 5 essential factors — battery technology, cycle life, charging speed, capacity, and inverter compatibility — to get the best value and performance.',
+    featuredImage: 'https://cms.microtek.in/upload/files/5-Things-to-Check-Before-Buying-a-Lithium-Battery--1780976356056.jpeg',
+    author: 'Satyajan Energy Solutions',
+    publishedDate: '2026-03-09',
+    readTime: '5 min read',
+    metaTitle: '5 Things to Check Before Buying a Lithium Battery | Satyajan Energy',
+    metaDescription: 'Learn the 5 essential things to check before buying a lithium battery — LiFePO4 technology, safety features, charging speed, battery lifespan, capacity, and inverter compatibility.',
+    metaKeywords: 'lithium battery buying guide, LiFePO4 battery check, best lithium battery india, inverter battery comparison, microtek lithium battery',
+  },
+
+  {
+    id: 'why-luxe-home-ups-best-for-home',
+    slug: 'why-luxe-home-ups-best-for-home',
+    title: 'Why LUXE Home UPS is Best for Your Home?',
+    category: 'inverters',
+    excerpt: 'The Microtek LUXE Home UPS combines pure sine wave technology, a built-in microcomputer, 5-stage intelligent battery charging, and premium design — making it one of the most advanced and reliable inverters for Indian homes.',
+    featuredImage: 'https://cms.microtek.in/upload/files/Microtek-Luxe-high-res-blog-banner-1721823591085.jpg',
+    author: 'Satyajan Energy Solutions',
+    publishedDate: '2022-12-16',
+    readTime: '4 min read',
+    metaTitle: 'Why LUXE Home UPS is Best for Your Home? | Microtek Inverter | Satyajan',
+    metaDescription: 'Discover why the Microtek LUXE Home UPS is the best inverter for your home. Pure sine wave, microcomputer control, LCD display, and 5-stage battery charging explained.',
+    metaKeywords: 'Microtek LUXE inverter, LUXE home UPS, best inverter for home, pure sine wave inverter, microtek inverter hyderabad',
+  },
 ];
+

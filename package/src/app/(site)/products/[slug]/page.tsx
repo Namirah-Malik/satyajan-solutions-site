@@ -1,20 +1,23 @@
-
 import type { Metadata } from 'next';
 import { notFound }      from 'next/navigation';
 import ProductDetailsClient from '@/components/ProductDetailsClient';
 import { mockProducts }  from '@/mock/products';
-import prisma            from '@/lib/prisma';   // ← CHANGED: singleton import
+import prisma            from '@/lib/prisma';
 
 export const revalidate = 3600;
 
+// ── FIX 1: Removed take:200 limit — fetches ALL product slugs ─────────────────
 export async function generateStaticParams() {
   try {
     const products = await prisma.product.findMany({
-      select: { slug: true, id: true },
-      take: 200,
+      select: { slug: true, id: true, name: true },
+      // NO take limit — gets all products
     });
     return products
-      .map((p: any) => ({ slug: p.slug || p.id }))
+      .map((p: any) => ({
+        // FIX: if slug is empty, generate from name so card always has a valid href
+        slug: p.slug || generateSlug(p.name) || p.id
+      }))
       .filter((p: any) => Boolean(p.slug));
   } catch {
     return [];
@@ -26,12 +29,13 @@ function validateSKU(sku: any): string | null {
   const s = sku.trim();
   if (s.length < 3 || s.length > 50) return null;
   if (!/^[A-Za-z0-9][A-Za-z0-9\-_\/\.]*$/.test(s)) return null;
-  if (/^SAT-[A-Z]{4,8}$/i.test(s)) return null; // reject our old fake pattern
-  if ((s.match(/-/g) || []).length > 4) return null; // reject slugs used as SKUs
+  if (/^SAT-[A-Z]{4,8}$/i.test(s)) return null;
+  if ((s.match(/-/g) || []).length > 4) return null;
   return s;
 }
+
 function generateSlug(name: string): string {
-  
+  if (!name) return '';
   return name
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
@@ -40,15 +44,37 @@ function generateSlug(name: string): string {
     .trim();
 }
 
-// ── MongoDB ObjectID validator ────────────────────────────────────────────────
 function isMongoId(str: string): boolean {
   return /^[a-f0-9]{24}$/i.test(str);
 }
 
-// ── Fetch by slug OR by id ────────────────────────────────────────────────────
-// CHANGED: uses prisma singleton directly — no getPrisma() wrapper needed
+// ── FIX 2: fetchProduct now also tries slug generated from name ───────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// PASTE THIS to replace the fetchProduct function in your page.tsx
+// This fixes the TypeScript error: "stockStatus" missing from select type
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function fetchProduct(slug: string): Promise<any | null> {
   try {
+    // All fields explicitly selected — fixes TS type mismatch error
+    const selectFields = {
+      id:               true,
+      name:             true,
+      slug:             true,
+      price:            true,
+      rate:             true,
+      images:           true,
+      features:         true,
+      salient_features: true,
+      specifications:   true,
+      description:      true,
+      category:         true,
+      SKU:              true,
+      tags:             true,
+      video:            true,
+      stockStatus:      true,  // ← THIS was missing, causing the TS error
+    };
+
     const orConditions: any[] = [
       { slug },
       { slug: { contains: slug } },
@@ -56,9 +82,23 @@ async function fetchProduct(slug: string): Promise<any | null> {
     if (isMongoId(slug)) {
       orConditions.push({ id: slug });
     }
-    const product = await prisma.product.findFirst({
-      where: { OR: orConditions },
+
+    let product = await prisma.product.findFirst({
+      where:  { OR: orConditions },
+      select: selectFields,
     });
+
+    // If not found by slug field, try matching by generated slug from name
+    if (!product) {
+      const allProducts = await prisma.product.findMany({
+        select: selectFields,
+      });
+      product = allProducts.find((p: any) => {
+        const generated = generateSlug(p.name || '');
+        return generated === slug || p.id === slug;
+      }) || null;
+    }
+
     if (product) return product;
   } catch (e) {
     console.error('DB error:', e);
@@ -75,7 +115,6 @@ async function fetchProduct(slug: string): Promise<any | null> {
   return null;
 }
 
-// ── Image URL extractor ───────────────────────────────────────────────────────
 function extractDirectImageUrl(img: any): string {
   if (!img) return '';
   let src =
@@ -118,7 +157,6 @@ function cleanName(name: string): string {
     .trim();
 }
 
-// ── Auto-generate tags from product name + category ───────────────────────────
 function generateTags(product: any, name: string): string[] {
   const tags: string[] = [];
   const nameLower = name.toLowerCase();
@@ -187,6 +225,12 @@ function generateTags(product: any, name: string): string[] {
     tags.push('inverter battery combo', 'inverter combo', 'power backup combo');
   }
 
+  // FIX: also handle "lithium products" category badge from DB
+  if (category === 'lithium products' || nameLower.includes('lithium')) {
+    tags.push('lithium battery combo', 'lithium ups combo', 'jumbo ups lithium',
+              'lifepo4 combo', 'lithium inverter combo');
+  }
+
   const vaMatch = nameLower.match(/(\d+)\s*va/i);
   if (vaMatch) tags.push(`${vaMatch[1]}va inverter`);
 
@@ -195,7 +239,6 @@ function generateTags(product: any, name: string): string[] {
   return [...new Set(tags)].slice(0, 14);
 }
 
-// ── Build FAQs ────────────────────────────────────────────────────────────────
 function buildFAQs(product: any, name: string, price: number) {
   const faqs = [
     {
@@ -236,7 +279,6 @@ function buildFAQs(product: any, name: string, price: number) {
   return faqs;
 }
 
-// ── generateMetadata ──────────────────────────────────────────────────────────
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
@@ -299,7 +341,6 @@ export async function generateMetadata(
   };
 }
 
-// ── Page component ────────────────────────────────────────────────────────────
 export default async function Details(
   { params }: { params: Promise<{ slug: string }> }
 ) {
@@ -346,8 +387,7 @@ export default async function Details(
     ? `₹${price.toLocaleString('en-IN')}`
     : 'Price on request';
 
-  // ── Structured Data ───────────────────────────────────────────────────────
-  const productSchema = {
+  const productSchema: any = {
     '@context': 'https://schema.org',
     '@type':    'Product',
     name,
@@ -374,6 +414,7 @@ export default async function Details(
       },
     },
   };
+
   const validSKU = validateSKU(dbProduct.SKU || dbProduct.sku);
   if (validSKU) {
     productSchema.sku = validSKU;

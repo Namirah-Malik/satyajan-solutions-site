@@ -16,10 +16,10 @@ function inr(n: number) {
 }
 
 const EMI_PLANS = [
-  { months: 3,  label: '3 months',  rate: 15, tag: '' },
-  { months: 6,  label: '6 months',  rate: 15, tag: '' },
-  { months: 9,  label: '9 months',  rate: 15, tag: '' },
-  { months: 12, label: '12 months', rate: 15, tag: 'Popular' },
+  { months: 3,  label: '3 months',  rate: 13, tag: '' },
+  { months: 6,  label: '6 months',  rate: 13, tag: '' },
+  { months: 9,  label: '9 months',  rate: 14, tag: '' },
+  { months: 12, label: '12 months', rate: 14, tag: 'Popular' },
   { months: 18, label: '18 months', rate: 15, tag: '' },
   { months: 24, label: '24 months', rate: 15, tag: '' },
 ];
@@ -389,7 +389,7 @@ export default function CartClient() {
                     </div>
                     <div className="bg-gray-50 px-3 py-3 space-y-2">
                       <p className="text-[11px] text-gray-700 leading-relaxed">
-                        Click <strong>"Pay via EMI"</strong> below → Razorpay popup opens → select <strong>"EMI"</strong> tab → choose your bank (SBI, HDFC, Axis, ICICI etc.) or Bajaj Finserv.
+                        Click <strong>"Pay via EMI"</strong> below → Razorpay popup opens → select <strong>"EMI"</strong> tab → choose your bank card (Axis, ICICI, Kotak, etc.) or Bajaj Finserv.
                       </p>
                       <p className="text-[11px] text-gray-700 leading-relaxed">
                         Razorpay will show your indicative EMI:{' '}
@@ -455,7 +455,7 @@ export default function CartClient() {
                     <div className="space-y-1.5">
                       {[
                         { step: '1', text: `Razorpay popup opens — click "EMI" tab` },
-                        { step: '2', text: 'Select your bank — SBI, HDFC, Axis, ICICI, etc.' },
+                        { step: '2', text: 'Select your bank card — Axis, ICICI, Kotak, or Bajaj Finserv' },
                         { step: '3', text: 'Confirm EMI plan & enter card/OTP' },
                         { step: '4', text: `Bank confirms: ${inr(emiMonthly)}/mo × ${selectedEmi.months} months` },
                       ].map(s => (
@@ -730,14 +730,14 @@ export default function CartClient() {
                       customerEmail={customerEmail  || undefined}
                       customerAddress={fullAddress  || undefined}
                       items={activeItems.map(i => ({ name: i.name, price: i.price, quantity: i.quantity }))}
-                      label={`Pay ${inr(totalEmi)} via EMI — SBI / HDFC / Bajaj`}
+                      label={`Pay ${inr(totalEmi)} via EMI — Axis / ICICI / Bajaj Finserv`}
                       onBeforePay={validateForm}
                     />
 
                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
                       <p className="text-[10px] text-gray-500 font-semibold mb-1.5">EMI available via:</p>
                       <div className="grid grid-cols-3 gap-1.5">
-                        {['SBI Card EMI', 'HDFC Card EMI', 'Bajaj Finserv', 'Axis Bank', 'ICICI Bank', 'Kotak Bank'].map(p => (
+                        {['Bajaj Finserv', 'Axis Bank EMI', 'ICICI Bank EMI', 'Kotak Bank EMI', 'Indusind Bank', 'RBL Bank'].map(p => (
                           <div key={p} className="text-center py-1.5 px-1 bg-white border border-gray-200 rounded-lg">
                             <p className="text-[9px] text-gray-600 font-medium leading-tight">{p}</p>
                           </div>

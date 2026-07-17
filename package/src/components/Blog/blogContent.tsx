@@ -2826,4 +2826,373 @@ export const blogDetailsContent = [
 </div>
   `,
 },
+// ─────────────────────────────────────────────────────────────────────────────
+// ADD THESE 3 ENTRIES to the blogDetailsContent array in blogContent.ts
+// Place them at the END of the array, before the closing ];
+// ─────────────────────────────────────────────────────────────────────────────
+
+  {
+    id: 'lithium-battery-inverter-buying-guide',
+    title: 'Planning to Buy a Lithium Battery and Inverter? Read This First',
+    content: `
+<p class="lead">Today's homes rely on uninterrupted power more than ever. From remote work and online learning to entertainment and smart appliances, even a short outage can disrupt the rhythm of daily life. That is why homeowners are increasingly choosing lithium battery and inverter combinations — designed for faster charging, cleaner performance, and greater convenience than older backup systems.</p>
+
+<h2>What Makes a Lithium Battery Different</h2>
+
+<p>A lithium-ion battery is a modern energy storage solution built for reliable backup and long-term performance. Compared with conventional battery options, it charges faster, lasts longer, and requires far less maintenance.</p>
+
+<p>It is also compact and lightweight, which makes it easier to install in apartments, modular homes, and spaces where every inch matters. For households that want efficiency without compromise, lithium is becoming the preferred choice.</p>
+
+<h2>Why Homeowners Are Switching to Lithium</h2>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li><strong>Faster charging</strong> — your backup is ready sooner after a power cut</li>
+  <li><strong>Longer life</strong> — strong cycle performance over 8–10 years</li>
+  <li><strong>Maintenance-free</strong> — no water topping or routine battery upkeep</li>
+  <li><strong>Compact design</strong> — ideal for space-conscious homes and apartments</li>
+  <li><strong>Stable power delivery</strong> — helps protect connected appliances</li>
+</ul>
+
+<h2>Which Inverter to Choose for a Lithium Battery</h2>
+
+<p>A great battery needs the right inverter to perform at its best. For lithium systems, compatibility, charging efficiency, and output quality are essential.</p>
+
+<p>Pure sine wave inverters are a strong match because they deliver stable, clean power that supports sensitive electronics and improves overall backup quality. They are the right fit for:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li>LED TVs</li>
+  <li>Computers and laptops</li>
+  <li>Wi-Fi routers</li>
+  <li>Refrigerators</li>
+  <li>Smart home devices</li>
+</ul>
+
+<p>A pure sine wave inverter also helps ensure the battery charges efficiently and runs smoothly over time.</p>
+
+<h2>Features Worth Checking Before You Buy</h2>
+
+<h3>Battery Management System (BMS)</h3>
+<p>A strong lithium battery should come with a BMS. This protects against overcharging, deep discharge, short circuits, and overheating — keeping your system safe and extending battery life significantly.</p>
+
+<h3>Fast Charging Support</h3>
+<p>Fast charging is one of the biggest advantages of lithium technology. This is ideal for homes with frequent power outages, where quick recharging between cuts makes a real difference.</p>
+
+<h3>Safety Protection</h3>
+<p>A premium backup solution should protect both your battery and your appliances. Look for overload protection, short circuit protection, and thermal management.</p>
+
+<h3>Space-Efficient Design</h3>
+<p>Lithium batteries take up less room and integrate more neatly into modern homes than bulkier alternatives — an important factor for apartments and compact living spaces.</p>
+
+<h2>Smart Buying Considerations</h2>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li><strong>Power requirement:</strong> Add up all appliances you want to run during an outage</li>
+  <li><strong>Battery capacity:</strong> Match capacity to the backup duration you need</li>
+  <li><strong>Charging speed:</strong> Check inverter compatibility for efficient charging</li>
+  <li><strong>Safety features:</strong> Prioritise BMS, thermal protection, and overload safeguards</li>
+  <li><strong>Installation space:</strong> Make sure the battery can be placed safely and ventilated properly</li>
+  <li><strong>Future needs:</strong> Choose a setup that can scale with your household demand</li>
+</ul>
+
+<h2>Where It Fits Best</h2>
+
+<p>A lithium battery and inverter system is well suited for homes, apartments, home offices, work-from-home setups, entertainment systems, and smart appliances — anywhere that needs reliable backup without the maintenance hassle.</p>
+
+<div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
+  <p class="font-semibold text-blue-900">Conclusion:</p>
+  <p class="text-blue-800">If you want a modern power backup solution that feels cleaner, smarter, and easier to live with, a lithium battery and inverter combination is a compelling choice. Before you buy, compare your load, backup needs, inverter compatibility, and available space. The right combination will give you dependable backup and greater peace of mind every day.</p>
+</div>
+
+<h2>Frequently Asked Questions</h2>
+
+<p><strong>Q1. Is a lithium battery better than older battery types?</strong><br>Yes. Lithium batteries generally offer faster charging, longer life, lower maintenance, and a more compact form factor than conventional lead-acid or tubular batteries.</p>
+
+<p><strong>Q2. Can any inverter be used with a lithium battery?</strong><br>No. Lithium batteries perform best with compatible inverters designed for efficient charging and stable output. Always check inverter compatibility before purchasing.</p>
+
+<p><strong>Q3. How long does a lithium battery last?</strong><br>Lithium batteries usually deliver 3,500–6,000 charge cycles, translating to 8–10 years of service under normal home use.</p>
+
+<p><strong>Q4. Are lithium batteries safe for home use?</strong><br>Yes. Modern lithium batteries include BMS protection, overcharge safeguards, and temperature monitoring for safe indoor use.</p>
+
+<p><strong>Q5. Why is a pure sine wave inverter recommended?</strong><br>It provides clean, stable power that protects sensitive appliances and improves backup performance — essential for modern electronics.</p>
+
+<div class="bg-blue-600 text-white p-6 rounded-lg my-8">
+  <h3 class="text-xl font-bold mb-2">Ready to Upgrade to Lithium?</h3>
+  <p class="mb-4">Browse our Microtek lithium battery range or speak to our experts for a personalised recommendation based on your home's power needs.</p>
+  <div class="flex gap-3 flex-wrap">
+    <a href="/products?category=New+Lithium+Battery" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">View Lithium Batteries</a>
+    <a href="/contactus" class="border-2 border-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Get Expert Advice</a>
+  </div>
+</div>
+    `,
+  },
+
+  {
+    id: '5-things-check-before-buying-lithium-battery',
+    title: '5 Things to Check Before Buying a Lithium Battery',
+    content: `
+<p class="lead">Lithium batteries are becoming more popular in India for home inverters, solar power systems, and backup power solutions. They are more modern, efficient, and long-lasting than traditional lead-acid batteries. However, not all lithium batteries are the same. Before you buy one, there are important things you should check to ensure you get the right battery for your needs.</p>
+
+<h2>1. Battery Technology and Safety</h2>
+
+<p>First, check the battery technology itself. Not all lithium batteries use the same chemistry. For home use, <strong>Lithium Iron Phosphate (LiFePO₄)</strong> is the safest and most recommended option because:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li>It is thermally stable and highly fire-resistant</li>
+  <li>It lasts significantly longer — 3,500 to 6,000 charge cycles</li>
+  <li>It is much safer than other lithium-ion types like NMC</li>
+</ul>
+
+<p>Most modern lithium batteries also come with a <strong>Battery Management System (BMS)</strong> — a smart guardian that protects against overcharging, overheating, short circuits, and over-discharge.</p>
+
+<div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
+  <p class="font-semibold text-blue-900">Key Takeaway:</p>
+  <p class="text-blue-800">Always choose a battery with LiFePO₄ chemistry and a built-in BMS for maximum safety and longevity.</p>
+</div>
+
+<h2>2. Charging Cycles and Battery Lifespan</h2>
+
+<p>Another key factor is how long the battery will last, measured in charge cycles. One charge cycle equals one complete charge and discharge.</p>
+
+<div class="overflow-x-auto my-6">
+  <table class="min-w-full border-collapse border border-gray-300">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="border border-gray-300 px-4 py-2 text-left">Battery Type</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">Cycle Life</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">Expected Lifespan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="border border-gray-300 px-4 py-2">Tubular (Lead-Acid)</td>
+        <td class="border border-gray-300 px-4 py-2">1,000–1,500 cycles</td>
+        <td class="border border-gray-300 px-4 py-2">3–5 years</td>
+      </tr>
+      <tr class="bg-gray-50">
+        <td class="border border-gray-300 px-4 py-2">LiFePO₄ Lithium</td>
+        <td class="border border-gray-300 px-4 py-2">3,500–6,000 cycles</td>
+        <td class="border border-gray-300 px-4 py-2">8–10 years</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 my-6">
+  <p class="font-semibold text-yellow-900">Pro Tip:</p>
+  <p class="text-yellow-800">When shopping, ask for the cycle life at 80% depth of discharge (DoD). This is the industry standard for comparing battery longevity accurately.</p>
+</div>
+
+<h2>3. Charging Speed and Efficiency</h2>
+
+<p>One major advantage of lithium batteries is their rapid charging capability. Here's what to check:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li><strong>Charging speed:</strong> How fast can it recharge after a power outage?</li>
+  <li><strong>Charging efficiency:</strong> Does it waste less energy during charging?</li>
+  <li><strong>Smart charging support:</strong> Does it optimise charging to reduce energy waste over time?</li>
+</ul>
+
+<p>This matters because in areas with unreliable power, quick charging ensures your battery is ready for the next outage, even if power returns for a brief time.</p>
+
+<h2>4. Capacity and Power Output</h2>
+
+<p>Battery capacity determines how long your appliances will run during a power cut. Capacity is measured in two ways:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li><strong>kWh (kilowatt-hours):</strong> total energy storage</li>
+  <li><strong>Ah (Ampere-hours):</strong> charge capacity at a specific voltage</li>
+</ul>
+
+<p>For example, a 100Ah LiFePO₄ battery at 25.6V provides 2.56 kWh of energy — enough to power fans, lights, TV, and a router for several hours.</p>
+
+<p>Also check the <strong>continuous discharge rating</strong> and <strong>peak/surge capacity</strong> — important for appliances with high startup currents like motors and refrigerators.</p>
+
+<h2>5. Maintenance, Size, and Compatibility</h2>
+
+<h3>Low Maintenance</h3>
+<p>Lithium batteries are almost maintenance-free. Unlike lead-acid batteries, you don't need to add water regularly, perform routine servicing, or worry about corrosion or acid leakage.</p>
+
+<h3>Compact and Lightweight</h3>
+<p>Lithium batteries are 50 to 70% lighter and more compact than tubular batteries — easier to install, space-saving for apartments, and safe for indoor placement.</p>
+
+<h3>Inverter Compatibility ← Most Important Check</h3>
+<p>Not all inverters work with lithium batteries. Older inverters designed for lead-acid batteries may overcharge or undercharge your lithium battery, shorten its lifespan, or trigger error codes.</p>
+
+<div class="bg-red-50 border-l-4 border-red-500 p-4 my-6">
+  <p class="font-semibold text-red-900">⚠️ Before You Buy:</p>
+  <p class="text-red-800">Confirm your inverter supports lithium battery mode and has programmable charging parameters. If you're unsure, choose an inverter-battery combo specifically designed for lithium — like the Microtek i-Lithium series.</p>
+</div>
+
+<h2>Summary Checklist</h2>
+
+<div class="bg-gray-100 p-6 rounded-lg my-6">
+  <ul class="space-y-2">
+    <li>✅ <strong>Battery chemistry:</strong> LiFePO₄ preferred over NMC or other types</li>
+    <li>✅ <strong>BMS protection:</strong> Overcharge, short circuit, deep discharge, thermal</li>
+    <li>✅ <strong>Cycle life:</strong> Minimum 3,500 cycles at 80% DoD</li>
+    <li>✅ <strong>Charging speed:</strong> Fast charge capability and smart charging support</li>
+    <li>✅ <strong>Capacity:</strong> Matches your load and required backup duration</li>
+    <li>✅ <strong>Inverter compatibility:</strong> Verify lithium battery mode is supported</li>
+    <li>✅ <strong>Warranty:</strong> Minimum 3 years; 5 years from reputed brands</li>
+  </ul>
+</div>
+
+<h2>Frequently Asked Questions</h2>
+
+<p><strong>Q1. Are lithium batteries better than conventional batteries?</strong><br>Yes. Lithium (LiFePO₄) batteries are 50–70% lighter, charge 2–3 times faster, last 2–3 times longer (3,500+ cycles vs 1,000–1,500 for tubular), and are virtually maintenance-free.</p>
+
+<p><strong>Q2. How long does a lithium battery last?</strong><br>A quality LiFePO₄ battery provides 3,500–6,000 charge cycles — approximately 8–10 years of service under normal home use.</p>
+
+<p><strong>Q3. Do lithium batteries need maintenance?</strong><br>No. Lithium batteries are nearly maintenance-free. No water top-ups, no terminal cleaning, and no routine servicing required.</p>
+
+<p><strong>Q4. Can I use a lithium battery with any inverter?</strong><br>Not always. Check if your inverter has a lithium battery mode and supports programmable charging parameters. If not, use an inverter specifically designed for lithium batteries.</p>
+
+<div class="bg-blue-600 text-white p-6 rounded-lg my-8">
+  <h3 class="text-xl font-bold mb-2">Need Help Choosing the Right Lithium Battery?</h3>
+  <p class="mb-4">Our experts can help you find the perfect battery and inverter combination for your home's power requirements.</p>
+  <div class="flex gap-3 flex-wrap">
+    <a href="/products?category=New+Lithium+Battery" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">View Lithium Batteries</a>
+    <a href="/contactus" class="border-2 border-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Talk to an Expert</a>
+  </div>
+</div>
+    `,
+  },
+
+  {
+    id: 'why-luxe-home-ups-best-for-home',
+    title: 'Why LUXE Home UPS is Best for Your Home?',
+    content: `
+<p class="lead">Buying an inverter for home is not a luxury anymore. In today's fast-paced world, a power cut brings our work to a virtual halt. Be it working from home, studying, or cooking, electricity is the foundation of our daily lives. People just can't afford a power cut in their busy lives — and all doubts end with the LUXE Home UPS.</p>
+
+<h2>What is LUXE Home UPS?</h2>
+
+<p>LUXE Home UPS is a Pure Sine Wave smart inverter for homes from the house of Microtek. It uses state-of-the-art technology to bring you the latest and best power backup solution. It is one of the most popular home UPS available in the market today, combining premium design with intelligent power management.</p>
+
+<h2>Key Features of the LUXE Home UPS</h2>
+
+<h3>Micro Computer Based Inverter</h3>
+<p>LUXE Home UPS is India's smartest and most intelligent home inverter with a built-in microcomputer. This microcomputer works like a brain for the inverter, ensuring optimum performance at all times — adapting to load conditions and protecting connected appliances automatically.</p>
+
+<h3>INTELLI Pure Sinewave Technology</h3>
+<p>Normal inverters are known to make noise and produce irregular power that can damage appliances. The LUXE Home UPS is built with INTELLI Pure Sinewave Technology, which ensures:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li>Silent, noise-free operation</li>
+  <li>Clean, grid-quality power for all appliances</li>
+  <li>Protection against voltage fluctuations</li>
+  <li>Safe operation of computers, LED TVs, refrigerators, and smart devices</li>
+</ul>
+
+<h3>Advanced Circuit Breakers</h3>
+<p>Typical inverters don't use quality circuit breakers, creating potential safety risks for families and children. LUXE Home UPS comes with advanced circuit breakers that protect your family from electricity risks — providing peace of mind alongside reliable backup.</p>
+
+<h3>Flexible Operation</h3>
+<p>Whether you live in a high power-cut area or a normal one, LUXE Home UPS is ideal for all sorts of applications. It offers both wide battery charging and standard battery charging — adapting to where you live and how frequently power outages occur.</p>
+
+<h3>5-Stage Intelligent Battery Charging Algorithm</h3>
+<p>This battery management feature enables the LUXE Home UPS microcomputer to monitor battery performance through 5 distinct stages. The result:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li>Efficient charging that maximises energy transfer</li>
+  <li>Extended battery life through intelligent charge management</li>
+  <li>Protection from overcharging at each stage</li>
+  <li>Better battery health over time</li>
+</ul>
+
+<h3>Premium Design and Build Quality</h3>
+<p>LUXE Home UPS is developed keeping design and strength in mind. Intensive research and development has made it one of the most good-looking and long-lasting inverters available — a product that blends into modern homes rather than clashing with them.</p>
+
+<h3>LCD Display and Safety Alert Buzzer</h3>
+<p>The LCD display gives you real-time operational visibility:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li>Input voltage and output voltage</li>
+  <li>Current operating mode</li>
+  <li>Battery status and charge level</li>
+  <li>Load information</li>
+</ul>
+
+<p>The safety alert buzzer alarms you in the event of an overload, over temperature, short circuit, or tripping — the most advanced safety system to keep your family and home protected from undetected electrical risks.</p>
+
+<div class="overflow-x-auto my-6">
+  <table class="min-w-full border-collapse border border-gray-300">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="border border-gray-300 px-4 py-2 text-left">Feature</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">LUXE Home UPS</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">Standard Inverter</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="border border-gray-300 px-4 py-2">Power Output</td>
+        <td class="border border-gray-300 px-4 py-2">Pure Sine Wave</td>
+        <td class="border border-gray-300 px-4 py-2">Square/Modified Wave</td>
+      </tr>
+      <tr class="bg-gray-50">
+        <td class="border border-gray-300 px-4 py-2">Control System</td>
+        <td class="border border-gray-300 px-4 py-2">Microcomputer-based</td>
+        <td class="border border-gray-300 px-4 py-2">Basic analog</td>
+      </tr>
+      <tr>
+        <td class="border border-gray-300 px-4 py-2">Battery Charging</td>
+        <td class="border border-gray-300 px-4 py-2">5-stage intelligent</td>
+        <td class="border border-gray-300 px-4 py-2">Single-stage basic</td>
+      </tr>
+      <tr class="bg-gray-50">
+        <td class="border border-gray-300 px-4 py-2">Display</td>
+        <td class="border border-gray-300 px-4 py-2">Full LCD</td>
+        <td class="border border-gray-300 px-4 py-2">LED indicators only</td>
+      </tr>
+      <tr>
+        <td class="border border-gray-300 px-4 py-2">Noise Level</td>
+        <td class="border border-gray-300 px-4 py-2">Silent</td>
+        <td class="border border-gray-300 px-4 py-2">Audible humming</td>
+      </tr>
+      <tr class="bg-gray-50">
+        <td class="border border-gray-300 px-4 py-2">Safety</td>
+        <td class="border border-gray-300 px-4 py-2">Advanced + alert buzzer</td>
+        <td class="border border-gray-300 px-4 py-2">Basic protection</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Why LUXE is the Right Choice for Your Home</h2>
+
+<p>In a nutshell, the Microtek LUXE Home UPS is the power backup solution your home deserves because it offers the best value for money. It is the perfect combination of form, functionality, and durability:</p>
+
+<ul class="list-disc list-inside space-y-2 my-4">
+  <li>Silent pure sine wave operation — safe for every appliance</li>
+  <li>Intelligent microcomputer — optimises performance automatically</li>
+  <li>5-stage charging — extends battery life significantly</li>
+  <li>Premium design — blends into modern homes</li>
+  <li>Full safety system — LCD display + alert buzzer</li>
+</ul>
+
+<div class="bg-green-50 border-l-4 border-green-500 p-4 my-6">
+  <p class="font-semibold text-green-900">Expert Verdict:</p>
+  <p class="text-green-800">If you want an inverter that does more than just provide backup — one that actively protects your appliances, monitors battery health, and fits seamlessly into a modern home — the Microtek LUXE Home UPS is the answer.</p>
+</div>
+
+<h2>Frequently Asked Questions</h2>
+
+<p><strong>Q1. What is pure sine wave and why does it matter?</strong><br>Pure sine wave inverters produce power identical in quality to grid electricity. This protects sensitive electronics like computers, LED TVs, and refrigerators from damage caused by irregular power output from standard inverters.</p>
+
+<p><strong>Q2. Is the LUXE Home UPS compatible with all battery types?</strong><br>Yes. The LUXE series is compatible with tubular, flat plate, SMF, and lithium batteries, giving you flexibility to choose your preferred battery type.</p>
+
+<p><strong>Q3. What does the 5-stage charging algorithm do?</strong><br>It manages the battery charging process through 5 distinct phases — bulk, absorption, float, equalisation, and trickle — to maximise charging efficiency, extend battery life, and prevent overcharging.</p>
+
+<p><strong>Q4. Is the LUXE Home UPS available in Hyderabad?</strong><br>Yes. Satyajan Energy Solutions is an authorised Microtek dealer in Hyderabad offering the full LUXE range with free installation and warranty support. Call +91 8019179159.</p>
+
+<div class="bg-blue-600 text-white p-6 rounded-lg my-8">
+  <h3 class="text-xl font-bold mb-2">Buy Microtek LUXE Home UPS in Hyderabad</h3>
+  <p class="mb-4">Get the best price on Microtek LUXE inverters with free delivery and installation across Hyderabad. Contact Satyajan Energy Solutions today.</p>
+  <div class="flex gap-3 flex-wrap">
+    <a href="/products?category=Inverter" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">View Inverters</a>
+    <a href="/contactus" class="border-2 border-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Get Best Price</a>
+  </div>
+</div>
+    `,
+  },
 ];

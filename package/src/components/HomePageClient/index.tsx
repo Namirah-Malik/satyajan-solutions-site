@@ -39,6 +39,12 @@ const SLIDES = [
     alt: 'Microtek Authorized Distributor Certificate 2025–2027 — Satyajan Energy Solutions Hyderabad',
     fit: 'contain',
   },
+  {
+    id: 4, type: 'image' as const,
+    src: '/images/hero/amazon-step-advanced-certificate-2026.jpg',
+    alt: 'Amazon Step Advanced Certificate 2026 — Satyajan Energy Solutions Pvt Ltd, outstanding performance on Amazon Marketplace',
+    fit: 'contain',
+  },
 ]
 
 // ── Projects data ─────────────────────────────────────────────────────────────
@@ -458,15 +464,17 @@ const PlayfulIcon = ({ icon, ringColor, bgColor }: { icon: string; ringColor: st
 )
 
 // FIX: StatCard now shows real value as fallback — never shows "0" to crawlers
+// Also handles non-numeric values (e.g. "Doorstep") by skipping counter animation
 function StatCard({ value, label }: { value: string; label: string }) {
   const num    = parseInt(value.replace(/\D/g, ''))
   const suffix = value.replace(/[0-9,]/g, '')
-  const { ref, count } = useCounter(num, suffix)
+  const isNumeric = !isNaN(num) && num > 0
+  const { ref, count } = useCounter(isNumeric ? num : 0, suffix)
   return (
     <div className="text-center">
-      {/* Falls back to value prop (e.g. "1000+") if counter hasn't fired yet */}
+      {/* Falls back to value prop if counter hasn't fired yet or value is non-numeric */}
       <span ref={ref} className="block text-2xl sm:text-3xl font-extrabold text-primary">
-        {count || value}
+        {isNumeric ? (count || value) : value}
       </span>
       <div className="text-[11px] sm:text-xs text-gray-500 mt-0.5 font-medium">{label}</div>
     </div>
@@ -767,7 +775,7 @@ export default function HomePageClient() {
             </motion.h1>
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}
               className="max-w-md text-[15px] text-gray-500 leading-relaxed mb-7">
-              Save up to 80% on electricity bills. 30-year warranty. Easy EMI options. Join 1000+ satisfied customers across India.
+              Save up to 80% on electricity bills. 5+ years of industrial excellence. Doorstep installation & onsite support. Join 10,000+ trusted customers across India.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.65 }}
               className="flex flex-col sm:flex-row gap-3 mb-4">
@@ -793,11 +801,11 @@ export default function HomePageClient() {
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.85 }}
               className="flex items-center gap-5 sm:gap-8 pt-4 border-t border-gray-100">
-              <StatCard value="1000+" label="Happy Customers" />
+              <StatCard value="10,000+" label="Trusted Customers" />
               <div className="w-px h-10 bg-gray-200" />
-              <StatCard value="30 Yrs" label="Warranty" />
+              <StatCard value="5+ Yrs" label="Industrial Excellence" />
               <div className="w-px h-10 bg-gray-200" />
-              <StatCard value="80%" label="Bill Savings" />
+              <StatCard value="Doorstep" label="Onsite Support" />
             </motion.div>
           </div>
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
@@ -987,7 +995,7 @@ export default function HomePageClient() {
         <div className="max-w-4xl mx-auto text-center">
           <GlassCard className="sr p-5 sm:p-6 md:p-10 bg-white/60">
             <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-emerald-700 mb-2 sm:mb-3 tracking-tight">Ready to Switch to Clean Energy?</h2>
-            <p className="text-gray-700 mb-4 sm:mb-5 md:mb-8 text-xs sm:text-sm md:text-base lg:text-lg font-medium">Join over 1000+ happy customers who have already made the switch with Satyajan Energy Solutions.</p>
+            <p className="text-gray-700 mb-4 sm:mb-5 md:mb-8 text-xs sm:text-sm md:text-base lg:text-lg font-medium">Join over 10,000+ trusted customers who have already made the switch with Satyajan Energy Solutions.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/products" className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-400 text-white px-5 md:px-8 py-2.5 sm:py-3 rounded-xl font-semibold hover:shadow-xl hover:scale-105 active:scale-95 transition-all text-xs sm:text-sm md:text-base text-center">Explore Products</Link>
               <Link href="/contactus" className="w-full sm:w-auto border-2 border-emerald-500 text-emerald-600 px-5 md:px-8 py-2.5 sm:py-3 rounded-xl font-semibold hover:bg-emerald-500 hover:text-white hover:scale-105 active:scale-95 transition-all text-xs sm:text-sm md:text-base text-center">Contact Us Today</Link>
